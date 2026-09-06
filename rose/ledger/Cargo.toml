@@ -1,0 +1,39 @@
+[package]
+name = "ledger"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Async runtime + HTTP server
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "signal"] }
+futures = "0.3"
+axum = "0.8"
+tower-http = { version = "0.6", features = ["cors", "fs", "trace"] }
+
+# The analytical engine — embedded, columnar, vectorized. `bundled` compiles
+# libduckdb from source so there is no system dependency to install.
+duckdb = { version = "1", features = ["bundled"] }
+
+# The transactional engine — we only ever talk to it over the wire, so a pure
+# Rust client (no libpq) is enough. `with-serde_json-1` lets us read the
+# `json`-typed column that EXPLAIN (FORMAT JSON) returns directly as a Value.
+tokio-postgres = { version = "0.7", features = ["with-serde_json-1"] }
+
+# Serialization — the whole API surface is JSON, and both engines hand us JSON
+# plans that we normalize into one shape.
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# CLI + config
+clap = { version = "4", features = ["derive", "env"] }
+
+# Object-safe async trait for the Engine seam
+async-trait = "0.1"
+
+# Error handling
+anyhow = "1"
+thiserror = "2"
+
+# Observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

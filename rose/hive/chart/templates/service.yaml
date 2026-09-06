@@ -1,0 +1,22 @@
+# The Service is the STABLE front door. Pods come and go — different IPs, names,
+# nodes every deploy — but the Service name and ClusterIP stay put. Callers talk
+# to `hive`, never to a pod. The Service load-balances across every pod whose
+# labels match its selector AND that currently passes its readiness probe; an
+# unready pod is silently held out of this set. That intersection — matching
+# labels ∩ ready — is exactly what makes rolling updates and self-healing
+# invisible to clients.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hive.fullname" . }}
+  labels:
+    {{- include "hive.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "hive.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP

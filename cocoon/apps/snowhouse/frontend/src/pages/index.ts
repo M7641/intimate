@@ -1,0 +1,9 @@
+export { default as SnowflakeDashboardPage } from "./dashboard";
+export { default as ExpensiveQueriesPage } from "./expensive-queries";
+export { default as CostByTablePage } from "./cost-by-table";
+export { default as WarehouseUtilizationPage } from "./warehouse-utilization";
+export { default as FailedQueriesPage } from "./failed-queries";
+export { default as RepeatedQueriesPage } from "./repeated-queries";
+export { default as StoragePage } from "./storage";
+export { default as CreditSpendPage } from "./credit-spend";
+export { default as SnowflakeQueryPlansPage } from "./query-plans";

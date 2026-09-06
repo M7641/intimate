@@ -1,0 +1,27 @@
+[package]
+name = "vellum"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# `webgpu` swaps the web backend from the default `webgl2` to the modern WebGPU
+# API (compute shaders, more draw calls, custom pipelines). When both features
+# are on Bevy prefers WebGPU; native always uses Vulkan/Metal/DX12 regardless.
+# The embedded `default_font` (a default feature) still renders UI text with no
+# asset loading.
+bevy = { version = "0.18.1", features = ["webgpu"] }
+
+# Bevy is a heavy dependency: build the engine itself with optimisations even in
+# dev so iteration (and the wasm runtime) stays usable, while keeping our own
+# crate at low opt for fast recompiles.
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+# Smaller wasm payload for the web build.
+[profile.release]
+opt-level = "s"
+lto = "thin"
+codegen-units = 1

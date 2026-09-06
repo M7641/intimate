@@ -1,0 +1,29 @@
+# Structure axis: assertions on the *built image's* shape, without running the
+# workload — which files exist and what the metadata says. This catches a
+# Dockerfile refactor that drops the non-root user or mislays the assets — things
+# a runtime test might not notice.
+#
+# Copy to the project root and rewrite EVERY value below to match your own
+# Dockerfile's contract. Run: moon run <project>:image-structure
+schemaVersion: '2.0.0'
+
+# The things you actually COPY into the image must be present. For a scratch Rust
+# image that's the binary + static assets; for a Python image it's /app, the
+# interpreter, site-packages, etc.
+fileExistenceTests:
+  - name: 'app binary present'
+    path: '/myapp' # EDIT
+    shouldExist: true
+  - name: 'static assets present'
+    path: '/dist/index.html' # EDIT (or remove)
+    shouldExist: true
+
+# Lock the image config set in the Dockerfile — a refactor that drops the
+# non-root user, the port, the entrypoint, or an env var fails this test.
+metadataTest:
+  user: '1000:1000' # EDIT — assert your non-root user
+  exposedPorts: ['3000'] # EDIT
+  entrypoint: ['/myapp'] # EDIT
+  envVars:
+    - key: 'STATIC_DIR' # EDIT (or remove)
+      value: '/dist'

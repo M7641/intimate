@@ -1,0 +1,92 @@
+# Default values for the hive chart. Override with `--set` or a `-f my.yaml`.
+# Every knob here maps to a production decision explained in the README.
+
+image:
+  repository: hive
+  # Overridden per release. `IfNotPresent` is fine for immutable tags; use
+  # `Always` only for mutable tags like `latest` (which you should avoid).
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+# ── How many pods, and how autoscaling overrides it ──────────────────
+# `replicaCount` is the FLOOR you run at all times. Three (not one, not two) is
+# the smallest number that survives losing a pod while still keeping a quorum of
+# capacity AND lets a rolling update proceed without dipping below two healthy
+# pods. When the HPA is enabled it owns the replica count above this floor.
+replicaCount: 3
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  # Scale to keep average CPU near 60%. Below this you are paying for idle pods;
+  # above it you have no headroom to absorb a burst before new pods are ready.
+  targetCPUUtilizationPercentage: 60
+
+# ── Resource requests/limits: the contract with the scheduler ────────
+# `requests` is what the scheduler reserves and what the HPA measures against —
+# get it wrong and autoscaling reacts to the wrong baseline. `limits` is the
+# hard ceiling. We set a CPU limit deliberately loose and a memory limit tight,
+# because CPU throttling degrades gracefully but hitting the memory limit gets
+# the pod OOM-killed.
+resources:
+  requests:
+    cpu: 100m
+    memory: 32Mi
+  limits:
+    cpu: 500m
+    memory: 64Mi
+
+# ── Rolling update: replace pods without a gap in capacity ───────────
+# maxUnavailable:0 means never drop below the desired count during a deploy;
+# maxSurge:1 lets one extra pod come up first. New pod must pass readiness
+# before an old one is torn down → zero-downtime.
+rollingUpdate:
+  maxUnavailable: 0
+  maxSurge: 1
+
+# ── PodDisruptionBudget: protect availability during VOLUNTARY disruption ──
+# Node drains, cluster upgrades and autoscaler scale-downs are "voluntary" and
+# respect a PDB. This keeps at least `minAvailable` pods up while a node is
+# being drained, so a cluster upgrade can't take the whole service down at once.
+pdb:
+  enabled: true
+  minAvailable: 2
+
+# ── Spread pods across nodes so one node failure ≠ an outage ─────────
+# Without this the scheduler is free to stack all replicas on one node, and that
+# node dying takes the whole service with it — defeating the point of replicas.
+topologySpread:
+  enabled: true
+  maxSkew: 1
+
+# ── Probes ───────────────────────────────────────────────────────────
+# Liveness: restart a wedged process. Slow, forgiving thresholds — a false
+# positive here needlessly kills a healthy pod.
+# Readiness: gate traffic. Fast, frequent — we want an unready pod out of
+# rotation quickly, and it recovers on its own once it passes again.
+probes:
+  liveness:
+    path: /healthz
+    initialDelaySeconds: 2
+    periodSeconds: 10
+    failureThreshold: 3
+  readiness:
+    path: /readyz
+    initialDelaySeconds: 1
+    periodSeconds: 2
+    failureThreshold: 2
+
+# Seconds the pod is given to drain after SIGTERM before SIGKILL. Must exceed
+# the in-app drain pause (5s) plus the longest in-flight request.
+terminationGracePeriodSeconds: 30
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+# Warm-up window (ms) before /readyz passes, to demonstrate the readiness gate.
+warmupMs: 3000
+
+containerPort: 3000

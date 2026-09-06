@@ -1,0 +1,15 @@
+# gitleaks configuration
+# Extends the built-in ruleset; only adds allowlists for known false positives.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known false positives — fixtures, docs examples, and minified bundles"
+paths = [
+  # Test fixture data: synthetic hashes used as fake keys, not real secrets.
+  '''.*/samples/.*''',
+  # Documentation: illustrative API_KEY=... examples, not live credentials.
+  '''aphra/docs/.*''',
+  # Generated/minified bundles: high-entropy long lines trip generic-api-key.
+  '''aphra/plugin/scripts/.*\.(c?js)''',
+]

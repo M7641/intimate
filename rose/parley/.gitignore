@@ -1,0 +1,3 @@
+# Learner memories written by the local FsMemoryStore (see src/memory/fs.rs).
+# Runtime state, never checked in.
+/data/

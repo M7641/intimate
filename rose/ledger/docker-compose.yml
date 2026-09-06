@@ -1,0 +1,36 @@
+# A light but faithful Postgres. The alpine image is ~80 MB yet ships the real
+# planner — what makes a plan production-like is the statistics (the seed runs
+# ANALYZE) and the cost knobs below, not the image size.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ledger
+      POSTGRES_PASSWORD: ledger
+      POSTGRES_DB: ledger
+    ports:
+      # 5433 on the host to avoid clashing with a local Postgres on 5432.
+      - "5433:5432"
+    volumes:
+      # Runs exactly once, on an empty data directory, before the DB accepts
+      # connections. Delete the volume to re-seed.
+      - ./seed/postgres.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+    # Planner cost inputs tuned to look like a modest SSD-backed prod server.
+    # These change which plan wins, so they belong in version control.
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=1GB"   # planner assumes this much OS+PG cache
+      - "-c"
+      - "work_mem=16MB"              # per-sort/hash memory before spilling
+      - "-c"
+      - "random_page_cost=1.1"       # SSD: random reads ~ sequential reads
+      - "-c"
+      - "max_connections=50"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ledger -d ledger"]
+      interval: 3s
+      timeout: 3s
+      retries: 10

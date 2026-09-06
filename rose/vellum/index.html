@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>vellum — docs in a game engine</title>
+    <!-- Trunk compiles this crate to wasm and injects the loader here. -->
+    <link data-trunk rel="rust" data-wasm-opt="z" />
+    <!-- Copy the assets dir into dist/ so the WebGPU compute shader
+         (assets/shaders/vellum_field.wgsl) is fetchable at runtime. -->
+    <link data-trunk rel="copy-dir" href="assets" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0e0f13;
+        overflow: hidden;
+      }
+      /* Bevy creates the canvas and `fit_canvas_to_parent` sizes it to the page. */
+      canvas {
+        display: block;
+        outline: none;
+      }
+    </style>
+  </head>
+  <body></body>
+</html>

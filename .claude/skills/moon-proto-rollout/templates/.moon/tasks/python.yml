@@ -1,0 +1,31 @@
+# Tasks inherited ONLY by python projects. Scoping = the `inheritedBy` field,
+# NOT the filename (Moon 2.x). Without it, a tasks file applies to ALL projects.
+$schema: 'https://moonrepo.dev/schemas/tasks.json'
+
+inheritedBy:
+  language: 'python'
+
+tasks:
+  test:
+    # Run pytest from the project's OWN dir (member as cwd) — avoids sys.path
+    # shadowing (a local pkg name colliding with stdlib). Assumes the workspace
+    # venv is already synced (`uv sync --all-packages`); CI runs that once before
+    # `moon run :test`.
+    command: 'uv run --no-sync pytest -q'
+    toolchain: 'system'
+  lint:
+    command: 'ruff check .'
+    toolchain: 'system'
+  fmt:
+    command: 'ruff format .'
+    toolchain: 'system'
+  typecheck:
+    command: 'ty check'
+    toolchain: 'system'
+  audit:
+    # known CVEs (pip-audit). Not cached: the CVE DB is external, not an input.
+    command: 'bash'
+    args: ['-c', 'uv export --quiet --no-emit-project --format requirements-txt | uvx pip-audit --disable-pip -r -']
+    toolchain: 'system'
+    options:
+      cache: false

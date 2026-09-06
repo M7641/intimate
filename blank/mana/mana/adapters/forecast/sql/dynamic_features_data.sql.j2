@@ -1,0 +1,39 @@
+with
+    spine as (
+        select distinct
+            date_trunc(week, date_day) as date_spine,
+            week_of_year
+        from {{ schema }}.calendar
+    ),
+    seasonality as (
+        select
+            product_id,
+            date_spine,
+            location_id,
+            week_of_year,
+            seasonality_index
+        from spine
+        left join {{ schema }}.seasonality_weekly using(week_of_year)
+        where seasonality_level = 'product_category'
+    ),
+    take_me as (
+        select
+            product_id || '-' || location_id as unique_id,
+            date_spine as ds,
+            seasonality_index as seasonality_index
+        from seasonality
+        where date_spine <= date_trunc(week, current_date) + interval '{{ horizon }} weeks' - interval '{{ validation_window }} weeks'
+            and date_spine >= date_trunc(week, current_date) - interval '{{ history }} weeks' - interval '{{ validation_window }} weeks'
+        {%- if location_id is not none %}
+            and location_id = '{{ location_id }}'
+        {%- endif %}
+        {%- if unique_ids is not none %}
+        and unique_id in (
+            {%- for unique_id in unique_ids -%}
+                '{{ unique_id }}'{% if not loop.last %}, {% endif %}
+            {%- endfor -%}
+        )
+        {%- endif -%}
+    )
+select *
+from take_me

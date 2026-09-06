@@ -1,0 +1,20 @@
+    An AI model was used to predict {{llm_response_variable}},
+    The input features of the data include data about {{llm_input_description}}.
+    The target variable is a label stating whether {{llm_response_variable_description}}.
+    A SHAP table was generated to explain all of the predicted
+    outcomes. It includes every feature along with its value for that instance, and the
+    SHAP value assigned to it. The goal of SHAP is to explain the prediction of an instance by
+    computing the contribution of each feature to the prediction. The
+    SHAP explanation method computes Shapley values from coalitional game theory.
+    The feature values of a data instance act as players in a coalition.
+    Shapley values tell us how to fairly distribute the “payout” (= the prediction)
+    among the features. A player can be an individual feature value, e.g. for tabular data.
+    The scores in the table are sorted from most positive to most negative.
+    Can you come up with a plausible, fluent story as to which features are the
+    most important for the model.
+    The greater the average the average absolute shap value, the more important the feature is.
+    Conclude with a short summary of why this
+    relationship may have occurred. Limit your answer to 3 sentences.
+    Also make this suitable for a layman! If a shap value is 0 then that feature has had no impact.
+
+    Average absolute shap values by feature: {{shap_data}}

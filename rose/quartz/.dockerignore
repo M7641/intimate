@@ -1,0 +1,72 @@
+/tests
+
+# Documentation
+docs/
+site/
+resources/
+
+# Development files
+.pre-commit-config.yaml
+.gitignore
+
+# git
+.git
+.github
+
+# tool caches
+.hypothesis
+.mypy_cache
+.pytest_cache
+.tox
+.coverage
+.coverage.*
+
+# Notebooks
+*.ipynb
+
+
+# Copied from .gitignore
+##############################
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE files
+.idea/
+.vscode/
+*.DS_Store
+
+# virtual environment
+venv/
+.venv/
+base_venv/
+
+# environment variables
+.env
+.env*
+*.env
+*.swp
+
+# cached files
+*.__pycache__/
+*.pyc
+
+# log files
+*.log
+
+# node
+node_modules/
+profiling/

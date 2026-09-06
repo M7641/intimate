@@ -1,0 +1,509 @@
+---
+// Per-theme animated backdrop. One canvas at a time, swapped when `data-theme`
+// changes (a fresh canvas per theme — a single canvas can't expose both a WebGL2
+// and a 2D context). Sits behind all content, ignores pointer events, and honors
+// prefers-reduced-motion (a single still frame) and tab visibility (pauses).
+//
+//   celestial — WebGL2 nebula + starfield  (ported from data_view)
+//   cyber     — Canvas 2D neon grid         (ported from data_view / basecamp)
+//   industry  — Canvas 2D turning gears     (new — the cyber day mirror)
+//   sky       — Babylon.js (lazy-loaded): procedural sky + reflective ocean + boat
+---
+
+<div class="bg-layer" aria-hidden="true"></div>
+
+<script>
+  interface Renderer {
+    stop(): void;
+  }
+
+  const layer = document.querySelector<HTMLElement>('.bg-layer');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function makeCanvas(opacity: number, blend = 'normal'): HTMLCanvasElement {
+    const c = document.createElement('canvas');
+    c.setAttribute('aria-hidden', 'true');
+    c.style.cssText = `position:absolute;inset:0;width:100%;height:100%;display:block;opacity:${opacity};mix-blend-mode:${blend};`;
+    layer!.appendChild(c);
+    return c;
+  }
+
+  const dpr = () => Math.min(window.devicePixelRatio || 1, 1.5);
+
+  // ── celestial: WebGL2 nebula + starfield ──────────────────────────────────
+  const CELESTIAL_VS = `#version 300 es
+in vec2 a_position;
+void main() { gl_Position = vec4(a_position, 0.0, 1.0); }`;
+
+  const CELESTIAL_FS = `#version 300 es
+precision highp float;
+out vec4 fragColor;
+uniform vec2 u_resolution;
+uniform float u_time;
+float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+float noise(vec2 p){vec2 i=floor(p);vec2 f=fract(p);vec2 u=f*f*(3.0-2.0*f);
+  float a=hash(i);float b=hash(i+vec2(1.0,0.0));float c=hash(i+vec2(0.0,1.0));float d=hash(i+vec2(1.0,1.0));
+  return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}
+float fbm(vec2 p){float v=0.0;float amp=0.5;for(int i=0;i<5;i++){v+=amp*noise(p);p*=2.0;amp*=0.5;}return v;}
+vec2 hash2(vec2 p){return vec2(hash(p),hash(p+19.19));}
+vec3 starLayer(vec2 px,float cell,float thresh,float core,float spikeLen,float spikes,float t){
+  vec2 id=floor(px/cell);vec3 acc=vec3(0.0);
+  for(int j=-1;j<=1;j++){for(int i=-1;i<=1;i++){
+    vec2 cid=id+vec2(float(i),float(j));
+    if(hash(cid)<thresh)continue;
+    vec2 star=(cid+0.15+0.7*hash2(cid+11.3))*cell;
+    vec2 d=px-star;float dist=length(d);
+    float bright=0.35+0.65*hash(cid+3.1);
+    float phase=hash(cid+7.7)*6.2831;
+    float tw=0.7+0.3*sin(t*1.3+phase);
+    float c=exp(-dist*dist/(core*core));
+    float halo=exp(-dist/(core*4.0))*0.16;
+    float sx=exp(-abs(d.y)*1.1)*exp(-abs(d.x)/spikeLen);
+    float sy=exp(-abs(d.x)*1.1)*exp(-abs(d.y)/spikeLen);
+    float spk=(sx+sy)*spikes*smoothstep(0.6,0.95,bright);
+    float v=(c+halo+spk)*bright*tw;
+    float w=hash(cid+9.3);
+    vec3 tint=vec3(0.92,0.94,1.0);
+    if(w>0.86)tint=vec3(1.0,0.86,0.66); else if(w<0.16)tint=vec3(0.72,0.85,1.0);
+    acc+=tint*v;
+  }}
+  return acc;}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  float aspect=u_resolution.x/u_resolution.y;
+  vec2 p=uv;p.x*=aspect;
+  vec3 col=vec3(0.055,0.048,0.105);
+  float t=u_time*0.015;
+  vec2 q=p*1.6+vec2(t,t*0.5);
+  float warp=fbm(q+fbm(q*0.5));
+  float clouds=fbm(p*1.2+warp+vec2(-t*0.6,t*0.3));
+  vec3 violet=vec3(0.42,0.28,0.62);vec3 blue=vec3(0.20,0.32,0.66);
+  vec3 nebula=mix(blue,violet,smoothstep(0.3,0.8,warp));
+  float density=pow(smoothstep(0.30,0.95,clouds),1.5);
+  col+=nebula*density*0.85;
+  float vig=smoothstep(1.25,0.35,distance(uv,vec2(0.5)));
+  col*=mix(0.78,1.0,vig);
+  vec2 px=gl_FragCoord.xy;float drift=u_time*1.6;vec3 sky=vec3(0.0);
+  sky+=starLayer(px+vec2(drift*0.15,0.0),24.0,0.88,0.9,6.0,0.0,u_time)*0.55;
+  sky+=starLayer(px+vec2(drift*0.45,0.0),60.0,0.90,1.2,9.0,0.35,u_time)*0.95;
+  sky+=starLayer(px+vec2(drift*0.85,0.0),140.0,0.93,1.6,16.0,0.9,u_time)*1.35;
+  col+=sky;
+  fragColor=vec4(col,1.0);
+}`;
+
+
+  function compile(gl: WebGL2RenderingContext, type: number, src: string) {
+    const sh = gl.createShader(type);
+    if (!sh) return null;
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+      console.warn('[background] shader compile failed:\n' + gl.getShaderInfoLog(sh));
+      gl.deleteShader(sh);
+      return null;
+    }
+    return sh;
+  }
+
+  function startCelestial(): Renderer {
+    const canvas = makeCanvas(1);
+    const gl = canvas.getContext('webgl2', { antialias: false, alpha: false });
+    if (!gl) return { stop: () => canvas.remove() };
+    const vs = compile(gl, gl.VERTEX_SHADER, CELESTIAL_VS);
+    const fs = compile(gl, gl.FRAGMENT_SHADER, CELESTIAL_FS);
+    const program = gl.createProgram();
+    if (!vs || !fs || !program) return { stop: () => canvas.remove() };
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    gl.useProgram(program);
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const aPos = gl.getAttribLocation(program, 'a_position');
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+    const uRes = gl.getUniformLocation(program, 'u_resolution');
+    const uTime = gl.getUniformLocation(program, 'u_time');
+    const ratio = dpr();
+    function resize() {
+      canvas.width = Math.floor(canvas.clientWidth * ratio);
+      canvas.height = Math.floor(canvas.clientHeight * ratio);
+      gl!.viewport(0, 0, canvas.width, canvas.height);
+    }
+    let raf = 0;
+    let start = 0;
+    function frame(now: number) {
+      if (!start) start = now;
+      resize();
+      gl!.uniform2f(uRes, canvas.width, canvas.height);
+      gl!.uniform1f(uTime, (now - start) / 1000);
+      gl!.drawArrays(gl!.TRIANGLES, 0, 3);
+      raf = requestAnimationFrame(frame);
+    }
+    if (reduced) {
+      resize();
+      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.uniform1f(uTime, 12);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    } else {
+      raf = requestAnimationFrame(frame);
+    }
+    return {
+      stop() {
+        if (raf) cancelAnimationFrame(raf);
+        canvas.remove();
+      },
+    };
+  }
+
+  // ── cyber: Canvas 2D neon grid ────────────────────────────────────────────
+  const GRID = 46;
+  function neon(mix: number, alpha: number) {
+    const r = Math.round(255 * mix);
+    const g = Math.round(229 + (61 - 229) * mix);
+    const b = Math.round(255 + (240 - 255) * mix);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  function startCyber(): Renderer {
+    const canvas = makeCanvas(0.55, 'screen');
+    const ctx = canvas.getContext('2d')!;
+    let cols = 0;
+    let rows = 0;
+    function resize() {
+      const ratio = dpr();
+      canvas.width = Math.floor(innerWidth * ratio);
+      canvas.height = Math.floor(innerHeight * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      cols = Math.ceil(innerWidth / GRID) + 1;
+      rows = Math.ceil(innerHeight / GRID) + 1;
+    }
+    const vWave = (c: number, t: number) => 0.5 + 0.5 * Math.sin(c * 0.5 - t);
+    const hWave = (r: number, t: number) => 0.5 + 0.5 * Math.sin(r * 0.5 - t * 0.85 + 1.3);
+    function draw(now: number) {
+      const t = now * 0.0016;
+      const w = innerWidth;
+      const h = innerHeight;
+      ctx.clearRect(0, 0, w, h);
+      ctx.lineWidth = 1;
+      for (let c = 0; c < cols; c++) {
+        const wv = vWave(c, t);
+        const x = Math.round(c * GRID) + 0.5;
+        ctx.strokeStyle = neon(wv * 0.55, 0.05 + 0.13 * wv);
+        ctx.shadowBlur = wv > 0.7 ? 6 : 0;
+        ctx.shadowColor = '#00ffff';
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let r = 0; r < rows; r++) {
+        const wv = hWave(r, t);
+        const y = Math.round(r * GRID) + 0.5;
+        ctx.strokeStyle = neon(wv * 0.55, 0.05 + 0.13 * wv);
+        ctx.shadowBlur = wv > 0.7 ? 6 : 0;
+        ctx.shadowColor = '#00ffff';
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+      ctx.shadowColor = '#ff00ff';
+      for (let c = 0; c < cols; c++) {
+        const vw = vWave(c, t);
+        if (vw < 0.6) continue;
+        for (let r = 0; r < rows; r++) {
+          const b = vw * hWave(r, t);
+          if (b < 0.78) continue;
+          ctx.fillStyle = neon(b * 0.6, b * 0.7);
+          ctx.shadowBlur = 8 * b;
+          ctx.beginPath();
+          ctx.arc(c * GRID, r * GRID, 1.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.shadowBlur = 0;
+    }
+    resize();
+    let raf = 0;
+    let last = 0;
+    function loop(now: number) {
+      raf = requestAnimationFrame(loop);
+      if (now - last < 1000 / 30) return;
+      last = now;
+      draw(now);
+    }
+    const onResize = () => resize();
+    window.addEventListener('resize', onResize);
+    if (reduced) draw(0);
+    else raf = requestAnimationFrame(loop);
+    return {
+      stop() {
+        if (raf) cancelAnimationFrame(raf);
+        window.removeEventListener('resize', onResize);
+        canvas.remove();
+      },
+    };
+  }
+
+  // ── industry: Canvas 2D turning gears ─────────────────────────────────────
+  function startIndustry(): Renderer {
+    const canvas = makeCanvas(0.5);
+    const ctx = canvas.getContext('2d')!;
+    const gears = [
+      { x: 0.12, y: 0.2, r: 130, teeth: 14, speed: 0.06, color: '#b5651d' },
+      { x: 0.24, y: 0.52, r: 90, teeth: 11, speed: -0.09, color: '#8a4a12' },
+      { x: 0.86, y: 0.74, r: 170, teeth: 18, speed: 0.045, color: '#7a6b4f' },
+      { x: 0.93, y: 0.26, r: 100, teeth: 12, speed: -0.07, color: '#9a6f00' },
+    ];
+    function resize() {
+      const ratio = dpr();
+      canvas.width = Math.floor(innerWidth * ratio);
+      canvas.height = Math.floor(innerHeight * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+    function gear(cx: number, cy: number, r: number, teeth: number, rot: number, color: string) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.18;
+      ctx.lineWidth = Math.max(2, r * 0.03);
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.72, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.2, 0, Math.PI * 2);
+      ctx.stroke();
+      for (let i = 0; i < teeth; i++) {
+        ctx.save();
+        ctx.rotate((i / teeth) * Math.PI * 2);
+        const tw = r * 0.12;
+        ctx.strokeRect(-tw / 2, r * 0.72, tw, r * 0.16);
+        ctx.restore();
+      }
+      for (let i = 0; i < 5; i++) {
+        const a = (i / 5) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * r * 0.2, Math.sin(a) * r * 0.2);
+        ctx.lineTo(Math.cos(a) * r * 0.72, Math.sin(a) * r * 0.72);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+    function draw(t: number) {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      for (const g of gears) {
+        gear(g.x * innerWidth, g.y * innerHeight, g.r, g.teeth, t * g.speed, g.color);
+      }
+    }
+    resize();
+    let raf = 0;
+    let start = 0;
+    function loop(now: number) {
+      if (!start) start = now;
+      draw((now - start) / 1000);
+      raf = requestAnimationFrame(loop);
+    }
+    const onResize = () => resize();
+    window.addEventListener('resize', onResize);
+    if (reduced) draw(4);
+    else raf = requestAnimationFrame(loop);
+    return {
+      stop() {
+        if (raf) cancelAnimationFrame(raf);
+        window.removeEventListener('resize', onResize);
+        canvas.remove();
+      },
+    };
+  }
+
+  // ── sky: a Babylon.js sea-and-sky scene, lazy-loaded only for this theme ────
+  // The whole engine ships in a separate chunk pulled in on first use, so the
+  // other themes and the docs' initial load pay nothing for it.
+  function startSky(): Renderer {
+    const canvas = makeCanvas(1);
+    let disposed = false;
+    let engine: { dispose(): void } | null = null;
+    let onResize: (() => void) | null = null;
+
+    void (async () => {
+      const BABYLON = await import('@babylonjs/core');
+      const MAT = await import('@babylonjs/materials');
+      if (disposed) return;
+
+      const {
+        Engine, Scene, Vector2, Vector3, Color3, Color4,
+        FreeCamera, HemisphericLight, DirectionalLight,
+        MeshBuilder, StandardMaterial, Texture, TransformNode,
+        DefaultRenderingPipeline, ImageProcessingConfiguration,
+      } = BABYLON;
+      const { WaterMaterial, SkyMaterial } = MAT;
+      const base = import.meta.env.BASE_URL;
+
+      const eng = new Engine(canvas, true, { stencil: false, preserveDrawingBuffer: false }, true);
+      engine = eng;
+      const scene = new Scene(eng);
+      scene.clearColor = new Color4(0.55, 0.80, 0.95, 1);
+
+      // fixed camera, looking down a little over the sea — no user controls
+      const camera = new FreeCamera('cam', new Vector3(0, 8, -36), scene);
+      camera.setTarget(new Vector3(0, 3, 0));
+      camera.fov = 0.9;
+
+      const hemi = new HemisphericLight('hemi', new Vector3(0, 1, 0), scene);
+      hemi.intensity = 1.05;
+      hemi.diffuse = new Color3(1.0, 0.99, 0.95);
+      hemi.groundColor = new Color3(0.4, 0.6, 0.7);
+      const sun = new DirectionalLight('sun', new Vector3(-0.34, -0.81, -0.51), scene);
+      sun.intensity = 1.8;
+
+      // procedural sky (Preetham) — explicit high sun → clear midday blue
+      const sky = new SkyMaterial('sky', scene);
+      sky.backFaceCulling = false;
+      sky.useSunPosition = true;
+      sky.sunPosition = new Vector3(40, 95, 60);
+      sky.turbidity = 4;
+      sky.luminance = 1.0;
+      sky.rayleigh = 1.6;
+      sky.mieCoefficient = 0.005;
+      sky.mieDirectionalG = 0.82;
+      const skybox = MeshBuilder.CreateBox('skybox', { size: 2000 }, scene);
+      skybox.material = sky;
+      skybox.infiniteDistance = true;
+
+      // ocean — reflective, bump-mapped waves
+      const waterMesh = MeshBuilder.CreateGround('water', { width: 4000, height: 4000, subdivisions: 64 }, scene);
+      const water = new WaterMaterial('water', scene, new Vector2(512, 512));
+      water.bumpTexture = new Texture(base + 'textures/waterbump.png', scene);
+      water.windForce = -6;
+      water.waveHeight = 0.3;          // tranquil
+      water.waveLength = 0.12;
+      water.windDirection = new Vector2(1, 0.2);
+      water.waterColor = new Color3(0.10, 0.58, 0.62);   // Okinawa turquoise
+      water.colorBlendFactor = 0.32;
+      water.bumpHeight = 0.75;         // crisp ripples → glisten
+      water.addToRenderList(skybox);
+      waterMesh.material = water;
+
+      // a little sailboat from primitives
+      const boat = new TransformNode('boat', scene);
+      const hullMat = new StandardMaterial('hullMat', scene);
+      hullMat.diffuseColor = new Color3(0.10, 0.12, 0.16);
+      hullMat.specularColor = new Color3(0.1, 0.1, 0.1);
+      const hull = MeshBuilder.CreateCylinder('hull', { height: 6, diameterTop: 1.6, diameterBottom: 0.25, tessellation: 12 }, scene);
+      hull.rotation.z = Math.PI / 2; // lay the cone on its side → wedge hull
+      hull.scaling = new Vector3(1, 1, 0.5);
+      hull.material = hullMat;
+      hull.parent = boat;
+      const mastMat = new StandardMaterial('mastMat', scene);
+      mastMat.diffuseColor = new Color3(0.25, 0.20, 0.15);
+      const mast = MeshBuilder.CreateCylinder('mast', { height: 7, diameter: 0.18 }, scene);
+      mast.position.y = 3.2;
+      mast.material = mastMat;
+      mast.parent = boat;
+      const sailMat = new StandardMaterial('sailMat', scene);
+      sailMat.diffuseColor = new Color3(0.95, 0.95, 0.97);
+      sailMat.emissiveColor = new Color3(0.30, 0.30, 0.32);
+      sailMat.backFaceCulling = false;
+      const sail = MeshBuilder.CreatePlane('sail', { width: 4, height: 5.5 }, scene);
+      sail.material = sailMat;
+      sail.position.set(-1.2, 3.4, 0);
+      sail.rotation.y = Math.PI / 2;
+      sail.parent = boat;
+      boat.scaling = new Vector3(0.6, 0.6, 0.6);
+      boat.position.set(6, 0.25, 6);  // smaller, further back, floating on the surface
+      // (deliberately NOT in the water reflection list — a thin sail mirrors as ugly smear)
+
+      // post: bloom + ACES tone map + vignette + grain + FXAA
+      const pipe = new DefaultRenderingPipeline('post', true, scene, [camera]);
+      pipe.fxaaEnabled = true;
+      pipe.bloomEnabled = true;
+      pipe.bloomThreshold = 0.75;
+      pipe.bloomWeight = 0.6;
+      pipe.bloomKernel = 64;
+      pipe.imageProcessing.toneMappingEnabled = true;
+      pipe.imageProcessing.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_ACES;
+      pipe.imageProcessing.exposure = 1.35;         // bright midday
+      pipe.imageProcessing.contrast = 1.1;          // a touch of punch for the turquoise
+      pipe.imageProcessing.vignetteEnabled = true;
+      pipe.imageProcessing.vignetteWeight = 1.2;    // softer, less darkening at edges
+      pipe.grainEnabled = true;
+      pipe.grain.intensity = 6;
+      pipe.grain.animated = true;
+
+      // animation: gentle bob + drift right→left, wrapping
+      let t = 0;
+      scene.registerBeforeRender(() => {
+        const dt = eng.getDeltaTime() / 1000;
+        t += dt;
+        boat.position.x -= dt * 1.2;
+        if (boat.position.x < -45) boat.position.x = 45;
+        boat.position.y = 0.25 + Math.sin(t * 0.8) * 0.18;   // float on the surface
+        boat.rotation.z = Math.sin(t * 0.7) * 0.04;
+        boat.rotation.x = Math.sin(t * 0.5) * 0.03;
+      });
+
+      onResize = () => eng.resize();
+      window.addEventListener('resize', onResize);
+
+      if (reduced) scene.render();
+      else eng.runRenderLoop(() => { if (!disposed) scene.render(); });
+    })();
+
+    return {
+      stop() {
+        disposed = true;
+        if (onResize) window.removeEventListener('resize', onResize);
+        engine?.dispose();
+        canvas.remove();
+      },
+    };
+  }
+
+  // ── Controller: swap the renderer when the theme changes ──────────────────
+  const STARTERS: Record<string, () => Renderer> = {
+    celestial: startCelestial,
+    cyber: startCyber,
+    industry: startIndustry,
+    sky: startSky,
+  };
+
+  let current: Renderer | null = null;
+  let currentTheme = '';
+
+  function apply() {
+    if (!layer) return;
+    const theme = document.documentElement.dataset.theme || 'celestial';
+    if (theme === currentTheme) return;
+    currentTheme = theme;
+    current?.stop();
+    current = (STARTERS[theme] ?? startCelestial)();
+  }
+
+  apply();
+  new MutationObserver(apply).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme'],
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      current?.stop();
+      current = null;
+      currentTheme = '';
+    } else {
+      apply();
+    }
+  });
+</script>
+
+<style>
+  .bg-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+</style>

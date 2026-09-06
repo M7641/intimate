@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["*"]
+
+[project]
+name = "proteus"
+version = "0.0.2"
+description = "proteus"
+authors = [
+  { name="Mike O'Donnell", email="michael@eyecatching.co.uk" },
+]
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies=[
+    "pre-commit",
+    "pytest",
+]
+[project.optional-dependencies]
+full = [
+    "joblib",
+    "scikit-learn==1.4.0",
+    "tensorflow==2.15.1",
+    "keras-tuner==1.4.6",
+    "tf-models-official>=2.12.0",
+    "pandas>=2.2.1",
+]
+
+
+[tool.ruff]
+select = [
+    "ALL"
+]
+ignore = [
+    "D",
+]
+exclude = [
+    ".venv",
+    "tests/",
+]
+fix = true
+target-version = "py310"
+
+[tool.pytest.ini_options]
+addopts = ["--strict-markers", "--strict-config", "-l"]
+xfail_strict = true
+filterwarnings = [
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]

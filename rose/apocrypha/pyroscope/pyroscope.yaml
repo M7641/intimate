@@ -1,0 +1,16 @@
+storage:
+  backend: filesystem
+  filesystem:
+    data_path: /data/pyroscope
+
+self_profiling:
+  disable_push: true
+
+analytics:
+  reporting_enabled: false
+
+limits:
+  max_query_length: 168h
+
+server:
+  http_listen_port: 4040

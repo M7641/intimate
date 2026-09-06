@@ -1,0 +1,26 @@
+# The FastAPI example wrapped in memray, for allocation profiling that sees
+# NATIVE allocations too (pydantic-core, uvicorn's C bits) — tracemalloc can't.
+#
+# memray runs the app as a single process and writes a capture to /captures.
+# The memray_introspect.py helper mounts a host dir there, drives load, stops the
+# app gracefully (so memray finalizes the file), then renders a flamegraph.
+FROM python:3.12-slim
+
+WORKDIR /app
+RUN pip install --no-cache-dir "fastapi>=0.110" "uvicorn>=0.29" "memray>=1.12"
+COPY app.py .
+
+# One worker: memray traces a single process cleanly (no fork supervisor).
+ENV GAUGE_HOST=0.0.0.0
+ENV WORKERS=1
+RUN mkdir /captures
+EXPOSE 8080
+
+# `memray run` wraps the whole process from start, so import-time allocations are
+# captured too. memray intercepts malloc, so native allocations (pydantic-core,
+# the allocator) ARE counted — attributed to the Python callsite that triggered
+# them, which is the thing tracemalloc misses entirely.
+# (Add `--native` for C/C++ stack frames too, but that needs debug symbols in the
+# image to be readable — omitted here to keep the image slim.)
+# uvicorn handles SIGTERM, so a graceful `stop` lets memray finalize the capture.
+CMD ["memray", "run", "--force", "-o", "/captures/out.bin", "app.py"]

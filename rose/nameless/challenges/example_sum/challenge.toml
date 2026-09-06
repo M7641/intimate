@@ -1,0 +1,21 @@
+name = "sum_array"
+description = "Compute the sum of all elements in an integer slice"
+signature = "fn solve(input: &[i64]) -> i64"
+
+[config]
+max_generations = 10
+candidates_per_generation = 3
+timeout_compile_secs = 30
+timeout_run_secs = 5
+
+[[tests]]
+input = "&[1, 2, 3, 4, 5]"
+expected = "15"
+
+[[tests]]
+input = "&[-1, 0, 1]"
+expected = "0"
+
+[[tests]]
+input = "&[]"
+expected = "0"

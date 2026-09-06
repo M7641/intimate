@@ -1,0 +1,11 @@
+export { default as RedshiftDashboardPage } from "./dashboard";
+export { default as TableScansPage } from "./table-scans";
+export { default as QueryPerformancePage } from "./query-performance";
+export { default as SlowQueriesPage } from "./slow-queries";
+export { default as UnusedTablesPage } from "./unused-tables";
+export { default as RedshiftUserActivityPage } from "./user-activity";
+export { default as CompressionPage } from "./compression";
+export { default as FilterEffectivenessPage } from "./filter-effectiveness";
+export { default as DiskQueriesPage } from "./disk-queries";
+export { default as StoragePage } from "./storage";
+export { default as RedshiftQueryPlansPage } from "./query-plans";

@@ -1,0 +1,8 @@
+{
+  "customer_id": "CUST-ABC",
+  "email": "ada@acme.com",
+  "tier": "platinum",
+  "annual_revenue": -42,
+  "signup_country": "United Kingdom",
+  "extra_field": "should be rejected"
+}

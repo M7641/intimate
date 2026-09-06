@@ -1,0 +1,45 @@
+[package]
+name = "parley"
+version = "0.1.0"
+edition = "2021"
+
+# lib.rs + main.rs split so integration tests can reference `parley::` types.
+[lib]
+name = "parley"
+path = "src/lib.rs"
+
+[[bin]]
+name = "parley"
+path = "src/main.rs"
+
+[dependencies]
+# The binary is the app's front door: a clap CLI that serves the API (default)
+# and orchestrates the frontend for local dev (install/build/dev/start).
+clap = { version = "4", features = ["derive"] }
+axum = { version = "0.8", features = ["multipart"] }
+tokio = { version = "1", features = ["full"] }
+tower-http = { version = "0.6", features = ["cors", "trace", "fs"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", features = ["json", "stream"] }
+anyhow = "1"
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+base64 = "0.22"
+uuid = { version = "1", features = ["v4", "serde"] }
+async-trait = "0.1"
+candle-core = { version = "0.10.2", features = ["metal"] }
+candle-nn = { version = "0.10.2", features = ["metal"] }
+candle-transformers = { version = "0.10.2", features = ["metal"] }
+tokenizers = "0.23.1"
+hf-hub = "0.5.0"
+# Learner memories persist behind a MemoryStore trait: local files by default,
+# MinIO/S3 when PARLEY_S3_ENDPOINT is set. The S3 API reaches MinIO today and AWS
+# tomorrow, changing only endpoint + credentials. See docs/architecture/learner-state.md.
+aws-sdk-s3 = "1"
+
+[target.'cfg(unix)'.dependencies]
+# `start` runs Vite in its own process group so the whole tree (npm → node) can
+# be signalled at teardown when the backend exits.
+libc = "0.2"

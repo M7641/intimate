@@ -1,0 +1,5 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'library'
+language: 'rust'
+# Library crate consumed by others. Deps inferred from Cargo.toml; when this
+# crate changes, moon re-tests every project that depends on it (`--affected`).

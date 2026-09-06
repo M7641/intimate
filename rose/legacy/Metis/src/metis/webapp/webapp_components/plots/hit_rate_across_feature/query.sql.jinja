@@ -1,0 +1,45 @@
+WITH
+    SHAP_VALUES AS (
+        SELECT
+            TABLE_ID,
+            FEATURE,
+            SHAP_VALUE AS {{global_feature | safe}},
+            INITCAP(REPLACE(FEATURE, '_', ' ')) AS FEATURE_CLEAN
+        FROM {{schema | safe}}.METIS_SHAP_VALUES_FOR_MODEL_EXPLAIN
+        WHERE FEATURE ILIKE '{{global_feature | safe}}'
+        AND MODEL_NAME = '{{model_name | safe}}'
+    {% if feature is not none and feature_value is not none %}
+        AND TABLE_ID IN (SELECT {{ entity_id | safe }}
+        FROM {{ucv_ucv_table_name | safe}}
+            WHERE {{feature | safe}} = '{{feature_value | safe}}')
+    {% endif %}
+    {% if start_date_picker is not none and end_date_picker is not none %}
+        AND TABLE_ID IN (SELECT {{ entity_id | safe }}
+        FROM {{ucv_ucv_table_name | safe}}
+            WHERE {{feature | safe}} < '{{end_date_picker | safe}}'
+            AND {{feature | safe}} > '{{start_date_picker | safe}}'
+        )
+    {% endif %}
+    ),
+    ACTUAL_VALUES AS (
+        SELECT
+            TABLE_ID,
+            FEATURE,
+            VALUE AS ACTUAL_VALUE
+        FROM {{schema | safe}}.METIS_DATA_USED_TO_EVALUATE_SHAP
+        WHERE MODEL_NAME = '{{model_name | safe}}'
+    ),
+    RESPONSE_VARIABLE AS (
+        SELECT
+            {{ entity_id | safe }} AS TABLE_ID,
+            {{response_variable_field_name | safe}} AS TARGET
+        FROM {{model_target_table_name | safe}}
+    ),
+    JOIN_PREVIOUS_VIEWS AS (
+        SELECT
+            *
+        FROM SHAP_VALUES
+            LEFT JOIN RESPONSE_VARIABLE USING(TABLE_ID)
+            LEFT JOIN ACTUAL_VALUES USING(TABLE_ID, FEATURE)
+    )
+SELECT * FROM JOIN_PREVIOUS_VIEWS

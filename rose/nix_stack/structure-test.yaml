@@ -1,0 +1,25 @@
+# Structural assertions on the built image — verifies it is *assembled*
+# correctly, without running the workload. Complements the runtime test
+# (backend/tests/image_it.rs) and the security scan (scripts/image-scan.sh).
+#
+# Run: moon run nix_stack:image-structure
+schemaVersion: '2.0.0'
+
+# The two things we actually copy into the scratch image must be present.
+fileExistenceTests:
+  - name: 'backend binary present'
+    path: '/nix-stack-backend'
+    shouldExist: true
+  - name: 'frontend index present'
+    path: '/dist/index.html'
+    shouldExist: true
+
+# Lock the image config we set in the Dockerfile — a refactor that drops the
+# non-root user, the port, the entrypoint or STATIC_DIR fails this test.
+metadataTest:
+  user: '1000:1000'
+  exposedPorts: ['3000']
+  entrypoint: ['/nix-stack-backend']
+  envVars:
+    - key: 'STATIC_DIR'
+      value: '/dist'

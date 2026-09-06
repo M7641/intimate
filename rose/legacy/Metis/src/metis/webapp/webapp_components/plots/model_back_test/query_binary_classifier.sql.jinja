@@ -1,0 +1,23 @@
+WITH
+    model_validation_set AS (
+        SELECT
+            TABLE_ID,
+            SCORE,
+            TARGET,
+            PREDICTED
+        FROM {{ model_validation_table | safe }}
+    )
+SELECT
+    SCORE,
+    COUNT(DISTINCT TABLE_ID) AS TOTAL,
+    SUM(TARGET) AS TRUE_TARGET,
+    (TRUE_TARGET::FLOAT / TOTAL::FLOAT) AS HIT_RATE,
+    SUM(
+        CASE
+            WHEN TARGET = PREDICTED AND TARGET = 1 THEN 1
+            ELSE 0
+        END
+    )::FLOAT / TOTAL::FLOAT AS RECALL_RATE
+FROM model_validation_set
+GROUP BY SCORE
+ORDER BY SCORE ASC

@@ -1,0 +1,240 @@
+{
+  "src/ts/components/ForcePlot.tsx": {
+    "displayName": "ForcePlot",
+    "description": "This is a description of the ForcePlot component.",
+    "props": {
+      "features": {
+        "description": "The features of the model.",
+        "required": true,
+        "type": {
+          "name": "object",
+          "raw": "object"
+        }
+      },
+      "style": {
+        "description": "The style of the component.",
+        "required": false,
+        "defaultValue": {
+          "value": "{}",
+          "computed": false
+        },
+        "type": {
+          "name": "object",
+          "raw": "object"
+        }
+      },
+      "title": {
+        "description": "The title of the component.",
+        "required": false,
+        "defaultValue": {
+          "value": "''",
+          "computed": false
+        },
+        "type": {
+          "name": "string",
+          "raw": "string"
+        }
+      },
+      "className": {
+        "description": "The CSS class of the component.",
+        "required": false,
+        "defaultValue": {
+          "value": "''",
+          "computed": false
+        },
+        "type": {
+          "name": "string",
+          "raw": "string"
+        }
+      },
+      "baseValue": {
+        "description": "The base value.",
+        "required": false,
+        "defaultValue": {
+          "value": "0",
+          "computed": false
+        },
+        "type": {
+          "name": "number",
+          "raw": "number"
+        }
+      },
+      "plot_cmap": {
+        "description": "plot color map.",
+        "required": false,
+        "defaultValue": {
+          "value": "'RdBu'",
+          "computed": false
+        },
+        "type": {
+          "name": "enum",
+          "value": [
+            {
+              "value": "'RdBu'",
+              "computed": false
+            },
+            {
+              "value": "'GnPR'",
+              "computed": false
+            },
+            {
+              "value": "'CyPU'",
+              "computed": false
+            },
+            {
+              "value": "'PkYg'",
+              "computed": false
+            },
+            {
+              "value": "'DrDb'",
+              "computed": false
+            },
+            {
+              "value": "'LpLb'",
+              "computed": false
+            },
+            {
+              "value": "'YlDp'",
+              "computed": false
+            },
+            {
+              "value": "'OrId'",
+              "computed": false
+            }
+          ],
+          "raw": "\"RdBu\" | \"GnPR\" | \"CyPU\" | \"PkYg\" | \"DrDb\" | \"LpLb\" | \"YlDp\" | \"OrId\""
+        }
+      },
+      "link": {
+        "description": "link function.",
+        "required": false,
+        "defaultValue": {
+          "value": "'identity'",
+          "computed": false
+        },
+        "type": {
+          "name": "enum",
+          "value": [
+            {
+              "value": "'identity'",
+              "computed": false
+            },
+            {
+              "value": "'logit'",
+              "computed": false
+            }
+          ],
+          "raw": "\"identity\" | \"logit\""
+        }
+      },
+      "featureNames": {
+        "description": "feature names.",
+        "required": false,
+        "defaultValue": {
+          "value": "[]",
+          "computed": false
+        },
+        "type": {
+          "name": "arrayOf",
+          "value": {
+            "name": "string",
+            "raw": "string"
+          },
+          "raw": "string[]"
+        }
+      },
+      "outNames": {
+        "description": "The out names.",
+        "required": false,
+        "defaultValue": {
+          "value": "[]",
+          "computed": false
+        },
+        "type": {
+          "name": "arrayOf",
+          "value": {
+            "name": "string",
+            "raw": "string"
+          },
+          "raw": "string[]"
+        }
+      },
+      "hideBaseValueLabel": {
+        "description": "hide base value label.",
+        "required": false,
+        "defaultValue": {
+          "value": "false",
+          "computed": false
+        },
+        "type": {
+          "name": "bool",
+          "raw": "boolean"
+        }
+      },
+      "hideBars": {
+        "description": "hide bars.",
+        "required": false,
+        "defaultValue": {
+          "value": "false",
+          "computed": false
+        },
+        "type": {
+          "name": "bool",
+          "raw": "boolean"
+        }
+      },
+      "labelMargin": {
+        "description": "label margin.",
+        "required": false,
+        "defaultValue": {
+          "value": "20",
+          "computed": false
+        },
+        "type": {
+          "name": "number",
+          "raw": "number"
+        }
+      },
+      "id": {
+        "description": "Unique ID to identify this component in Dash callbacks.",
+        "required": false,
+        "type": {
+          "name": "string",
+          "raw": "string"
+        }
+      },
+      "setProps": {
+        "description": "Update props to trigger callbacks.",
+        "required": true,
+        "type": {
+          "name": "func",
+          "raw": "(props: Record<string, any>) => void"
+        }
+      }
+    },
+    "isContext": false
+  },
+  "src/ts/components/squibble.tsx": {
+    "displayName": "squibble",
+    "description": "Component description",
+    "props": {
+      "id": {
+        "description": "Unique ID to identify this component in Dash callbacks.",
+        "required": false,
+        "type": {
+          "name": "string",
+          "raw": "string"
+        }
+      },
+      "setProps": {
+        "description": "Update props to trigger callbacks.",
+        "required": true,
+        "type": {
+          "name": "func",
+          "raw": "(props: Record<string, any>) => void"
+        }
+      }
+    },
+    "isContext": false
+  }
+}

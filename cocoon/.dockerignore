@@ -1,0 +1,25 @@
+# Build context for `data_view deploy` / `warehouse deploy`: the workspace root.
+# `ouroboros` zips this directory (honouring the rules below), and BuildKit reads
+# this same file from the context root. The per-app Dockerfiles build with
+# workspace-relative paths (`cargo build -p <app>`), so the whole source tree
+# must ship — but NOT the regenerated heavy directories.
+#
+# IMPORTANT: use anchored `/*` (NOT bare `*`). The deploy path packages the
+# artifact with the `ignore` crate (gitignore semantics), where a bare `*`
+# matches files at EVERY depth — `!dir` would re-include the directory but every
+# file inside it would stay ignored. Anchored `/*` only excludes top-level
+# entries, so the contents of re-included directories come back automatically.
+/*
+
+# ── Cargo workspace sources ──
+!Cargo.toml
+!Cargo.lock
+!crates
+!apps
+
+# ── Never ship regenerated / heavy trees (rebuilt inside the image) ──
+# Single shared workspace target/ is top-level (already excluded by /*), but
+# guard against any nested ones too.
+**/target/
+**/node_modules/
+**/dist/

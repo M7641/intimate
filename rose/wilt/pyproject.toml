@@ -1,0 +1,19 @@
+[project]
+name = "wilt"
+version = "0.1.0"
+description = "Model-based RL prototype: joint replenishment + markdown pricing for perishables"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=1.26",
+    "torch>=2.2",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["wilt"]

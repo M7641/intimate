@@ -1,0 +1,10 @@
+global-include *.yml
+global-include *.yaml
+global-include *.jinja
+global-include *.j2
+global-include *.sql
+global-include *.css
+
+global-include *.js
+global-include *.json
+global-include *.html

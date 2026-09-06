@@ -1,0 +1,35 @@
+[package]
+name = "siren"
+version = "0.1.0"
+edition = "2021"
+description = "Interactive text-to-image studio: prompt → preview → reprompt → save."
+
+[dependencies]
+# CLI + async runtime
+clap = { version = "4", features = ["derive"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "process", "fs"] }
+anyhow = "1"
+async-trait = "0.1"
+
+# Hugging Face ecosystem (Rust-native)
+candle-core = "0.9"
+candle-nn = "0.9"
+candle-transformers = "0.9"
+hf-hub = { version = "0.4", features = ["tokio"] }
+tokenizers = { version = "0.22", default-features = false, features = ["onig"] }
+
+# Imaging
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+
+# Misc
+rand = "0.8"
+
+[features]
+# Apple Silicon GPU. Default on macOS feels natural for this project.
+default = ["metal"]
+metal = ["candle-core/metal", "candle-nn/metal", "candle-transformers/metal"]
+cuda = ["candle-core/cuda", "candle-nn/cuda", "candle-transformers/cuda"]
+
+[[bin]]
+name = "siren"
+path = "src/main.rs"

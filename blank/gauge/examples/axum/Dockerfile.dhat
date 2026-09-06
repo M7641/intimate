@@ -1,0 +1,17 @@
+# The Axum example built with dhat heap profiling on — the Rust counterpart to
+# the FastAPI memray image. A global allocator records every allocation and dhat
+# writes dhat-heap.json (to the cwd) on graceful shutdown.
+FROM rust:1-slim AS build
+WORKDIR /src
+COPY Cargo.toml ./
+COPY src ./src
+RUN cargo build --release --features dhat-heap
+
+FROM debian:bookworm-slim
+COPY --from=build /src/target/release/gauge-axum-example /usr/local/bin/app
+ENV GAUGE_HOST=0.0.0.0
+ENV PORT=8080
+# Run from /captures so dhat writes its capture there (bind-mounted by the helper).
+WORKDIR /captures
+EXPOSE 8080
+CMD ["/usr/local/bin/app"]

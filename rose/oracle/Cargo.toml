@@ -1,0 +1,41 @@
+[package]
+name = "oracle"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "time", "fs", "process", "signal"] }
+
+# Web server + SSE transport (same shape as the `flow` pilot)
+axum = "0.8"
+tokio-stream = { version = "0.1", features = ["sync"] }
+futures = "0.3"
+
+# Database
+sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite"] }
+
+# LLM judge (Anthropic API) — same crate the `nameless` pilot uses
+rig-core = { version = "0.32", features = ["derive"] }
+
+# HTTP fetching + feed parsing for ingestion
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+feed-rs = "2"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Time
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+
+# Error handling
+anyhow = "1"
+async-trait = "0.1"
+
+# Utilities
+uuid = { version = "1", features = ["v4"] }
+
+# Observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

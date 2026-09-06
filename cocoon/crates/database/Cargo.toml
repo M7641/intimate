@@ -1,0 +1,77 @@
+[package]
+name = "database"
+version = "0.3.0"
+edition.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+r2d2 = { workspace = true }
+
+# In-memory connectors
+duckdb = { workspace = true, optional = true }
+rusqlite = { workspace = true, optional = true }
+
+# External: Postgres (native, Rust-pure — used for Redshift too)
+postgres = { workspace = true, optional = true }
+postgres-native-tls = { workspace = true, optional = true }
+native-tls = { workspace = true, optional = true }
+chrono = { workspace = true, optional = true }
+rust_decimal = { workspace = true, optional = true }
+
+# External: async Postgres/Redshift (spike — `postgres-async` feature).
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"], optional = true }
+tokio-postgres = { workspace = true, optional = true }
+deadpool-postgres = { workspace = true, optional = true }
+
+# External: Snowflake REST API (via reqwest). `gzip` so large result partitions
+# returned gzip-compressed are auto-decompressed (Snowflake compresses big bodies).
+reqwest = { workspace = true, features = ["blocking", "json", "gzip"], optional = true }
+tracing = { workspace = true, optional = true }
+
+[dev-dependencies]
+tracing-subscriber = { workspace = true }
+
+[features]
+# No default backend: every consumer picks exactly the backends it needs
+# (the workspace dep is `default-features = false`). The crate's own lint/test
+# tasks pass `--all-features` (see crates/database/moon.yml) for full coverage.
+default = []
+duckdb = ["dep:duckdb"]
+sqlite = ["dep:rusqlite"]
+postgres = ["dep:postgres", "dep:postgres-native-tls", "dep:native-tls", "dep:chrono", "dep:rust_decimal"]
+# Spike: async Postgres/Redshift on tokio-postgres + deadpool. Pulls in `postgres`
+# to reuse its row->JSON conversion (the wire types are identical).
+postgres-async = ["postgres", "dep:tokio", "dep:tokio-postgres", "dep:deadpool-postgres"]
+snowflake = ["dep:reqwest", "dep:tracing"]
+
+[lib]
+name = "database"
+path = "src/lib.rs"
+
+[[example]]
+name = "duckdb"
+required-features = ["duckdb"]
+
+[[example]]
+name = "merge"
+required-features = ["duckdb"]
+
+[[example]]
+name = "sqlite"
+required-features = ["sqlite"]
+
+[[example]]
+name = "postgres"
+required-features = ["postgres"]
+
+[[example]]
+name = "postgres_async"
+required-features = ["postgres-async"]
+
+[[example]]
+name = "snowflake"
+required-features = ["snowflake"]
+
+[lints]
+workspace = true

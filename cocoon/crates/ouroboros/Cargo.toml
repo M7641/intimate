@@ -1,0 +1,41 @@
+# `ouroboros` — client + CLI (lecture seule) pour la plateforme Nimbus.
+#
+# Port Rust de `blank/ouroboros` (Python/typer). Expose deux faces, comme le
+# package Python d'origine (lib + script) :
+#   - une librairie : `Client` + clients de domaine (`Images`, `Services`,
+#     `Workflows`, `Tenant`) consommables par d'autres crates de `cocoon` ;
+#   - un binaire `ouroboros` : CLI reproduisant les 7 commandes de lecture.
+[package]
+name = "ouroboros"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+name = "ouroboros"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ouroboros"
+path = "src/main.rs"
+
+[dependencies]
+# Client HTTP synchrone : un CLI n'a pas besoin de runtime async (cf. nyx).
+# `multipart` sert à l'upload d'artefact zip lors du déploiement.
+reqwest = { workspace = true, features = ["blocking", "json", "multipart"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+clap = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+# Rendu des tables `instance-options` (équivalent du `rich.Table` Python).
+comfy-table = "7"
+# Construction de l'artefact de déploiement : filtrage .dockerignore (gitwildmatch)
+# via `ignore` (ripgrep), parcours via `walkdir`, archive via `zip`.
+ignore = "0.4"
+walkdir = "2"
+zip = { version = "3", default-features = false, features = ["deflate"] }
+tempfile = "3"
+
+[lints]
+workspace = true

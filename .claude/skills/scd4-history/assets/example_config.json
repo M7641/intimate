@@ -1,0 +1,18 @@
+{
+  "schema": "analytics",
+  "table": "dim_customer",
+  "business_key": [
+    {"name": "customer_id", "type": "BIGINT"}
+  ],
+  "tracked_columns": [
+    {"name": "email", "type": "VARCHAR(255)"},
+    {"name": "tier", "type": "VARCHAR(20)"},
+    {"name": "country", "type": "VARCHAR(2)"}
+  ],
+  "static_columns": [
+    {"name": "signup_date", "type": "DATE"}
+  ],
+  "history_suffix": "_history",
+  "staging_prefix": "stg_",
+  "load_ts_placeholder": "{load_ts}"
+}

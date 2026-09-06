@@ -1,0 +1,25 @@
+[project]
+name = "ouroboros"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Mike", email = "michael@eyecatching.co.uk" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "requests>=2.32.5",
+    "typer>=0.19.2",
+    "pure",
+    "pathspec>=0.12.1",
+]
+
+[tool.uv.sources]
+pure = { workspace = true }
+
+[project.scripts]
+ouroboros = "ouroboros.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.8.23,<0.9.0"]
+build-backend = "uv_build"

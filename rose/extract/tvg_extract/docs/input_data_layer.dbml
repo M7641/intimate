@@ -1,0 +1,67 @@
+// Input data layer — `extract` module
+// Warehouse-side tables that feed the extraction pipeline (text side).
+// Render at https://dbdiagram.io or with `@dbml/cli`.
+//
+// Column names are VERBATIM from the warehouse, including real misspellings
+// (navaigation_attributes, cretated_date_time) — quote as-is in SQL.
+// Types marked with a `?` in their note are assumed, not yet verified.
+
+Project extract_input {
+  database_type: 'Redshift'
+  Note: '''
+    Input contract for the `extract` pipeline.
+    Both tables are at SKU grain and join on sku_id, but the pipeline consumes
+    at PRODUCT grain: it collapses SKU variants to one representative row per
+    product_id (qualify row_number over product_id) — so pipeline `id` = product_id.
+    It also filters to launched-and-exited products
+    (actual_launch_date is not null AND actual_exit_date < current_date) to cut
+    volume. Neither table carries an image — extraction is text-only.
+  '''
+}
+
+Table stage.prd1_product_attributes {
+  sku_id                 bigint    [not null, note: 'SKU grain. Join key to hierarchy']
+  product_id             bigint    [not null, note: 'Parent product']
+  attribute_details      varchar   [note: 'SUPER in-warehouse; ingested as raw string, parsed in the pipeline. Structured attribute bag, primary text signal']
+  navaigation_attributes varchar   [note: 'SUPER in-warehouse; ingested as raw string, parsed in the pipeline. Faceted-nav attributes. (sic: navigation)']
+  extracted_date_time    timestamp [note: 'When the row was extracted into staging']
+  cretated_date_time     timestamp [note: 'Row creation time. (sic: created)']
+
+  indexes {
+    sku_id [pk]
+  }
+
+  Note: 'Per-SKU attribute payload. Semi-structured columns are the richest extraction signal.'
+}
+
+Table stage.prd1_product_hierarchy {
+  sku_id               bigint  [not null, note: 'SKU grain. Join key to attributes']
+  product_id           bigint  [not null, note: 'Parent product -> pipeline `id` (product grain)']
+  actual_launch_date   date    [note: 'Lifecycle filter: must be not null. ? assumed on this table']
+  actual_exit_date     date    [note: 'Lifecycle filter: must be < current_date. ? assumed on this table']
+  product_group_id     bigint  [note: 'Grouping above product']
+  product_name         varchar [note: 'Display name. Text signal']
+  product_copy         varchar [note: 'Marketing copy / description. Primary text signal']
+  heading_text         varchar [note: 'Short heading. Text signal']
+  colour               varchar [note: 'Stated colour (ground-truth label)']
+  size                 varchar [note: 'Stated size']
+  product_division     varchar [note: 'Taxonomy L1']
+  product_department   varchar [note: 'Taxonomy L2']
+  product_category     varchar [note: 'Taxonomy L3. Candidate domain selector']
+  product_sub_category varchar [note: 'Taxonomy L4']
+  product_range        varchar [note: 'Range grouping']
+  product_type         varchar [note: 'Product type']
+  reporting_range      varchar [note: 'Reporting grouping']
+  product_brand        varchar [note: 'Brand']
+  supplier_name        varchar [note: 'Supplier']
+
+  indexes {
+    sku_id [pk]
+  }
+
+  Note: 'Per-SKU descriptive + merchandising taxonomy. Spine of the join.'
+}
+
+// Hierarchy is the spine; attributes are left-joined onto it.
+// `?` cardinality: confirm prd1_product_attributes is one-row-per-sku_id.
+Ref: stage.prd1_product_hierarchy.sku_id - stage.prd1_product_attributes.sku_id

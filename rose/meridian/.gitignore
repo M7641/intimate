@@ -1,0 +1,6 @@
+# SQLite databases created by the pilot (the dev DB is in-memory; only the
+# managed db is a file). The migrations/ directory IS committed — it is the
+# reviewable artefact.
+*.db
+*.db-shm
+*.db-wal

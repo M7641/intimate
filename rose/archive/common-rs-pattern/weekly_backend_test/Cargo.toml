@@ -1,0 +1,35 @@
+[package]
+name = "weekly-backend"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Greenfield weekly backend (Axum) — successor to the FastAPI app at modules/reports/weekly/backend/api.py."
+
+[[bin]]
+name = "weekly-backend"
+path = "src/main.rs"
+
+[dependencies]
+common_rs = { path = "../../../../src/common_rs" }
+
+axum = { version = "0.8", features = ["macros", "ws"] }
+axum-extra = { version = "0.10", features = ["query"] }
+tokio = { version = "1", features = ["full"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["compression-gzip", "fs"] }
+dashmap = "6"
+futures-util = "0.3"
+
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio-rustls", "postgres", "chrono", "json", "macros"] }
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = { version = "0.4", features = ["serde"] }
+
+tracing = "0.1"
+
+thiserror = "2"
+regex = "1"
+uuid = { version = "1", features = ["v4"] }
+async-stream = "0.3"
+csv = "1.3"

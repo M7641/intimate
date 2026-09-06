@@ -1,0 +1,42 @@
+WITH
+    SHAP_VALUES AS (
+        SELECT
+            TABLE_ID,
+            FEATURE,
+            ROUND(SHAP_VALUE::FLOAT, 4) AS SHAP_VALUE
+        FROM {{schema | safe}}.METIS_SHAP_VALUES_FOR_MODEL_EXPLAIN
+        WHERE TABLE_ID = '{{selected_entity_id | safe}}'
+        AND MODEL_NAME = '{{model_name | safe}}'
+    ),
+    TOP_X_FEATURES AS (
+        SELECT TOP {{ number_of_features | safe }}
+            FEATURE,
+            ABS(SHAP_VALUE::FLOAT) AS ABS_SHAP_VALUE
+        FROM SHAP_VALUES
+        ORDER BY ABS_SHAP_VALUE DESC
+    ),
+    ACTUAL_VALUES AS (
+        SELECT
+            TABLE_ID,
+            FEATURE,
+            VALUE AS ACTUAL_VALUE
+        FROM {{schema | safe}}.METIS_DATA_USED_TO_EVALUATE_SHAP
+        WHERE TABLE_ID = '{{selected_entity_id | safe}}'
+        AND MODEL_NAME = '{{model_name | safe}}'
+    ),
+    LEFT_JOIN AS (
+        SELECT
+            TABLE_ID,
+            FEATURE,
+            SHAP_VALUE,
+            ACTUAL_VALUE
+        FROM SHAP_VALUES
+        LEFT JOIN ACTUAL_VALUES USING(TABLE_ID, FEATURE)
+        WHERE SHAP_VALUES.FEATURE IN (SELECT FEATURE FROM TOP_X_FEATURES)
+    )
+SELECT
+    TABLE_ID,
+    INITCAP(REPLACE(FEATURE, '_', ' ')) AS FEATURE_CLEAN,
+    SHAP_VALUE,
+    ACTUAL_VALUE
+FROM LEFT_JOIN;

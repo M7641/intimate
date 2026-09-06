@@ -1,0 +1,19 @@
+# `deploy-catalog` — single source of truth for how each cocoon app deploys.
+#
+# One declarative `AppSpec` per deployable app (service name, image, dockerfile,
+# credentials). Both an app's own `deploy` subcommand and the `warden` control
+# CLI read from here, so a service's deploy shape lives in exactly ONE place.
+#
+# Credentials are declared BY REFERENCE: a spec lists the *names* of the secrets
+# a service needs, never their values. Nothing secret is compiled into the crate.
+[package]
+name = "deploy-catalog"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+# Produces `ouroboros::DeployService` values from the declarative specs.
+ouroboros = { workspace = true }
+
+[lints]
+workspace = true

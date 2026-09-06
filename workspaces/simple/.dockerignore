@@ -1,0 +1,8 @@
+# Build context hygiene — keep junk out of the image build context.
+.git
+.gitignore
+**/.DS_Store
+**/__pycache__
+**/*.pyc
+**/*.pyo
+*.log

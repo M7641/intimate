@@ -1,0 +1,26 @@
+{
+  "skill_name": "axum-production-patterns",
+  "evals": [
+    {
+      "id": 0,
+      "name": "greenfield-postgres-service",
+      "prompt": "I'm starting a brand-new Rust web service with Axum 0.8, backed by Postgres, that will run in Kubernetes. It exposes a small JSON API (a couple of CRUD endpoints for 'widgets'). Scaffold it so it's genuinely production-ready from day one - proper centralized error handling, graceful shutdown on SIGTERM, liveness/readiness probes, structured logging, request timeouts and a body limit, CORS, and a sensible router/state layout. Not a hello-world. Give me the actual source files (main.rs, app.rs, state.rs, error.rs, a routes module) and the Cargo.toml dependencies.",
+      "expected_output": "A set of Rust source files implementing a production-grade Axum service: lib.rs+main.rs split, AppState, central error enum with IntoResponse, middleware stack in correct order, graceful shutdown handling SIGTERM, /health/live + /health/ready endpoints, tracing init, and a Cargo.toml with the right crates/versions.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "harden-naive-router",
+      "prompt": "Here's the main.rs for a small Axum service I threw together (attached as naive_main.rs). It works locally but I need to put it in production behind a load balancer. Go through it and make it production-ready - point out what's missing and rewrite it properly.",
+      "expected_output": "An identification of the naive file's production gaps (unwrap-based error handling, no graceful shutdown, no health/readiness probes, no middleware: timeout/body-limit/panic-catch/cors/request-id, no tracing/metrics, hardcoded config) and a rewritten version that fixes them following the production checklist.",
+      "files": ["naive_main.rs"]
+    },
+    {
+      "id": 2,
+      "name": "cocoon-reuse-service-kit",
+      "prompt": "I'm working in the cocoon repo and adding a new endpoint group to the data_view app. How should I wire up shared state, error handling, and the middleware for the new routes so it's consistent with how the rest of the service is built? Show me the handler and router skeleton.",
+      "expected_output": "Guidance that reuses the existing service-kit crate (AppState, AppError/IntoResponse, the middleware stack) rather than re-implementing these patterns inline, with a router()/handler skeleton that nests under the existing app and returns Result<_, AppError>. Should reference reading service-kit before writing new code.",
+      "files": ["naive_main.rs"]
+    }
+  ]
+}

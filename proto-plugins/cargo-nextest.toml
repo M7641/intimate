@@ -1,0 +1,29 @@
+# Vendored proto plugin for cargo-nextest — the Rust test runner. Authored here
+# per our "vendored thin pointer" policy; points at OFFICIAL nextest-rs/nextest
+# releases. Notes that bite if you edit this:
+#   - Tags are prefixed `cargo-nextest-<version>` (the repo also has other tag
+#     families like `nextest-runner-*`), so version-pattern strips the prefix and
+#     filters to cargo-nextest releases only.
+#   - macOS ships ONE universal binary (no per-arch asset) → arch is hardcoded.
+#   - Linux uses the static musl build. The tarball holds `cargo-nextest` at the
+#     root (no prefix dir), so no archive-prefix is needed.
+name = "cargo-nextest"
+type = "cli"
+
+[resolve]
+git-url = "https://github.com/nextest-rs/nextest"
+version-pattern = "cargo-nextest-((?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+))"
+
+[platform.linux]
+download-file = "cargo-nextest-{version}-{arch}-unknown-linux-musl.tar.gz"
+
+[platform.macos]
+# universal2 binary — same asset for both arm64 and x86_64
+download-file = "cargo-nextest-{version}-universal-apple-darwin.tar.gz"
+
+[install]
+download-url = "https://github.com/nextest-rs/nextest/releases/download/cargo-nextest-{version}/{download_file}"
+
+[install.exes.cargo-nextest]
+exe-path = "cargo-nextest"
+primary = true

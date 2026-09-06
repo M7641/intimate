@@ -1,0 +1,11 @@
+name: 'galicia'
+version: '1.0.0'
+config-version: 2
+profile: 'galicia'
+
+model-paths: ["models"]
+
+models:
+  galicia:
+    mart:
+      +materialized: table

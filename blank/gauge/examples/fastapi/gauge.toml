@@ -1,0 +1,28 @@
+# gauge config for the FastAPI example — run with:
+#   uv run gauge run --config examples/fastapi/gauge.toml
+image = "gauge-fastapi-example"
+
+[build]
+context = "examples/fastapi"
+
+[container]
+port = 8080
+# memory = "512m"   # uncomment to measure behaviour under a real cgroup cap
+# Run multiple uvicorn workers to see per-process overhead add up (the cgroup
+# sums every worker). 4 workers ≈ 5x the single-worker baseline memory.
+# run_args = ["-e", "WORKERS=4"]
+
+[ready]
+url = "http://127.0.0.1:8080/health"
+timeout = 30
+
+[load]
+# Derive the load from the app's OpenAPI spec — gauge exercises every
+# documented GET endpoint (/health, /items/{id}, /search, /work) round-robin.
+openapi_url = "http://127.0.0.1:8080/openapi.json"
+requests = 4000
+concurrency = 32
+
+[output]
+dir = "examples/fastapi/report"
+interval = 0.3

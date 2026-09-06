@@ -1,0 +1,57 @@
+WITH
+    SHAP_VALUES AS (
+        SELECT
+            TABLE_ID,
+            FEATURE,
+            SHAP_VALUE,
+            ROW_NUMBER() OVER(PARTITION BY FEATURE ORDER BY TABLE_ID) AS ROW_COUNTER
+        FROM {{ schema | safe }}.METIS_SHAP_VALUES_FOR_MODEL_EXPLAIN
+        WHERE MODEL_NAME = '{{model_name | safe}}'
+    {% if feature is not none and feature_value is not none %}
+        AND TABLE_ID IN (SELECT {{ entity_id | safe}}
+        FROM {{ucv_ucv_table_name | safe}}
+            WHERE {{feature | safe}} = '{{feature_value | safe}}')
+    {% endif %}
+    ),
+    ACTUAL_VALUES AS (
+        SELECT
+            TABLE_ID,
+            FEATURE,
+            CASE
+                WHEN VALUE IN ('None', 'none', 'nan', 'NaN') THEN NULL
+                ELSE VALUE
+            END AS ACTUAL_VALUE
+        FROM {{ schema | safe }}.METIS_DATA_USED_TO_EVALUATE_SHAP
+        WHERE MODEL_NAME = '{{model_name | safe}}'
+    ),
+    JOIN_PREVIOUS_VIEWS AS (
+        SELECT
+            *
+        FROM SHAP_VALUES
+            LEFT JOIN ACTUAL_VALUES USING(TABLE_ID, FEATURE)
+        WHERE ACTUAL_VALUE IS NOT NULL
+        AND ROW_COUNTER <= {{sample_size | safe}}
+        AND FEATURE IN ('{{ feature_one | safe }}', '{{ feature_two | safe }}')
+    ),
+    FEATURE_ONE AS (
+        SELECT
+            TABLE_ID,
+            SHAP_VALUE::NUMERIC(10, 5) AS SHAP_VALUE,
+            ACTUAL_VALUE AS {{ feature_one | safe }}
+        FROM JOIN_PREVIOUS_VIEWS
+        WHERE FEATURE IN ('{{ feature_one | safe }}')
+    ),
+    FEATURE_TWO AS (
+        SELECT
+            TABLE_ID,
+            ACTUAL_VALUE AS {{ feature_two | safe }}
+        FROM JOIN_PREVIOUS_VIEWS
+        WHERE FEATURE IN ('{{ feature_two | safe }}')
+    ),
+    REJOIN_VIEWS AS (
+        SELECT
+            *
+        FROM FEATURE_ONE
+            LEFT JOIN FEATURE_TWO USING(TABLE_ID)
+    )
+SELECT * FROM REJOIN_VIEWS

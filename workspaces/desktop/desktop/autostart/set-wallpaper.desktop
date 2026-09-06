@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Set Wallpaper
+Comment=Apply the default Tokyo Night desktop wallpaper
+Exec=/usr/local/bin/set-wallpaper
+Terminal=false
+X-XFCE-Autostart-Phase=Application

@@ -1,0 +1,10 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'application'
+language: 'python'
+# Top-level ML package — consumes pure + io-database from the blank workspace,
+# plus the mana workspace members (search, ...) it composes. mimic stays inline
+# as a regular subpackage (mana/mimic/).
+dependsOn:
+  - 'pure'
+  - 'io-database'
+  - 'mana-search'

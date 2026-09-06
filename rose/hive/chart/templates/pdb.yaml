@@ -1,0 +1,20 @@
+{{- if .Values.pdb.enabled }}
+# A PodDisruptionBudget guards against VOLUNTARY disruption — node drains,
+# cluster upgrades, autoscaler scale-downs. It tells Kubernetes "you may evict
+# pods, but never take me below `minAvailable` at once." Without it, a routine
+# node upgrade could drain several nodes and evict every replica simultaneously,
+# turning planned maintenance into an outage. It does NOT protect against
+# INVOLUNTARY disruption (a node hardware failure) — that's what running
+# multiple replicas across nodes is for.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "hive.fullname" . }}
+  labels:
+    {{- include "hive.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "hive.selectorLabels" . | nindent 6 }}
+{{- end }}

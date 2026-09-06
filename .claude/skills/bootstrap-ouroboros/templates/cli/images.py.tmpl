@@ -1,0 +1,52 @@
+@app.command("list-images")
+def list_images(
+    detailed: bool = typer.Option(False, "--detailed", "-d", help="Show detailed info"),
+    save: bool = typer.Option(False, "--save", "-s", help="Save to file"),
+) -> None:
+    """
+    List deployed images
+
+    Examples:
+        uv run ouroboros list-images
+    """
+
+    images_client = Images()
+    platform_images = images_client.list_images()
+
+    images = []
+    for img in platform_images:
+        if detailed:
+            image_details = images_client.describe_image(img["id"])
+            images.append(image_details)
+        else:
+            images.append(img)
+
+    if save:
+        with open("images.json", "w") as f:
+            json.dump(images, f, indent=4)
+        console.print("Images saved to images.json")
+    else:
+        for img in images:
+            console.print(img)
+
+
+@app.command("describe-image")
+def describe_image(
+    image_id: int = typer.Argument(..., help="The ID of the image to describe"),
+    save: bool = typer.Option(False, "--save", "-s", help="Save to file"),
+) -> None:
+    """
+    Describe a specific image by ID
+
+    Examples:
+        uv run ouroboros describe-image <image_id>
+    """
+
+    images_client = Images()
+    image_details = images_client.describe_image(image_id)
+    console.print(image_details)
+
+    if save:
+        with open(f"image_{image_id}.json", "w") as f:
+            json.dump(image_details, f, indent=4)
+        console.print(f"Image details saved to image_{image_id}.json")

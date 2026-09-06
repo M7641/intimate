@@ -1,0 +1,68 @@
+# Moon workspace — repo root. Pilot scope: the blank uv workspace members.
+# cocoon (Rust), mana, etc. get added as Moon proves out.
+$schema: 'https://moonrepo.dev/schemas/workspace.json'
+
+projects:
+  # blank — uv workspace (Python)
+  pure: 'blank/pure'
+  # Renamed off the bare names to avoid clashing with the cocoon Rust crates
+  # of the same Cargo package name (moon project ids are global, not per-language).
+  py-ouroboros: 'blank/ouroboros'
+  destiny: 'blank/destiny'
+  inertia: 'blank/inertia'
+  gauge: 'blank/gauge'
+  io-database: 'blank/io/database'
+  sftper: 'blank/io/sftper'
+  sthree: 'blank/io/sthree'
+  # mana — ML package under blank/ (its own nested uv workspace; consumes pure + io-database)
+  mana: 'blank/mana'
+  # mana workspace members — one box per section with heavy/platform-specific deps
+  mana-search: 'blank/mana/modules/search'
+  # cocoon — Cargo workspace (Rust). Inter-crate deps are INFERRED from Cargo.toml.
+  data_view: 'cocoon/apps/data_view'
+  cocoon-nyx: 'cocoon/apps/nyx'
+  augur: 'cocoon/apps/augur'
+  tako: 'cocoon/apps/tako'
+  redhouse: 'cocoon/apps/redhouse'
+  snowhouse: 'cocoon/apps/snowhouse'
+  # cocoon docs — Astro + Starlight site (reference docs + decision log)
+  cocoon-docs: 'cocoon/docs'
+  service-kit: 'cocoon/crates/service-kit'
+  blobs: 'cocoon/crates/blobs'
+  database: 'cocoon/crates/database'
+  faker: 'cocoon/crates/faker'
+  keyvalue: 'cocoon/crates/keyvalue'
+  ouroboros: 'cocoon/crates/ouroboros'
+  schema: 'cocoon/crates/schema'
+  # rose — heterogeneous projects (ids = path with slashes -> dashes).
+  # dependsOn left empty for now (most are standalone); refine for affected later.
+  apocrypha-prometheus: 'rose/apocrypha/prometheus'
+  calque: 'rose/calque'
+  apocrypha-spawner: 'rose/apocrypha/spawner'
+  dragonfly-plugin: 'rose/dragonfly/plugin'
+  extract: 'rose/extract'
+  forage: 'rose/forage'
+  fusion: 'rose/fusion'
+  galicia-rs-galicia-py: 'rose/galicia-rs/galicia-py'
+  galicia-rs: 'rose/galicia-rs'
+  incinerate: 'rose/incinerate'
+  lagoon: 'rose/lagoon'
+  moss: 'rose/moss'
+  nameless: 'rose/nameless'
+  nix_stack-backend: 'rose/nix_stack/backend'
+  nix_stack: 'rose/nix_stack'
+  perch-app: 'rose/perch/app'
+  quartz: 'rose/quartz'
+  saga: 'rose/saga'
+  siren: 'rose/siren'
+  troy-python: 'rose/troy/python'
+  unity: 'rose/unity'
+  unity-two: 'rose/unity/two'
+  vive-restate_pipeline: 'rose/vive/restate_pipeline'
+  # TypeScript frontends
+  quartz-frontend: 'rose/quartz/frontend'
+  nix_stack-frontend: 'rose/nix_stack/frontend'
+
+vcs:
+  client: 'git'
+  defaultBranch: 'main'

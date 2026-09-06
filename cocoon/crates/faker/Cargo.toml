@@ -1,0 +1,11 @@
+[package]
+name = "faker"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+name = "faker"
+path = "src/lib.rs"
+
+[lints]
+workspace = true

@@ -1,0 +1,7 @@
+FROM prom/prometheus
+
+COPY prometheus.yml /etc/prometheus/prometheus.yml
+COPY api_key.txt /etc/prometheus/api_key.txt
+
+EXPOSE 8050
+ENTRYPOINT [ "prometheus", "--config.file=/etc/prometheus/prometheus.yml", "--web.listen-address=:8050" ]

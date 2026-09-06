@@ -1,0 +1,12 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'application'
+language: 'typescript'
+
+tasks:
+  # This frontend uses bun (bun.lock). `install` is a dep of the inherited
+  # `lint` task so `moon ci` materialises node_modules before tsc.
+  install:
+    command: 'bun install --frozen-lockfile'
+    toolchain: 'system'
+    options:
+      cache: false

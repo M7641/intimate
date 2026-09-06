@@ -1,0 +1,4 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'application'
+language: 'rust'
+# Rust CLI shipped as a Python wheel via maturin — no internal crate deps.

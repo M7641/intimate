@@ -1,0 +1,18 @@
+FROM osrm/osrm-backend
+
+RUN sed -i 's|deb.debian.org|archive.debian.org|g' /etc/apt/sources.list && \
+    sed -i 's|security.debian.org|archive.debian.org|g' /etc/apt/sources.list && \
+    sed -i '/stretch-updates/d' /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install -y wget && \
+    mkdir -p /data && \
+    wget -O /data/britain-and-ireland-latest.osm.pbf http://download.geofabrik.de/europe/britain-and-ireland-latest.osm.pbf && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN osrm-extract -p /opt/car.lua /data/britain-and-ireland-latest.osm.pbf \
+    && osrm-partition /data/britain-and-ireland-latest.osrm \
+    && osrm-customize /data/britain-and-ireland-latest.osrm
+
+ENTRYPOINT osrm-routed --port 8080 --algorithm mld /data/britain-and-ireland-latest.osrm
+
+EXPOSE 8080

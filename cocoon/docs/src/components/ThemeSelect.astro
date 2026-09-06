@@ -1,0 +1,47 @@
+---
+// A named-theme picker — the same shape as basecamp's ThemeSelect, but without
+// the Starlight coupling. Sets `data-theme` on <html> and persists the choice.
+const THEMES = [
+  { value: 'celestial', label: 'Celestial' },
+  { value: 'sky', label: 'Sky' },
+  { value: 'cyber', label: 'Cyber' },
+  { value: 'industry', label: 'Industry' },
+];
+---
+
+<docs-theme-select class="theme-select">
+  <label class="sr-only" for="theme-select">Colour theme</label>
+  <select id="theme-select">
+    {THEMES.map((t) => <option value={t.value}>{t.label}</option>)}
+  </select>
+</docs-theme-select>
+
+<script>
+  const KEY = 'docs-theme';
+  const THEMES = ['celestial', 'sky', 'cyber', 'industry'] as const;
+  type Theme = (typeof THEMES)[number];
+
+  const parse = (value: unknown): Theme =>
+    THEMES.includes(value as Theme) ? (value as Theme) : 'celestial';
+
+  function apply(theme: Theme): void {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem(KEY, theme);
+  }
+
+  class DocsThemeSelect extends HTMLElement {
+    constructor() {
+      super();
+      const select = this.querySelector('select');
+      const current = parse(localStorage.getItem(KEY));
+      if (select) select.value = current;
+      document.documentElement.dataset.theme = current;
+      select?.addEventListener('change', (event) => {
+        if (event.currentTarget instanceof HTMLSelectElement) {
+          apply(parse(event.currentTarget.value));
+        }
+      });
+    }
+  }
+  customElements.define('docs-theme-select', DocsThemeSelect);
+</script>

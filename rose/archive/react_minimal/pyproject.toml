@@ -1,0 +1,27 @@
+[project]
+name = "react-minimal"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Mike", email = "michael@eyecatching.co.uk" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.116.0",
+    "joblib>=1.5.1",
+    "nimbus-sdk>=1.18.0",
+    "tenacity>=9.1.2",
+    "typer>=0.12.5",
+    "uvicorn>=0.35.0",
+]
+
+[project.urls]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[project.scripts]
+api = "react_minimal.cli:app"

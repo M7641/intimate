@@ -1,0 +1,52 @@
+@app.command("list-workflows")
+def list_workflows(
+    detailed: bool = typer.Option(False, "--detailed", "-d", help="Show detailed info"),
+    save: bool = typer.Option(False, "--save", "-s", help="Save to file"),
+) -> None:
+    """
+    List deployed workflows
+
+    Examples:
+        uv run ouroboros list-workflows
+    """
+
+    workflows_client = Workflows()
+    platform_workflows = workflows_client.list_workflows()
+
+    workflows = []
+    for wf in platform_workflows:
+        if detailed:
+            workflow_details = workflows_client.get_workflow_details(wf["id"])
+            workflows.append(workflow_details)
+        else:
+            workflows.append(wf)
+
+    if save:
+        with open("workflows.json", "w") as f:
+            json.dump(workflows, f, indent=4)
+        console.print("Workflows saved to workflows.json")
+    else:
+        for wf in workflows:
+            console.print(wf)
+
+
+@app.command("describe-workflow")
+def describe_workflow(
+    workflow_id: int = typer.Argument(..., help="The ID of the workflow to describe"),
+    save: bool = typer.Option(False, "--save", "-s", help="Save to file"),
+) -> None:
+    """
+    Describe a specific workflow by ID
+
+    Examples:
+        uv run ouroboros describe-workflow <workflow_id>
+    """
+
+    workflows_client = Workflows()
+    workflow_details = workflows_client.get_workflow_details(workflow_id)
+    console.print(workflow_details)
+
+    if save:
+        with open(f"workflow_{workflow_id}.json", "w") as f:
+            json.dump(workflow_details, f, indent=4)
+        console.print(f"Workflow details saved to workflow_{workflow_id}.json")

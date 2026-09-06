@@ -1,0 +1,7 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'library'
+language: 'python'
+# Nearest-neighbour search over embeddings. A leaf box — depends only on pure
+# (logging) plus its own ANN backends (scikit-learn, scann on Linux).
+dependsOn:
+  - 'pure'

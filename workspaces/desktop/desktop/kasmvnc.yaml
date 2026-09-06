@@ -1,0 +1,8 @@
+# System-wide KasmVNC defaults.
+# The desktop is always reached through the JupyterHub/Nimbus proxy or a tunnel, so
+# KasmVNC itself serves plain HTTP — the outer layer provides TLS and auth.
+# The per-session web port is written at runtime by start-desktop to ~/.vnc/kasmvnc.yaml.
+network:
+  protocol: http
+  ssl:
+    require_ssl: false

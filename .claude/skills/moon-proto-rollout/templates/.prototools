@@ -1,0 +1,42 @@
+# proto toolchain manifest — the single source of tool versions for this repo.
+# Built-in proto tools (rust/python/node/bun/uv) need no plugin. The long-tail
+# lint/security tools are NOT built-in, so each has a VENDORED plugin manifest
+# under proto-plugins/ (file:// locators) — a reviewed thin pointer to the tool's
+# OFFICIAL upstream releases, rather than fetching a community plugin at runtime.
+#
+# TEMPLATE: delete the tools the target repo doesn't use. Pin exact versions for
+# reproducibility where it matters; "latest" is fine for fast-moving linters.
+
+# — versions (top-level shorthand) —
+proto = "0.57.4"          # always pin proto + moon themselves
+moon = "2.3.2"
+
+# built-in tools — keep only the languages the target uses:
+rust = "stable"
+python = "latest"
+node = "latest"
+bun = "latest"
+uv = "latest"
+
+# non-built-in tools — each needs a [plugins] entry below + a proto-plugins/ file:
+ruff = "latest"           # python lint/format
+ty = "latest"             # python type checker (Astral)
+gitleaks = "latest"       # secret scanning
+lefthook = "latest"       # git hooks
+sqruff = "latest"         # SQL lint/format
+cargo-deny = "latest"     # rust supply-chain audit
+
+[env]
+# supply-chain cooldown — no dependency uploaded in the last 48h enters a lock.
+# Keep only if the target uses uv.
+UV_EXCLUDE_NEWER = "48 hours"
+
+# — vendored plugins for the non-built-in tools (see proto-plugins/) —
+# Keep only the lines matching the tools kept above.
+[plugins]
+ruff = "file://./proto-plugins/ruff.toml"
+ty = "file://./proto-plugins/ty.toml"
+gitleaks = "file://./proto-plugins/gitleaks.toml"
+lefthook = "file://./proto-plugins/lefthook.toml"
+sqruff = "file://./proto-plugins/sqruff.toml"
+cargo-deny = "file://./proto-plugins/cargo-deny.toml"

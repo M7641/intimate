@@ -1,0 +1,47 @@
+# Tasks inherited ONLY by python projects. Scoping = the `inheritedBy` field,
+# NOT the filename (Moon 2.x). Without it, a tasks file applies to ALL projects.
+$schema: 'https://moonrepo.dev/schemas/tasks.json'
+
+inheritedBy:
+  language: 'python'
+
+tasks:
+  sync:
+    # Setup task: materialise the project's uv environment. Runs from the project
+    # dir so uv resolves the right workspace. A dependency of `test`/`typecheck`
+    # so `moon ci` is self-contained (no blanket `uv sync` in the workflow) and
+    # affected-aware. Not cached: environment setup, not a hashable output.
+    command: 'uv sync'
+    toolchain: 'system'
+    options:
+      cache: false
+  test:
+    # Run pytest from the project's OWN dir (member as cwd) — avoids the sys.path
+    # shadowing we hit (io/ vs stdlib). `--no-sync` because the `sync` dep below
+    # already materialised the venv.
+    command: 'uv run --no-sync pytest -q'
+    toolchain: 'system'
+    deps: ['~:sync']
+  lint:
+    # ruff is a standalone proto tool — no venv needed, so no sync dep.
+    command: 'ruff check .'
+    toolchain: 'system'
+  fmt:
+    command: 'ruff format .'
+    toolchain: 'system'
+    options:
+      # Mutating — enforced by the pre-commit hook, not the CI gate.
+      runInCI: false
+  typecheck:
+    # ty resolves imported deps, so it needs the synced environment.
+    command: 'ty check'
+    toolchain: 'system'
+    deps: ['~:sync']
+  audit:
+    # known CVEs (pip-audit). Replaces scripts/py-audit.sh — run with `moon run :audit`.
+    # Not cached: the CVE DB is external, not an input.
+    command: 'bash'
+    args: ['-c', 'uv export --quiet --no-emit-project --format requirements-txt | uvx pip-audit --disable-pip -r -']
+    toolchain: 'system'
+    options:
+      cache: false

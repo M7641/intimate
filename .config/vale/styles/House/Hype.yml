@@ -1,0 +1,19 @@
+extends: existence
+message: "'%s' is hype. State the fact instead."
+level: warning
+ignorecase: true
+tokens:
+  - blazing(ly)?
+  - seamless(ly)?
+  - effortless(ly)?
+  - cutting[- ]edge
+  - state[- ]of[- ]the[- ]art
+  - game[- ]chang(er|ing)
+  - world[- ]class
+  - best[- ]in[- ]class
+  - revolutionary
+  - supercharged?
+  - powerful
+  - robust
+  - rock[- ]solid
+  - lightning[- ]fast

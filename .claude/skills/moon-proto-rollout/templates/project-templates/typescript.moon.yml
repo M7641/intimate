@@ -1,0 +1,6 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'application'    # or 'library' for a shared package
+language: 'typescript'
+# Declare internal package deps so `--affected` re-checks dependents.
+# dependsOn:
+#   - 'ui-kit'

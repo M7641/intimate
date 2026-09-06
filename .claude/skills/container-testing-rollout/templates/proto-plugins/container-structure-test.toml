@@ -1,0 +1,27 @@
+# Vendored proto plugin for container-structure-test (GoogleContainerTools) —
+# declarative assertions on a built image's files + metadata. Authored here per
+# our "vendored thin pointer" policy; points at OFFICIAL releases.
+#
+# Like Atlas, it publishes RAW binaries (no archive), so `unpack = false` and the
+# download-file carries no extension — proto drops it in place as the
+# `container-structure-test` executable. Tags are `vX.Y.Z` (the `v` is literal in
+# the URL); the asset uses `darwin` for macOS and `amd64`/`arm64` for arch.
+name = "container-structure-test"
+type = "cli"
+
+[resolve]
+git-url = "https://github.com/GoogleContainerTools/container-structure-test"
+
+[platform.linux]
+download-file = "container-structure-test-linux-{arch}"
+
+[platform.macos]
+download-file = "container-structure-test-darwin-{arch}"
+
+[install]
+download-url = "https://github.com/GoogleContainerTools/container-structure-test/releases/download/v{version}/{download_file}"
+unpack = false
+
+[install.arch]
+aarch64 = "arm64"
+x86_64 = "amd64"

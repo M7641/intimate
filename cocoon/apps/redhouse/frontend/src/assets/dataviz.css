@@ -1,0 +1,95 @@
+/* ---------------------------------------------------------------------------
+ * Data-viz semantic palette
+ * ---------------------------------------------------------------------------
+ * A four-step severity scale (critical / warning / info / neutral) plus a
+ * `success` state, used by the query-plan explorers to color nodes, bars,
+ * badges and status text.
+ *
+ * The base hue for each role lives in every theme file as `--sev-*`, so light
+ * gets darker, higher-contrast bases (readable on white) while dark/cyber get
+ * lighter ones. The classes below derive their tint/border from that single
+ * base via `color-mix`, so every theme adapts automatically and nothing is
+ * hard-coded to a fixed RGB palette.
+ *
+ * Variants:
+ *   .sev-tint-*   surface + border  (cards — text stays foreground)
+ *   .sev-badge-*  surface + border + text  (chips / legend swatches)
+ *   .sev-fg-*     text only  (status labels)
+ *   .sev-dot-*    solid fill  (bars, legend squares)
+ * ------------------------------------------------------------------------- */
+
+.sev-tint-critical {
+  background-color: color-mix(in oklab, var(--sev-critical) 12%, transparent);
+  border-color: color-mix(in oklab, var(--sev-critical) 38%, transparent);
+}
+.sev-tint-warning {
+  background-color: color-mix(in oklab, var(--sev-warning) 12%, transparent);
+  border-color: color-mix(in oklab, var(--sev-warning) 38%, transparent);
+}
+.sev-tint-info {
+  background-color: color-mix(in oklab, var(--sev-info) 12%, transparent);
+  border-color: color-mix(in oklab, var(--sev-info) 38%, transparent);
+}
+.sev-tint-neutral {
+  background-color: color-mix(in oklab, var(--sev-neutral) 12%, transparent);
+  border-color: color-mix(in oklab, var(--sev-neutral) 32%, transparent);
+}
+.sev-tint-success {
+  background-color: color-mix(in oklab, var(--sev-success) 12%, transparent);
+  border-color: color-mix(in oklab, var(--sev-success) 38%, transparent);
+}
+
+.sev-badge-critical {
+  color: var(--sev-critical);
+  background-color: color-mix(in oklab, var(--sev-critical) 16%, transparent);
+  border-color: color-mix(in oklab, var(--sev-critical) 35%, transparent);
+}
+.sev-badge-warning {
+  color: var(--sev-warning);
+  background-color: color-mix(in oklab, var(--sev-warning) 16%, transparent);
+  border-color: color-mix(in oklab, var(--sev-warning) 35%, transparent);
+}
+.sev-badge-info {
+  color: var(--sev-info);
+  background-color: color-mix(in oklab, var(--sev-info) 16%, transparent);
+  border-color: color-mix(in oklab, var(--sev-info) 35%, transparent);
+}
+.sev-badge-success {
+  color: var(--sev-success);
+  background-color: color-mix(in oklab, var(--sev-success) 16%, transparent);
+  border-color: color-mix(in oklab, var(--sev-success) 35%, transparent);
+}
+.sev-badge-neutral {
+  color: var(--sev-neutral);
+  background-color: color-mix(in oklab, var(--sev-neutral) 16%, transparent);
+  border-color: color-mix(in oklab, var(--sev-neutral) 35%, transparent);
+}
+
+.sev-fg-critical { color: var(--sev-critical); }
+.sev-fg-warning { color: var(--sev-warning); }
+.sev-fg-info { color: var(--sev-info); }
+.sev-fg-success { color: var(--sev-success); }
+.sev-fg-neutral { color: var(--sev-neutral); }
+
+.sev-dot-critical { background-color: var(--sev-critical); }
+.sev-dot-warning { background-color: var(--sev-warning); }
+.sev-dot-info { background-color: var(--sev-info); }
+.sev-dot-neutral { background-color: var(--sev-neutral); }
+
+/* Dark "SQL terminal" surface — intentionally dark in every theme so SQL reads
+ * like a code editor. Tokenised rather than hard-coded zinc. */
+.sql-surface {
+  background-color: oklch(0.2 0.012 280);
+  color: oklch(0.92 0.005 280);
+  border-color: oklch(0.32 0.02 280);
+}
+
+/* Inline code chip that follows the active theme's foreground. */
+.inline-code {
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.25rem;
+  background-color: color-mix(in oklab, var(--foreground) 10%, transparent);
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}

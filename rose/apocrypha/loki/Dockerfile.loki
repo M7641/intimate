@@ -1,0 +1,7 @@
+FROM grafana/loki:2.9.4
+
+COPY loki.yaml /etc/loki/local-config.yaml
+
+EXPOSE 3100
+
+ENTRYPOINT ["loki", "-config.file=/etc/loki/local-config.yaml", "-target=all"]

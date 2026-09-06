@@ -1,0 +1,46 @@
+[project]
+name = "extract"
+version = "0.1.0"
+description = "Schema-driven structured extraction from product text (LLM + non-generative paths)."
+requires-python = ">=3.12"
+dependencies = [
+    # data access (database.py / datasource.py)
+    "jinja2>=3.1.6",
+    "snowflake-connector-python>=3.16.0",
+    "requests>=2.34.2",
+    "polars>=1.34.0",
+    # extract module — model + IO
+    "torch>=2.2",
+    "torchvision>=0.27.0",
+    "transformers>=4.49",
+    "accelerate>=0.30",
+    "pillow>=10.0",
+    "typer>=0.12",
+    "rich>=13.0",
+    "ruff>=0.15.15",
+    # deploy (extract deploy) — the Nimbus deploy client is vendored into
+    # extract.deploy (bootstrap-ouroboros, workflow + image tiers);
+    # these are its only runtime deps beyond requests (already listed above).
+    "pathspec>=0.12.1",
+]
+
+[project.scripts]
+extract = "extract.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/extract"]
+exclude = ["**/test_*.py", "**/conftest.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["src/extract"]
+addopts = "--import-mode=importlib"
+pythonpath = ["src"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]

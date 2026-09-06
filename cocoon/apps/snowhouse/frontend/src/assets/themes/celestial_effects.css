@@ -1,0 +1,200 @@
+/* Celestial effects — the "living night sky" layer.
+   Everything here is scoped under .celestial so the other themes are
+   untouched. Motion is built from compositor-only properties (opacity,
+   box-shadow, transform) and a single @property-animated angle, so it stays
+   on the GPU. The global prefers-reduced-motion rule in index.css freezes all
+   of it to a still, still-lit state. */
+
+/* A registered angle is the one value CSS can't normally interpolate inside a
+   gradient. Registering it lets the orbiting star sweep the card border. */
+@property --celestial-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* ---- Background plumbing ------------------------------------------------ */
+
+/* The base indigo lives on <html> (which carries the theme class). The body
+   must stay transparent: in the root stacking context a body background paints
+   *above* the negative-z canvas and would hide the nebula entirely. */
+.celestial {
+  background-color: var(--background);
+}
+
+.celestial body {
+  background-color: transparent;
+}
+
+/* Let the WebGL nebula (or its fallback) show through the scroll area. */
+.celestial main {
+  background-color: transparent;
+}
+
+/* Skeletons default to bg-accent, which is gold here and far too loud. Tone
+   them to a soft indigo so loading states stay in the night palette. */
+.celestial [data-slot="skeleton"] {
+  background-color: color-mix(in oklch, var(--muted) 65%, var(--primary));
+}
+
+/* The header floats over the nebula: a thin veil of the card colour with a
+   light blur. Purposeful glass, not decoration — it keeps nav legible while
+   the sky drifts behind it. */
+.celestial header {
+  background-color: color-mix(in oklch, var(--card) 80%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Static fallback nebula, shown only when the WebGL canvas is absent
+   (it sits a layer below the canvas, which is opaque when present). */
+.celestial body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -20;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      60% 50% at 72% 18%,
+      oklch(0.36 0.12 292 / 0.28),
+      transparent 70%
+    ),
+    radial-gradient(
+      55% 60% at 18% 82%,
+      oklch(0.40 0.10 256 / 0.22),
+      transparent 70%
+    ),
+    radial-gradient(
+      45% 45% at 50% 55%,
+      oklch(0.30 0.08 300 / 0.16),
+      transparent 70%
+    );
+}
+
+/* ---- Cards: borders that hum --------------------------------------------- */
+
+.celestial :is([data-slot="card"], .bg-card.border) {
+  position: relative;
+  border-color: color-mix(in oklch, var(--primary) 32%, var(--border));
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--primary) 10%, transparent),
+    0 6px 28px -10px oklch(0.12 0.05 271 / 0.65);
+  transition:
+    box-shadow 600ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 600ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 600ms ease;
+}
+
+/* The hum: a soft glow that breathes around the border. */
+.celestial :is([data-slot="card"], .bg-card.border)::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 14px -2px color-mix(in oklch, var(--primary) 42%, transparent);
+  opacity: 0.3;
+  animation: celestial-hum 5.5s ease-in-out infinite;
+}
+
+@keyframes celestial-hum {
+  0%,
+  100% {
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* A single bright point orbits the border on hover — a star rounding the
+   card. The conic gradient is masked to the 1px border ring only. */
+.celestial :is([data-slot="card"], .bg-card.border)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: conic-gradient(
+    from var(--celestial-angle),
+    transparent 0deg,
+    color-mix(in oklch, var(--primary) 75%, transparent) 38deg,
+    color-mix(in oklch, var(--accent) 80%, transparent) 72deg,
+    transparent 110deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 450ms ease;
+}
+
+.celestial :is([data-slot="card"], .bg-card.border):hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklch, var(--primary) 48%, var(--border));
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--primary) 24%, transparent),
+    0 14px 44px -12px oklch(0.1 0.05 271 / 0.8),
+    0 0 34px -8px color-mix(in oklch, var(--primary) 46%, transparent);
+}
+
+.celestial :is([data-slot="card"], .bg-card.border):hover::before {
+  opacity: 1;
+  animation: celestial-orbit 4s linear infinite;
+}
+
+@keyframes celestial-orbit {
+  to {
+    --celestial-angle: 360deg;
+  }
+}
+
+/* ---- Inputs: a focus ring that breathes ---------------------------------- */
+
+.celestial input:focus-visible,
+.celestial textarea:focus-visible,
+.celestial [role="combobox"]:focus-visible,
+.celestial [data-slot="select-trigger"]:focus-visible {
+  animation: celestial-focus-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes celestial-focus-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 3px color-mix(in oklch, var(--ring) 24%, transparent),
+      0 0 12px -2px color-mix(in oklch, var(--ring) 35%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px color-mix(in oklch, var(--ring) 44%, transparent),
+      0 0 22px -2px color-mix(in oklch, var(--ring) 62%, transparent);
+  }
+}
+
+/* ---- Primary buttons: a faint outer glow --------------------------------- */
+
+.celestial [data-slot="button"].bg-primary {
+  box-shadow: 0 0 18px -6px color-mix(in oklch, var(--primary) 70%, transparent);
+  transition:
+    box-shadow 300ms ease,
+    background-color 200ms ease;
+}
+
+.celestial [data-slot="button"].bg-primary:hover {
+  box-shadow: 0 0 26px -4px color-mix(in oklch, var(--primary) 85%, transparent);
+}
+
+/* ---- Active nav item: a lit underline ------------------------------------ */
+
+.celestial nav a[aria-current="page"] {
+  text-shadow: 0 0 12px color-mix(in oklch, var(--primary) 60%, transparent);
+}

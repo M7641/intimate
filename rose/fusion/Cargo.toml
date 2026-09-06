@@ -1,0 +1,10 @@
+[package]
+name = "fusion"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+arrow = { version = "54", features = ["prettyprint"] }
+parquet = { version = "54", features = ["arrow"] }
+datafusion = "45"
+tokio = { version = "1", features = ["full"] }

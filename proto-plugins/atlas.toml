@@ -1,0 +1,32 @@
+# Vendored proto plugin for Atlas (atlasgo.io) — manage your database schema as
+# code. Authored here per our "vendored thin pointer" policy; it mirrors the
+# community crashdump/proto-tools manifest but is kept in-repo and pointed at
+# Atlas's OFFICIAL CDN.
+#
+# Atlas is unusual: it does NOT publish GitHub release assets. It serves RAW
+# binaries (no archive) from release.ariga.io, so `unpack = false` and the
+# download-file has no archive extension — proto drops the file in place as the
+# `atlas` executable. Versions resolve from ariga/atlas git tags (vX.Y.Z); the
+# `v` is literal in the filename while {version} is the bare number.
+name = "atlas"
+type = "cli"
+
+[resolve]
+git-url = "https://github.com/ariga/atlas"
+
+[platform.linux]
+download-file = "atlas-community-linux-{arch}-v{version}"
+
+[platform.macos]
+download-file = "atlas-community-darwin-{arch}-v{version}"
+
+[platform.windows]
+download-file = "atlas-community-windows-{arch}-v{version}.exe"
+
+[install]
+download-url = "https://release.ariga.io/atlas/{download_file}"
+unpack = false
+
+[install.arch]
+aarch64 = "arm64"
+x86_64 = "amd64"

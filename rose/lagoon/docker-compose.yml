@@ -1,0 +1,13 @@
+# Manual spin-up of MiniStack (the pytest suite starts its own container).
+#   docker compose up -d     # start
+#   curl localhost:4566/_ministack/health
+#   docker compose down       # stop
+services:
+  ministack:
+    image: ministackorg/ministack
+    ports:
+      - "4566:4566"
+    # MiniStack's RDS support boots real Postgres containers, so it needs the
+    # host Docker socket to manage them.
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

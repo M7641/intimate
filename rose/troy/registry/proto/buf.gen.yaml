@@ -1,0 +1,21 @@
+# buf.gen.yaml — the canonical codegen path (one definition -> two languages).
+#
+# Run with: buf generate   (from registry/proto/)
+#
+# This is the schema-first promise: the .proto is the single source of truth,
+# and BOTH the Rust and Python types are generated from it. Neither service
+# hand-writes the Customer type. `buf breaking` then guarantees you can't ship
+# a change that desyncs them.
+#
+# Uses Buf's remote plugins so no local protoc/plugins need installing.
+version: v2
+plugins:
+  # ---- Rust (prost messages + tonic gRPC) ----
+  - remote: buf.build/community/neoeinstein-prost
+    out: ../../rust/src/gen
+  - remote: buf.build/community/neoeinstein-tonic
+    out: ../../rust/src/gen
+
+  # ---- Python (betterproto: dataclasses + async grpc stubs) ----
+  - remote: buf.build/community/danielgtaylor-betterproto
+    out: ../../python/troy/gen

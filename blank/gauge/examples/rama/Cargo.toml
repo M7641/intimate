@@ -1,0 +1,15 @@
+[package]
+name = "gauge-rama-example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Rama is a modular service framework; `http-full` turns on the HTTP server,
+# web-service routing, and extractors used below.
+rama = { version = "0.3.0-alpha.4", features = ["http-full"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+debug = 1

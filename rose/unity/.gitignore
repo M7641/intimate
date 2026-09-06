@@ -1,0 +1,13 @@
+# Generated WASM artifacts -- rebuild with `mise run build` (see suffering_two/mise.toml)
+public/wasm/
+
+# Rust build output
+two/target/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Editor / tooling
+.ropeproject/

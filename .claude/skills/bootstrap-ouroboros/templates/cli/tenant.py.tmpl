@@ -1,0 +1,17 @@
+@app.command("instance-options")
+def instance_options(
+    entity_type: str = typer.Argument(
+        ...,
+        help="Entity type (e.g. workflow, webapp, workspace)",
+    ),
+) -> None:
+    """
+    Show available instance types and sizes for a given entity type.
+
+    Examples:
+        uv run ouroboros instance-options workflow
+        uv run ouroboros instance-options webapp
+        uv run ouroboros instance-options api-deployment
+    """
+    tenant = Tenant()
+    tenant.print_instance_options(entity_type)

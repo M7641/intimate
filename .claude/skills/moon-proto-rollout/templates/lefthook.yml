@@ -1,0 +1,52 @@
+# All tools come from proto. Hooks run NON-INTERACTIVELY (they don't source
+# ~/.zshrc), so each command prepends proto's shims to PATH — the repo stays
+# self-sufficient regardless of each dev's shell config.
+#
+# TEMPLATE: keep only the jobs whose languages exist in the target repo.
+
+assert_lefthook_installed: true
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: ruff-check
+      glob: "*.py"
+      run: PATH="$HOME/.proto/shims:$PATH" ruff check --fix {staged_files}
+      stage_fixed: true
+
+    - name: ruff-format
+      glob: "*.py"
+      run: PATH="$HOME/.proto/shims:$PATH" ruff format {staged_files}
+      stage_fixed: true
+
+    - name: rustfmt
+      glob: "*.rs"
+      # cargo fmt is edition-aware (reads Cargo.toml). Formats the whole affected
+      # crate, not just staged hunks.
+      run: PATH="$HOME/.proto/shims:$PATH" moon run :fmt --affected --query "language=rust"
+      stage_fixed: true
+
+    - name: gitleaks
+      # Secret scan over the whole staged diff.
+      run: PATH="$HOME/.proto/shims:$PATH" gitleaks git --staged --redact --no-banner
+
+    # EOL normalisation: handle natively via .gitattributes (`* text=auto`).
+
+    - name: large-files
+      # block files > 5MB (inline)
+      run: |
+        for f in {staged_files}; do
+          if [ -f "$f" ] && [ "$(wc -c < "$f")" -gt 5242880 ]; then
+            echo "✖ $f exceeds 5MB"; exit 1
+          fi
+        done
+
+pre-push:
+  parallel: true
+  jobs:
+    # Build-graph aware: Moon runs lint/test ONLY for affected projects, across
+    # all languages — replaces per-language fan-out scripts.
+    - name: lint-affected
+      run: PATH="$HOME/.proto/shims:$PATH" moon run ':lint' --affected
+    - name: test-affected
+      run: PATH="$HOME/.proto/shims:$PATH" moon run ':test' --affected

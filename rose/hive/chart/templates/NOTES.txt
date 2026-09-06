@@ -1,0 +1,27 @@
+hive {{ .Chart.AppVersion }} is deploying as release "{{ .Release.Name }}".
+
+Watch the fleet come up (each pod passes readiness before it takes traffic):
+
+  kubectl get pods -l app.kubernetes.io/instance={{ .Release.Name }} -w
+
+Port-forward the Service and hit it repeatedly — the "pod" field cycles across
+replicas, which is the load-balancing you're paying for:
+
+  kubectl port-forward svc/{{ include "hive.fullname" . }} 8080:{{ .Values.service.port }}
+  for i in $(seq 10); do curl -s localhost:8080/ | grep -o '"pod":"[^"]*"'; done
+
+Prove self-healing — delete a pod and watch the Deployment replace it while the
+Service keeps serving:
+
+  kubectl delete pod -l app.kubernetes.io/instance={{ .Release.Name }} --field-selector=... # pick one
+
+{{- if .Values.autoscaling.enabled }}
+
+Drive load and watch the HPA add replicas (needs metrics-server installed):
+
+  kubectl get hpa {{ include "hive.fullname" . }} -w
+  # in another shell, hammer the CPU endpoint through the port-forward:
+  while true; do curl -s "localhost:8080/work?ms=500" >/dev/null; done
+{{- end }}
+
+The README explains WHY each of these works, and when multiple pods earn their keep.

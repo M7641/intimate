@@ -1,0 +1,213 @@
+/* Cyber effects — neon layer synced with the basecamp cyber mode, adapted for
+   a data tool. The signature pieces carry over (animated grid backdrop via
+   CyberBackground, scanlines, cyan/magenta neon borders and glow). The docs-
+   site-only theatrics (link glitch, CRT flicker, heading hue-rotate) are left
+   out: they fight legibility in a dense data UI. Scoped under .cyber. */
+
+/* ---- Background plumbing (shared shape with celestial) ------------------- */
+
+/* Base colour on <html>; body must stay transparent so the negative-z grid
+   canvas is not painted over by the body background. */
+.cyber {
+  background-color: var(--background);
+}
+
+.cyber body {
+  background-color: transparent;
+}
+
+.cyber main {
+  background-color: transparent;
+}
+
+/* Static grid fallback, shown when the canvas is absent (reduced data, no
+   2D context). Matches the canvas cell size so the two never misalign. */
+.cyber body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -20;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 46px 46px;
+}
+
+/* Scanlines: a faint moving CRT veil over everything. Subtle enough to read
+   through, present enough to feel like a terminal. */
+.cyber body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.06) 0px,
+    rgba(0, 0, 0, 0.06) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  animation: cyber-scanline 0.3s linear infinite;
+}
+
+@keyframes cyber-scanline {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(3px);
+  }
+}
+
+/* A registered angle, animatable inside the conic gradient that traces the
+   border. The cyber counterpart to celestial's orbiting star. */
+@property --cyber-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* ---- Cards: translucent so the grid shows, cyan neon border --------------- */
+
+.cyber :is([data-slot="card"], .bg-card.border) {
+  position: relative;
+  background-color: color-mix(in srgb, var(--card) 86%, transparent);
+  border-color: rgba(0, 255, 255, 0.2);
+  box-shadow:
+    0 0 10px rgba(0, 255, 255, 0.05),
+    inset 0 0 24px rgba(0, 0, 0, 0.3);
+  transition:
+    border-color 250ms ease,
+    box-shadow 250ms ease,
+    transform 250ms ease;
+}
+
+.cyber :is([data-slot="card"], .bg-card.border):hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 255, 255, 0.5);
+  box-shadow:
+    0 0 22px rgba(0, 255, 255, 0.16),
+    inset 0 0 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Two soft neon glows drifting around the border: a broad cyan band and a
+   magenta one opposite, each fading over a wide arc rather than a sharp head.
+   Masked to the 1px ring; a hazy drop-shadow gives the bleed. Slow and diffuse
+   — distant city lights seen across the night, not a scanner. */
+.cyber :is([data-slot="card"], .bg-card.border)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  z-index: 1;
+  background: conic-gradient(
+    from var(--cyber-angle),
+    rgba(0, 255, 255, 0) 0deg,
+    rgba(0, 255, 255, 0.5) 48deg,
+    rgba(0, 255, 255, 0) 112deg,
+    rgba(255, 0, 255, 0) 182deg,
+    rgba(255, 0, 255, 0.8) 232deg,
+    rgba(255, 0, 255, 0.8) 268deg,
+    rgba(255, 0, 255, 0) 332deg,
+    rgba(0, 255, 255, 0) 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.45))
+    drop-shadow(0 0 15px rgba(255, 0, 255, 0.6));
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.cyber :is([data-slot="card"], .bg-card.border):hover::before {
+  opacity: 0.9;
+  animation: cyber-orbit 7s linear infinite;
+}
+
+@keyframes cyber-orbit {
+  to {
+    --cyber-angle: 360deg;
+  }
+}
+
+/* ---- Nav: cyan, magenta on hover, lit when active ------------------------ */
+
+.cyber nav a {
+  transition:
+    color 200ms ease,
+    text-shadow 200ms ease;
+}
+
+.cyber nav a:hover {
+  color: #ff00ff;
+  text-shadow: 0 0 8px rgba(255, 0, 255, 0.5);
+}
+
+.cyber nav a[aria-current="page"] {
+  text-shadow:
+    0 0 6px rgba(0, 255, 255, 0.7),
+    0 0 14px rgba(0, 255, 255, 0.4);
+}
+
+/* ---- Primary buttons: cyan glow ----------------------------------------- */
+
+.cyber [data-slot="button"].bg-primary {
+  box-shadow: 0 0 16px -4px rgba(0, 255, 255, 0.7);
+  transition: box-shadow 200ms ease;
+}
+
+.cyber [data-slot="button"].bg-primary:hover {
+  box-shadow: 0 0 24px -2px rgba(0, 255, 255, 0.9);
+}
+
+/* ---- Inputs: cyan focus glow -------------------------------------------- */
+
+.cyber input:focus-visible,
+.cyber textarea:focus-visible,
+.cyber [role="combobox"]:focus-visible,
+.cyber [data-slot="select-trigger"]:focus-visible {
+  border-color: #00ffff;
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.35);
+}
+
+/* Skeletons default to bg-accent (magenta here) — too loud. Use a dim cyan. */
+.cyber [data-slot="skeleton"] {
+  background-color: rgba(0, 255, 255, 0.12);
+}
+
+/* ---- Selection + scrollbar ---------------------------------------------- */
+
+.cyber ::selection {
+  background: rgba(255, 0, 255, 0.3);
+  color: #ffffff;
+}
+
+.cyber ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.cyber ::-webkit-scrollbar-track {
+  background: #0a0a1a;
+  border-left: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.cyber ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff00ff, #00ffff);
+  border-radius: 4px;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
+}
+
+.cyber ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ff40ff, #40ffff);
+}

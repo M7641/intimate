@@ -1,0 +1,195 @@
+{
+  "uid": "workflows",
+  "title": "Workflows",
+  "description": "Workflow monitoring — step duration, success/failure rates, queue depth, stalled detection",
+  "tags": ["observability", "workflows", "event-sourced"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "templating": {
+    "list": [
+      {
+        "name": "workflow_type",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(otel_workflow_step_duration_seconds_count, workflow_type)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "text": "All", "value": "$__all" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Active Workflows",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(otel_workflow_active_count{workflow_type=~\"$workflow_type\"}) by (workflow_type)",
+          "legendFormat": "{{ workflow_type }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 100 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Queue Depth",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(otel_workflow_queue_depth{workflow_type=~\"$workflow_type\"}) by (workflow_type)",
+          "legendFormat": "{{ workflow_type }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 20 },
+              { "color": "red", "value": 50 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Success / Failure Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 4, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(otel_workflow_step_duration_seconds_count{workflow_type=~\"$workflow_type\", workflow_outcome=\"success\"}[5m]))",
+          "legendFormat": "success"
+        },
+        {
+          "expr": "sum(rate(otel_workflow_step_duration_seconds_count{workflow_type=~\"$workflow_type\", workflow_outcome=\"failure\"}[5m]))",
+          "legendFormat": "failure"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": { "drawStyle": "line", "fillOpacity": 15 }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "failure" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "success" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Step Duration by Step",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(otel_workflow_step_duration_seconds_bucket{workflow_type=~\"$workflow_type\"}[5m])) by (le, workflow_step))",
+          "legendFormat": "p95 {{ workflow_step }}"
+        },
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(otel_workflow_step_duration_seconds_bucket{workflow_type=~\"$workflow_type\"}[5m])) by (le, workflow_step))",
+          "legendFormat": "p50 {{ workflow_step }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": { "drawStyle": "line", "fillOpacity": 5 }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "State Transitions",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(otel_workflow_step_duration_seconds_count{workflow_type=~\"$workflow_type\"}[5m])) by (workflow_step, workflow_outcome)",
+          "legendFormat": "{{ workflow_step }} → {{ workflow_outcome }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": { "drawStyle": "bars", "fillOpacity": 50, "stacking": { "mode": "normal" } }
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Stalled Workflows (no transition > 10m)",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "otel_workflow_active_count{workflow_type=~\"$workflow_type\"} > 0 and on(workflow_id) (time() - otel_workflow_last_transition_timestamp{workflow_type=~\"$workflow_type\"}) > 600",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "workflow_id": "Workflow ID",
+              "workflow_type": "Type",
+              "workflow_step": "Last Step",
+              "Value": "Stalled Duration (s)"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "s" }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Recent Workflow Traces",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
+      "datasource": { "type": "tempo", "uid": "tempo" },
+      "targets": [
+        {
+          "queryType": "nativeSearch",
+          "search": "workflow.type=$workflow_type",
+          "limit": 20
+        }
+      ]
+    }
+  ],
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "1m"
+}

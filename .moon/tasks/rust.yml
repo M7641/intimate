@@ -1,0 +1,42 @@
+# Tasks inherited ONLY by rust projects. Scoping = the `inheritedBy` field,
+# NOT the filename (Moon 2.x). Without it, a tasks file applies to ALL projects.
+$schema: 'https://moonrepo.dev/schemas/tasks.json'
+
+inheritedBy:
+  language: 'rust'
+
+tasks:
+  test:
+    # cargo-nextest: faster (parallel, per-test process isolation) with clearer
+    # output. Pinned in .prototools via a vendored proto plugin. NOTE: nextest
+    # does NOT run doctests — those are gated separately by `test-doc` below.
+    # `--no-tests=pass`: a project with zero tests (e.g. a thin CLI) is a pass,
+    # not an error — nextest fails the run by default when it finds none.
+    command: 'cargo nextest run --no-tests=pass'
+    toolchain: 'system'
+  test-doc:
+    # Doctests, which nextest cannot run. Cheap/no-op for crates that have none.
+    command: 'cargo test --doc'
+    toolchain: 'system'
+  lint:
+    command: 'cargo clippy --all-targets -- -D warnings'
+    toolchain: 'system'
+  fmt:
+    command: 'cargo fmt'
+    toolchain: 'system'
+    options:
+      # Mutating task — enforced locally by the lefthook pre-commit hook, not by
+      # the CI gate (which is lint + test + audit). Add a `fmt --check` task if
+      # you want formatting to also block in CI.
+      runInCI: false
+  audit:
+    # supply-chain (cargo-deny). Run with `moon run :audit`. The config lives in
+    # .config/, which cargo-deny does NOT auto-discover (it only looks for
+    # <cwd>/deny.toml), so --config is mandatory here and in any manual run.
+    # Not cached: the advisory DB is external, not an input.
+    command: 'cargo-deny'
+    args:
+      ['check', '--config', '$workspaceRoot/.config/deny.toml', 'advisories', 'bans', 'sources']
+    toolchain: 'system'
+    options:
+      cache: false

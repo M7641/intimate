@@ -1,0 +1,32 @@
+[package]
+name = "galicia"
+version = "0.1.0"
+edition = "2021"
+description = "PoC Rust : DuckDB + Apache Iceberg sur 'S3' local — alternative low-cost à Redshift"
+
+[[bin]]
+name = "galicia"
+path = "src/main.rs"
+
+[dependencies]
+# Le vrai table-format Iceberg (writer) + un catalogue SQL (le rôle de "Glue").
+iceberg = "0.9.1"
+iceberg-catalog-sql = "0.9.1"
+
+# Arrow/Parquet DOIVENT matcher la version qu'iceberg 0.9.1 compile (57.1),
+# sinon les RecordBatch passés au writer sont d'un type incompatible.
+arrow-array = "57.1"
+arrow-schema = "57.1"
+parquet = "57.1"
+
+# Le moteur de requête : DuckDB embarqué (compilé depuis les sources, pas de lib système).
+duckdb = { version = "1", features = ["bundled"] }
+
+# iceberg-catalog-sql utilise sqlx mais n'active pas de runtime ; on le force ici.
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "sqlite"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+futures = "0.3"
+clap = { version = "4", features = ["derive"] }
+rand = "0.8"
+chrono = "0.4"
+anyhow = "1"

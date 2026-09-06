@@ -1,0 +1,23 @@
+# Reference: a lean Rust image the three axes assume. The final stage is
+# `scratch` — no OS, no shell, no package manager — so the runtime axis can only
+# test it from the outside (a feature), and the hygiene axis has almost nothing
+# to scan (the argument for scratch, as a number).
+
+# ── Stage 1: build a fully static Rust binary ──────────────────────
+# rust:alpine's default target is *-linux-musl, which links statically
+# (crt-static is on for musl). The result needs no libc and no dynamic loader at
+# runtime — precisely what lets the final image be `scratch`.
+FROM rust:alpine AS build
+RUN apk add --no-cache musl-dev
+WORKDIR /app
+COPY . ./
+RUN cargo build --release
+
+# ── Stage 2: scratch — nothing but the binary (+ any static assets) ─
+# The attack surface is the files we copy in. A numeric USER needs no
+# /etc/passwd entry. Every line below is asserted by structure-test.yaml.
+FROM scratch
+COPY --from=build /app/target/release/myapp /myapp
+EXPOSE 3000
+USER 1000:1000
+ENTRYPOINT ["/myapp"]

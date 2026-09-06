@@ -1,0 +1,13 @@
+{
+  "metadata": { "dbt_version": "1.8.0" },
+  "nodes": {
+    "model.acme.dim_customer": {
+      "metadata": { "name": "dim_customer", "schema": "analytics", "type": "table" },
+      "columns": {
+        "customer_key":   { "type": "TEXT",    "index": 1 },
+        "tier":           { "type": "TEXT",    "index": 2 },
+        "annual_revenue": { "type": "NUMERIC", "index": 3 }
+      }
+    }
+  }
+}

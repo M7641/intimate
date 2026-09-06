@@ -1,0 +1,107 @@
+# Northwind retail glossary — the vocabulary that turns a generic SQL assistant
+# into a Northwind-aware one. Every term here is something a buyer or planner
+# would type in a question without a second thought. The LLM sees these
+# definitions verbatim in the system prompt.
+#
+# Adding a term is cheap. Skipping a term is what causes wrong SQL.
+
+terms:
+  lfl:
+    full: "Like-for-like"
+    means: |
+      Stores that were trading in both the current and the comparable
+      prior period. Used to strip out the noise of new openings and
+      closures when comparing YoY performance.
+    sql_hint: "JOIN dim__lfl_stores USING (store_id) WHERE lfl = TRUE"
+    default_assumption: "Unless the user explicitly says 'all stores' or 'total', LFL is the default for YoY questions."
+
+  linecard:
+    full: "Linecard"
+    means: |
+      A per-product, per-region view spanning 52 historical weeks +
+      52 forecast weeks (104 rows per product per region). Used in
+      range_plan for forecasting and stock-cover analysis.
+    primary_table: "rangeplan__linecard"
+    grain: "(product_id, region, week)"
+
+  wssi:
+    full: "Weekly Sales, Stock & Intake"
+    means: |
+      The headline planning report — sales, stock, and intake by ISO
+      week. wssi__total is the total-level headline; drill-downs exist
+      at department and type_group level (not in the pilot's curated set).
+    primary_table: "wssi__total"
+
+  range_plan:
+    full: "Range plan"
+    means: |
+      The set of products a category is currently planning to stock,
+      with forecast sales and stock cover. Linecard is the per-product
+      view inside a range plan.
+
+  grade:
+    full: "Store grade"
+    means: |
+      Store grades ZZ..8 (size band). ZZ is the smallest, 8 the
+      largest. Range plans and forecasts are often split by grade.
+    sql_hint: "dim__stores.grade IN ('ZZ', '1', '2', ...)"
+
+  short_code:
+    full: "Short code"
+    means: |
+      A buyer-facing product code, distinct from product_id. NOT a
+      primary key — multiple products can share a short_code through
+      a relaunch lifecycle. Use product_id as PK; show short_code as
+      a buyer-readable label.
+
+  cosa:
+    full: "Cost-of-sale adjustment"
+    means: |
+      An adjustment applied to sales_cost for retroactive supplier
+      rebates and supplier funding. Not exposed in the curated pilot
+      schema — flag as out-of-scope if asked.
+
+  carton:
+    full: "Carton"
+    means: |
+      The pack/case unit suppliers ship in (a.k.a. master case).
+      Different from sales unit. Conversion lives on dim__products
+      (not exposed in curated pilot schema yet).
+
+  planogram:
+    full: "Planogram"
+    means: |
+      The shelf layout for a product range in a store. Not exposed
+      in the curated pilot schema. Flag as out-of-scope if asked.
+
+  po:
+    full: "Purchase order"
+    means: |
+      An order placed on a supplier for inbound stock. PO units appear
+      on the linecard as forward-looking inbound, separate from forecast
+      sales.
+
+  fill:
+    full: "Fill (or store fill)"
+    means: |
+      The percentage of an order that arrived from the warehouse to
+      the store, vs the requested quantity. Not exposed in the curated
+      pilot schema.
+
+  stock_cover:
+    full: "Stock cover (weeks)"
+    means: |
+      How many weeks of forward demand the current stock will satisfy.
+      Computed as stock_units / average_weekly_sales. The forward window
+      is usually 13 weeks of forecast.
+    sql_hint: "stock_units / NULLIF(AVG(sales_units) OVER (PARTITION BY product_id, region ORDER BY week ROWS BETWEEN CURRENT ROW AND 12 FOLLOWING), 0)"
+
+  dim_dates:
+    full: "dim__dates semantics"
+    means: |
+      Three week-grain columns that look similar but mean different
+      things. date_week is the Monday of the ISO week. date_weeknum is
+      the same week as a 'YYYY-WW' string. cal_start_week is the
+      trading-week start; usually equal to date_week but not always —
+      prefer date_week for arithmetic, cal_start_week when matching
+      against a buyer-supplied trading-week.

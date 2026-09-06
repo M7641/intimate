@@ -1,0 +1,26 @@
+name = "sqruff"
+type = "cli"
+
+[resolve]
+git-url = "https://github.com/quarylabs/sqruff"
+
+[platform.macos]
+download-file = "sqruff-darwin-{arch}.tar.gz"
+
+[platform.linux]
+download-file = "sqruff-linux-{arch}-musl.tar.gz"
+
+[platform.windows]
+download-file = "sqruff-windows-{arch}.zip"
+
+[install]
+download-url = "https://github.com/quarylabs/sqruff/releases/download/v{version}/{download_file}"
+
+[install.arch]
+x86_64 = "x86_64"
+aarch64 = "aarch64"
+
+[install.exes]
+[install.exes.sqruff]
+exe-path = "sqruff"
+primary = true

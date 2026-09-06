@@ -1,0 +1,158 @@
+# React template
+
+A great way to get up and running is by using the code from the [blocks page on Shadcn UI](https://ui.shadcn.com/blocks#blocks). All the blcoks have their code available to copy and paste into your project. Example `dashboard-01` has metric cards, charts, tables, and a sidebar navigation.
+
+You can find other [components here](https://ui.shadcn.com/docs/components/). To add one, change directory into the `frontend` folder and run the command:
+
+If you do not have `bun` installed, please see the section on [Mise-en-place](#mise-en-place) below.
+
+```zsh
+npx shadcn-ui add <component-name>
+```
+
+This template comes with a cli to handle managing the application through the terminal. To get started you can run:
+
+```zsh
+uv run {{ webapp_name }} --help
+
+uv run {{ webapp_name }} install --help
+uv run {{ webapp_name }} dev --help
+uv run {{ webapp_name }} install --help
+uv run {{ webapp_name }} start --help
+uv run {{ webapp_name }} deploy --help
+```
+
+Some general points to note:
+
+1. Don't use ccs files in the general case. [Tailwind CSS](https://tailwindcss.com/) covers the vast majority of use cases.
+2. Use shadcn/ui components where possible. I will be implementing Nimbus themeing.
+3. Page routing is being managed in `main.tsx`. Tanstack Router does want us to use a file based routing system, but I ended up prefering doing it manually.
+
+## Tech Stack
+
+- Frontend
+  - React
+  - Vite
+  - TypeScript
+  - shadcn/ui
+  - Tailwind CSS
+  - Tanstack Router/Table/Query
+
+- Backend
+  - FastAPI
+  - pyinstrument - Profiler
+  - apscheduler - Task Scheduling
+  - orjson - Fast JSON parsing
+  - httptools - Faster HTTP parsing
+  - uvloop - Faster event loop
+  - gzip middleware
+
+## Useful Links
+
+- [Zustand](https://github.com/pmndrs/zustand) - State Management
+- [animejs](https://animejs.com/documentation/getting-started/) - Animation Library
+- [Shaders](https://www.shadcn.io/shaders)
+- [themes](https://tweakcn.com/editor/theme?p=dashboard)
+- [Recharts](https://recharts.github.io/en-US/) - Shadcn uses this, but I might move to using it directly and update to 3.x. Shadcn are in the process of updating so ideally that's in place before long.
+- [redis](https://aioredis.readthedocs.io/en/latest/getting-started/) - Async Redis client. I've not yet ran into a need for serverside caching. See the section below on thoughts on caching.
+- [FastAPI Tips](https://github.com/Kludex/fastapi-tips) - A good little check list of tips for FastAPI development.
+
+## Future ideas
+
+- [granian](https://github.com/emmett-framework/granian?tab=readme-ov-file) - In contrast with uvicorn. This appeals to me as it could, in theory, do both FastAPI hosting and Dash hosting with the same code. As compared to us using uvicorn for FastAPI and gunicorn for Dash.
+- [Dependencies](https://fastapi.tiangolo.com/tutorial/dependencies/)
+- [Middleware](https://starlette.dev/middleware/#pure-asgi-middleware) - Could implement a middleware for rate limiting.
+
+## Caching
+
+To begin, only do caching when you really need to. It is a source of bugs and create situations that lead to serious problems for our customers. For example, I've set up caching with an app with different user roles and sent the wrong data to the wrong user as that was the data in the cache. Therefore, you want to be deliberate with caching.
+
+Then I would suggest to think of caching in two areas. The server and the UI. TanStack Query will cache on the frontend for you and this will do a great job in terms of an individual users experience. On the server you could use redis which will cache across multiple users and across multiple sessions.
+
+First start with ensuring TanStack Query is set up well for the use case. Then I would look to add the server side caching only for the most critical endpoints that are slowest to compute.
+
+## Mise-en-place
+
+[Mise-en-place](https://mise.jdx.dev/getting-started.html) is a tool to help manage development environments. I started using this
+as I have started to use multiple programming languages to deliver applications.
+
+In this case, we are using `bun` to develop the frontend and `python` to develop the backend.
+
+```zsh
+curl https://mise.run | sh
+```
+
+It's then best to activate mise for your shell. For example, if you are using `zsh`:
+
+```zsh
+eval "$(mise activate zsh --shims)" >> ~/.zshrc
+source ~/.zshrc
+```
+
+Then check
+```zsh
+export PATH="$HOME/.local/share/mise/shims:$PATH"
+```
+
+was successfully added to your `.zshrc` file and check the PATH is correct by running:
+
+```zsh
+echo $PATH
+```
+
+Then use `mise doctor` just validate everything is working. In what is a frustrating confusion,
+there are two ways to activate mise, I've used the SHIMS method above
+
+The above is important as for programs to run, the OS needs to know where they are so they can run the executables.
+If you install these tools directly, the install process will alter the PATH for you. Mise with SHIMS will
+add small wrapper scripts that intercept calls to these programs and redirect them to the correct version.
+
+SHIMS is said to work better with IDEs and the PATH method is said to be better with terminal useage.
+I've not seen a good illustrating example however. [More info here](https://mise.jdx.dev/ide-integration.html).
+
+If you get the error `mise ERROR no tasks defined in ~. Are you in a project directory?`, then
+this could be a number of things and none of which are releated to the actual message itself.
+I would go consult the docs instead to ensure you have everything set up correctly.
+
+Once this is in place, it will be done forever for your shell so it's only a one time set up.
+
+Then you can run commands like:
+
+```zsh
+mise use uv@latest bun@latest --global
+```
+
+This will install the latest versions of `uv` and `bun` and you can now run these commands directly from your terminal.
+
+
+1. https://lightningcss.dev/
+2. https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react-swc
+
+## TS Apps on Workspaces
+
+
+```
+curl https://mise.run | sh
+eval "$(mise activate bash)"
+mise use --global bun@latest
+```
+
+Then, in the folder of the app:
+
+```
+bun install
+bun run dev
+```
+
+If there's a node error still:
+```
+mise use --global node@latest
+```
+
+Then on the Vite side to redirect in the webapp:
+https://github.com/nimbus-labs/ds-grocer-recommender/blob/rec_app/modules/recommender_app/frontend/vite.config.ts
+
+This is for React, so for Astro, it would be without the React-compiler mentions.
+
+If there's a backend API too:
+https://github.com/nimbus-labs/ds-grocer-recommender/blob/rec_app/modules/recommender_app/src/recommender_app/api.py#L47-L58

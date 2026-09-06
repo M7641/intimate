@@ -1,0 +1,16 @@
+[project]
+name = "pure"
+version = "0.1.0"
+description = "Near pure dependencies"
+readme = "README.md"
+authors = [
+    { name = "Mike", email = "michael@eyecatching.co.uk" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "networkx>=3.6.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

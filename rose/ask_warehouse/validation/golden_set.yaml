@@ -1,0 +1,73 @@
+# Golden eval set for the ask_warehouse pilot.
+#
+# Each entry is one (question, expectations) pair. The runner sends the
+# question to the local /api/ask endpoint and checks:
+#   - the SQL parses + passes safety  (must_be_valid_sql)
+#   - the SQL execution succeeded     (must_execute)
+#   - the row count is in range       (expected_rows: [min, max])
+#   - the SQL contains certain tokens (sql_must_contain)
+#
+# The bar for moving from pilot to general release: ≥80% pass rate
+# across this set. Add new entries when users find a question shape
+# the LLM fails on — that's the cheapest way to grow Northwind-specific
+# accuracy.
+
+examples:
+  - id: lfl_total_this_week
+    question: "What were the total LFL sales for the most recent week?"
+    sql_must_contain: ["dim__lfl_stores", "lfl", "sales_product_week"]
+    expected_rows: [1, 1]
+    must_execute: true
+
+  - id: lfl_yoy
+    question: "Compare LFL sales last week vs the same week last year"
+    sql_must_contain: ["lfl", "dateadd", "year"]
+    expected_rows: [1, 10]
+    must_execute: true
+
+  - id: top_n_products_garden
+    question: "Top 10 Garden products by revenue in the last 4 weeks"
+    sql_must_contain: ["dim__products", "department", "garden", "limit"]
+    expected_rows: [1, 10]
+    must_execute: true
+
+  - id: wssi_recent
+    question: "Show the WSSI for the last 13 weeks with YoY growth"
+    sql_must_contain: ["wssi__total", "sales_retail_ly"]
+    expected_rows: [1, 13]
+    must_execute: true
+
+  - id: linecard_for_sku
+    question: "Show the linecard for SKU 12345678 across all regions"
+    sql_must_contain: ["rangeplan__linecard", "12345678"]
+    expected_rows: [0, 1000]
+    must_execute: true
+
+  - id: stores_open_south
+    question: "How many stores are currently trading in the South region?"
+    sql_must_contain: ["dim__stores", "south", "closed_date"]
+    expected_rows: [1, 1]
+    must_execute: true
+
+  - id: stock_cover_for_sku
+    question: "What is the stock cover in weeks for product 12345678 by region?"
+    sql_must_contain: ["rangeplan__linecard", "stock_units", "12345678"]
+    expected_rows: [0, 10]
+    must_execute: true
+
+  - id: out_of_scope_planogram
+    question: "Which products in store ABC have a planogram refresh next week?"
+    # Planogram data is not in the curated schema → expect -- UNSURE
+    must_be_unsure: true
+
+  - id: out_of_scope_cosa
+    question: "Show me the COSA adjustments for last quarter"
+    # COSA is in the glossary but not in any curated table → expect -- UNSURE
+    must_be_unsure: true
+
+  - id: ambiguous_total_vs_lfl
+    question: "What's our revenue this year?"
+    # The instructions tell the model to default to LFL — verify it does
+    sql_must_contain: ["lfl"]
+    expected_rows: [1, 10]
+    must_execute: true

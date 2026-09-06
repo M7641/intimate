@@ -1,0 +1,15 @@
+extends: existence
+message: "'%s' is filler. Cut it."
+level: suggestion
+ignorecase: true
+tokens:
+  - very
+  - really
+  - quite
+  - basically
+  - obviously
+  - simply
+  - actually
+  - in order to
+  - it should be noted that
+  - needless to say

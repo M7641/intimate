@@ -1,0 +1,7 @@
+FROM grafana/tempo:2.4.1
+
+COPY tempo.yaml /etc/tempo/tempo.yaml
+
+EXPOSE 3200 4317
+
+ENTRYPOINT ["tempo", "-config.file=/etc/tempo/tempo.yaml"]

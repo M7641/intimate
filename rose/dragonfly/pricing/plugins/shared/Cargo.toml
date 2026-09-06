@@ -1,0 +1,11 @@
+[package]
+name = "pricing-shared"
+version = "0.1.0"
+edition = "2021"
+
+# A plain library crate (not cdylib): it carries the host/plugin data
+# contract and is depended on by every department plugin. Keeping the
+# types in one place is the "reuse" half of the story; the per-department
+# logic that lives in each plugin crate is the "custom" half.
+[dependencies]
+serde = { version = "1", features = ["derive"] }

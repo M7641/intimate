@@ -1,0 +1,25 @@
+# {{ package_name }}
+
+https://www.maturin.rs/
+
+Maturin is a tool for building and publishing Rust-based Python packages. It's what Ruff, Polars, and Orjson use
+to build their packages. Maturin based packages are intended for extreme situations where performance is critical,
+and no solution exists in Python.
+
+Matruin based package do incur some overhead in terms of build time and there is a slight increase in start time
+due to the nead to run bytecode outisde of the Python runtime.
+
+## Binding types
+
+- `pyo3` - This is the most popular binding type.
+- `cffi` - This binding type uses the C Foreign Function Interface (CFFI) to create bindings.
+- `bin` - This binding type creates a standalone binary that can be called from Python.
+- `uniffi` - This binding type uses https://mozilla.github.io/uniffi-rs/latest/.
+
+Rather than `bin` you can still expose a script entry point in `pyo3` or `cffi` packages. UV uses `bin` so
+there is a chance that is the most optimal if you are just creaing a CLI tool. Although at that point,
+not sure why you would not just use Rust directly given the interface is not python, but the os.
+
+You can also go the other way: https://pyo3.rs/v0.27.1/#using-python-from-rust.
+
+This template will use `pyo3`.

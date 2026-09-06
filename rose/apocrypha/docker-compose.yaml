@@ -1,0 +1,93 @@
+services:
+  # ── Telemetry router ────────────────────────────────────────────────
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    volumes:
+      - ./otel-collector/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - "4317:4317"   # OTLP gRPC  (Rust apps on host)
+      - "4318:4318"   # OTLP HTTP  (Python apps on host)
+      - "8888:8888"   # collector internal metrics
+      - "8889:8889"   # prometheus exporter
+    depends_on:
+      - tempo
+      - loki
+    restart: unless-stopped
+
+  # ── Traces ──────────────────────────────────────────────────────────
+  tempo:
+    image: grafana/tempo:2.4.1
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo/tempo.yaml
+      - tempo-data:/var/tempo
+    ports:
+      - "3200:3200"   # query frontend (Grafana + debug)
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    restart: unless-stopped
+
+  # ── Logs ────────────────────────────────────────────────────────────
+  loki:
+    image: grafana/loki:2.9.4
+    volumes:
+      - ./loki/loki.yaml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    ports:
+      - "3100:3100"
+    command: ["-config.file=/etc/loki/local-config.yaml", "-target=all"]
+    restart: unless-stopped
+
+  # ── Metrics ─────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus-stack.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    ports:
+      - "8050:8050"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.listen-address=:8050"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-remote-write-receiver"
+    restart: unless-stopped
+
+  # ── Profiling ───────────────────────────────────────────────────────
+  pyroscope:
+    image: grafana/pyroscope:1.4.0
+    volumes:
+      - ./pyroscope/pyroscope.yaml:/etc/pyroscope/config.yaml
+      - pyroscope-data:/data/pyroscope
+    ports:
+      - "4040:4040"
+    command: ["-config.file=/etc/pyroscope/config.yaml"]
+    restart: unless-stopped
+
+  # ── Dashboards ──────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.0
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_SERVER_HTTP_PORT=3001
+      - GF_INSTALL_PLUGINS=grafana-pyroscope-app
+    volumes:
+      - ./grafana/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./grafana/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3001:3001"
+    depends_on:
+      - tempo
+      - loki
+      - prometheus
+      - pyroscope
+    restart: unless-stopped
+
+volumes:
+  tempo-data:
+  loki-data:
+  prometheus-data:
+  pyroscope-data:
+  grafana-data:

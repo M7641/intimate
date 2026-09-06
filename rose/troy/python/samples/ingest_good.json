@@ -1,0 +1,7 @@
+{
+  "customer_id": "cust_abc123",
+  "email": "ada@acme.com",
+  "tier": "enterprise",
+  "annual_revenue": 5000000,
+  "signup_country": "GB"
+}

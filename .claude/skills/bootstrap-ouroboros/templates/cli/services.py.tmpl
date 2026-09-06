@@ -1,0 +1,52 @@
+@app.command("list-services")
+def list_services(
+    detailed: bool = typer.Option(False, "--detailed", "-d", help="Show detailed info"),
+    save: bool = typer.Option(False, "--save", "-s", help="Save to file"),
+) -> None:
+    """
+    List deployed services
+
+    Examples:
+        uv run ouroboros list-services
+    """
+
+    services_client = Services()
+    platform_services = services_client.list_services()
+
+    services = []
+    for service in platform_services:
+        if detailed:
+            service_details = services_client.get_service_details(service["id"])
+            services.append(service_details)
+        else:
+            services.append(service)
+
+    if save:
+        with open("services.json", "w") as f:
+            json.dump(services, f, indent=4)
+        console.print("Services saved to services.json")
+    else:
+        for service in services:
+            console.print(service)
+
+
+@app.command("describe-service")
+def describe_service(
+    service_id: str = typer.Argument(..., help="The ID of the service to describe"),
+    save: bool = typer.Option(False, "--save", "-s", help="Save to file"),
+) -> None:
+    """
+    Describe a specific service by ID
+
+    Examples:
+        uv run ouroboros describe-service <service_id>
+    """
+
+    services_client = Services()
+    service_details = services_client.get_service_details(service_id)
+    console.print(service_details)
+
+    if save:
+        with open(f"service_{service_id}.json", "w") as f:
+            json.dump(service_details, f, indent=4)
+        console.print(f"Service details saved to service_{service_id}.json")

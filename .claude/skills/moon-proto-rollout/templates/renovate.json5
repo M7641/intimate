@@ -1,0 +1,79 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  // `:semanticCommits` makes Renovate's OWN PRs conventional, matching the repo.
+  extends: ["config:recommended", ":semanticCommits"],
+
+  // One issue listing everything Renovate sees / is waiting on.
+  dependencyDashboard: true,
+
+  // ── Scope: only the ecosystems this stack owns ──
+  // config:recommended also auto-detects dockerfile, docker-compose, mise, pyenv,
+  // pip_requirements, etc. Restrict to the managers you deliberately manage —
+  // here Cargo, uv (pep621), npm/bun, GitHub Actions, and the proto customManager
+  // below (`custom.regex`). Add managers to this list to take on more ecosystems
+  // (e.g. "dockerfile" to keep base images current).
+  enabledManagers: ["cargo", "pep621", "npm", "github-actions", "custom.regex"],
+
+  // ── Supply-chain cooldown ──
+  // Mirror the proto stack's uv cooldown: set this to the SAME window as
+  // `UV_EXCLUDE_NEWER` / `[tool.uv] exclude-newer` in .prototools / pyproject.
+  // It flips that passive window (uv refuses fresh deps, nothing advances the
+  // lock) into an active one: a PR opens the moment a release crosses the age.
+  minimumReleaseAge: "48 hours",
+  internalChecksFilter: "strict", // surface nothing until the window has elapsed
+
+  // ── Keep the committed lockfiles fresh ──
+  // Requires the lockfiles that DEPLOY to be committed (Cargo.lock, uv.lock,
+  // bun.lock, package-lock.json). Renovate can only do range/transitive updates
+  // and lockFileMaintenance where the lock is committed.
+  lockFileMaintenance: {
+    enabled: true,
+    schedule: ["before 6am on monday"],
+  },
+
+  // ── Anti-spam: rate-limit + schedule off-hours (a moon monorepo fans out fast) ──
+  prConcurrentLimit: 5,
+  prHourlyLimit: 2,
+  schedule: ["after 9pm every weekday", "before 6am every weekday", "every weekend"],
+
+  packageRules: [
+    // Don't manage archived prototypes or scaffolding-template lockfiles. Adjust
+    // these globs to the target repo (delete the rule if it has none).
+    // { matchFileNames: ["**/archive/**", "**/templates/**"], enabled: false },
+
+    // Patch + dev deps: auto-merge once the moon CI gate (affected lint/test/audit)
+    // is green. Safe because of the committed-lock + affected-test interlock.
+    { matchUpdateTypes: ["patch", "pin", "digest"], automerge: true },
+    { matchDepTypes: ["devDependencies", "dev-dependencies"], automerge: true },
+    { matchUpdateTypes: ["lockFileMaintenance"], automerge: true },
+
+    // Group by ecosystem for a readable, per-language PR.
+    { matchManagers: ["cargo"], groupName: "rust deps" },
+    { matchManagers: ["pep621"], groupName: "python deps" },
+    { matchManagers: ["npm"], groupName: "frontend deps" },
+    { matchDepNames: ["moonrepo/moon", "moonrepo/proto"], groupName: "moonrepo toolchain" },
+
+    // Major versions are always manual — never auto-merge. This rule is LAST so it
+    // overrides the patch/devDep auto-merge rules above for major bumps.
+    { matchUpdateTypes: ["major"], automerge: false, labels: ["dep:major"] },
+  ],
+
+  // proto has no native Renovate manager → a regex customManager over the root
+  // .prototools. It tracks `proto` and `moon` (always pinned to concrete versions
+  // by this stack). The `\d...` capture deliberately skips entries pinned to
+  // "latest"/"stable", which Renovate cannot bump. If the target pins other tools
+  // to concrete versions with a known datasource, add them here.
+  customManagers: [
+    {
+      customType: "regex",
+      // `fileMatch` is the widely-compatible field name (current Renovate also
+      // accepts `managerFilePatterns` and auto-migrates this). Anchored so only
+      // the ROOT .prototools matches, not nested template copies.
+      fileMatch: ["^\\.prototools$"],
+      // matches:  proto = "0.57.4"   and   moon = "2.3.2"
+      matchStrings: ['(?<depName>proto|moon) = "(?<currentValue>\\d[^"]+)"'],
+      depNameTemplate: "moonrepo/{{{depName}}}",
+      datasourceTemplate: "github-releases",
+    },
+  ],
+}

@@ -1,0 +1,77 @@
+#syntax=docker/dockerfile:1.4
+FROM node:24-bookworm
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+ARG STAGE
+ARG TENANT
+ARG REDSHIFT_USERNAME
+ARG REDSHIFT_PASSWORD
+ARG REDSHIFT_HOST
+ARG REDSHIFT_PORT
+ARG REDSHIFT_IAM_ROLE
+ARG DATA_LAKE
+ARG DATA_LAKE_TYPE
+ARG DATA_LAKE_ROOT_PATH
+ARG DATA_LAKE_REGION
+ARG DATA_WAREHOUSE_TYPE
+ARG TARGET_ENV
+
+ARG API_KEY
+ARG GITHUB_TOKEN_GITHUB
+
+
+ENV STAGE=$STAGE \
+    TENANT=$TENANT \
+    REDSHIFT_USERNAME=$REDSHIFT_USERNAME \
+    REDSHIFT_PASSWORD=$REDSHIFT_PASSWORD \
+    REDSHIFT_HOST=$REDSHIFT_HOST \
+    REDSHIFT_PORT=$REDSHIFT_PORT \
+    REDSHIFT_IAM_ROLE=$REDSHIFT_IAM_ROLE \
+    DATA_LAKE=$DATA_LAKE \
+    DATA_LAKE_TYPE=$DATA_LAKE_TYPE \
+    DATA_LAKE_ROOT_PATH=$DATA_LAKE_ROOT_PATH \
+    DATA_LAKE_REGION=$DATA_LAKE_REGION \
+    DATA_WAREHOUSE_TYPE=$DATA_WAREHOUSE_TYPE \
+    TF_CPP_MIN_LOG_LEVEL=3 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONFAULTHANDLER=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_NO_CACHE=1 \
+    UV_PYTHON=3.13 \
+    TZ=UTC \
+    VIRTUAL_ENV=/app/.venv \
+    PATH="/app/.venv/bin:$PATH" \
+    API_KEY=$API_KEY \
+    TARGET_ENV=$TARGET_ENV
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        libpq-dev \
+        python3-dev \
+        git \
+        curl \
+        unzip \
+        ca-certificates \
+        bash \
+    && curl -fsSL https://bun.sh/install | bash \
+    && mv /root/.bun/bin/bun /usr/local/bin/ \
+    && apt-get autoclean autoremove \
+    && rm -rf /var/lib/apt/lists/* \
+    # The -s is to enable the user to use the shell such as bun.
+    && useradd -m -u 1467 -s /bin/sh peak-user \
+    && mkdir -p /app \
+    && chown -R peak-user:peak-user /app
+
+COPY --chown=peak-user:peak-user . /app
+
+WORKDIR /app
+
+RUN git config --global url."https://${GITHUB_TOKEN_GITHUB}@github.com/".insteadOf "https://github.com/" \
+    && uv sync --locked \
+    && git config --global --unset url."https://${GITHUB_TOKEN_GITHUB}@github.com/".insteadOf
+
+EXPOSE 8050
+ENTRYPOINT uv run --no-sync {{ webapp_name }} start

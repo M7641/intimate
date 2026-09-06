@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rose.dev/troy/marts/dim_customer",
+  "title": "dim_customer",
+  "description": "Contract for the dim_customer mart produced by dbt. dbt's own model contracts enforce column TYPES; this schema additionally enforces VALUE invariants (ranges, enums, key format) that dbt cannot express. Used to (a) validate sample rows and (b) reconcile against the dbt catalog.json.",
+  "x-dbt": {
+    "model": "dim_customer",
+    "schema": "analytics",
+    "expected_columns": {
+      "customer_key": "TEXT",
+      "tier": "TEXT",
+      "annual_revenue": "NUMERIC"
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["customer_key", "tier", "annual_revenue"],
+  "properties": {
+    "customer_key": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$",
+      "description": "MD5 surrogate key from the raw vault hub."
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["free", "starter", "professional", "enterprise"]
+    },
+    "annual_revenue": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1000000000000
+    }
+  }
+}

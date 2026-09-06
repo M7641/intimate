@@ -1,0 +1,7 @@
+config:
+  aws:region: eu-west-3
+  perch:logRetentionDays: "14"
+  perch:lambdaMemoryMb: "512"
+  perch:lambdaTimeoutSeconds: "15"
+  # Décommente pour recevoir les alarmes par mail (subscription manuelle à confirmer).
+  # perch:alarmEmail: vous@example.com

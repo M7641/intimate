@@ -1,0 +1,19 @@
+[package]
+name = "keyvalue"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+fjall = { version = "3", optional = true }
+
+[features]
+default = ["memory"]
+memory = []
+fjall = ["dep:fjall"]
+
+[lib]
+name = "keyvalue"
+path = "src/lib.rs"
+
+[lints]
+workspace = true

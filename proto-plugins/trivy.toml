@@ -1,0 +1,35 @@
+# Vendored proto plugin for Trivy (aquasecurity/trivy) — the container/filesystem
+# vulnerability scanner. Authored here per our "vendored thin pointer" policy;
+# points at OFFICIAL aquasecurity/trivy releases.
+#
+# Trivy's asset naming is non-standard and needs remapping:
+#   - OS is capitalised (`Linux`, `macOS`) → hardcoded per platform section.
+#   - arch is `64bit` / `ARM64` (not proto's `x86_64` / `aarch64`) → [install.arch].
+#   - tags are `vX.Y.Z` but the asset filename uses the bare version → `v{version}`
+#     is literal in the URL while {version} stays bare.
+name = "trivy"
+type = "cli"
+
+[resolve]
+git-url = "https://github.com/aquasecurity/trivy"
+
+[platform.linux]
+download-file = "trivy_{version}_Linux-{arch}.tar.gz"
+checksum-file = "trivy_{version}_checksums.txt"
+
+[platform.macos]
+download-file = "trivy_{version}_macOS-{arch}.tar.gz"
+checksum-file = "trivy_{version}_checksums.txt"
+
+[install]
+download-url = "https://github.com/aquasecurity/trivy/releases/download/v{version}/{download_file}"
+checksum-url = "https://github.com/aquasecurity/trivy/releases/download/v{version}/{checksum_file}"
+
+# The tarball holds `trivy` at the root (alongside LICENSE/README).
+[install.exes.trivy]
+exe-path = "trivy"
+primary = true
+
+[install.arch]
+aarch64 = "ARM64"
+x86_64 = "64bit"

@@ -1,0 +1,38 @@
+[package]
+name = "hive"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "hive"
+path = "src/main.rs"
+
+[dependencies]
+# Async runtime + HTTP server. `signal` gives us SIGTERM handling, which is
+# the whole point of graceful shutdown during a rolling update.
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "signal", "time"] }
+axum = "0.8"
+tower-http = { version = "0.6", features = ["trace"] }
+
+# Serialization — the API surface is JSON.
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# CLI + config from env (Kubernetes injects everything via env vars).
+clap = { version = "4", features = ["derive", "env"] }
+
+# Error handling for main().
+anyhow = "1"
+
+# Observability.
+tracing = "0.1"
+# `json` gives structured, one-line-per-event logs — the format a cluster log
+# aggregator (Loki, ELK, Cloud Logging) can parse per field instead of by regex.
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+[profile.release]
+# Smaller static binary → smaller scratch image → faster pod cold-start,
+# which matters when the scheduler is spinning up replicas under load.
+strip = true
+lto = true
+codegen-units = 1

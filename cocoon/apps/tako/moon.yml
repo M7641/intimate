@@ -1,0 +1,9 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'application'
+language: 'rust'
+dependsOn:
+  - 'blobs'
+  - 'database'
+  - 'faker'
+  - 'schema'
+  - 'service-kit'

@@ -1,0 +1,39 @@
+# Build context = this project root. Keep the upload to pyproject + uv.lock +
+# src; drop everything the image rebuilds or never needs.
+
+# version control / CI
+.git
+.github
+
+# the local virtualenv and build artifacts (the image runs `uv sync` itself)
+.venv/
+dist/
+build/
+*.egg-info/
+
+# tool caches
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.hypothesis
+
+# python bytecode
+__pycache__/
+*.pyc
+
+# editor / notebook cruft
+.vscode/
+.idea/
+*.swp
+*.ipynb_checkpoints
+
+# local data snapshots (never part of the image)
+*.csv
+*.tsv
+*.parquet
+*.pkl
+*.log
+
+# docs are not needed at runtime
+docs/
+*.md

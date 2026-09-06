@@ -1,0 +1,25 @@
+# Tasks inherited ONLY by rust projects. Scoping = the `inheritedBy` field,
+# NOT the filename (Moon 2.x). Without it, a tasks file applies to ALL projects.
+$schema: 'https://moonrepo.dev/schemas/tasks.json'
+
+inheritedBy:
+  language: 'rust'
+
+tasks:
+  test:
+    command: 'cargo test'
+    toolchain: 'system'
+  lint:
+    command: 'cargo clippy --all-targets -- -D warnings'
+    toolchain: 'system'
+  fmt:
+    command: 'cargo fmt'
+    toolchain: 'system'
+  audit:
+    # supply-chain (cargo-deny). Run with `moon run :audit --query "language=rust"`.
+    # Not cached: the advisory DB is external, not an input.
+    command: 'cargo-deny'
+    args: ['check', '--config', '$workspaceRoot/deny.toml', 'advisories', 'bans', 'sources']
+    toolchain: 'system'
+    options:
+      cache: false

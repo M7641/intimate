@@ -1,0 +1,57 @@
+WITH
+    IDENTIFY_TOP_X_FEATURES AS (
+        SELECT TOP {{number_of_features | safe}}
+            FEATURE,
+            AVG(ABS(SHAP_VALUE::FLOAT)::FLOAT) AS AVERAGE_SHAP_VALUE
+        FROM {{schema | safe}}.METIS_SHAP_VALUES_FOR_MODEL_EXPLAIN
+            GROUP BY FEATURE
+            ORDER BY AVERAGE_SHAP_VALUE DESC
+    ),
+    SHAP_VALUES AS (
+        SELECT
+            TABLE_ID,
+            FEATURE,
+            ROUND(SHAP_VALUE::FLOAT, 4) AS SHAP_VALUE
+        FROM {{schema | safe}}.METIS_SHAP_VALUES_FOR_MODEL_EXPLAIN
+        WHERE MODEL_NAME = '{{model_name | safe}}'
+    ),
+    ACTUAL_VALUES_PRE AS (
+        SELECT
+            TABLE_ID,
+            FEATURE,
+            VALUE AS ACTUAL_VALUE,
+            ROW_NUMBER() OVER(PARTITION BY FEATURE ORDER BY RANDOM()) AS ROW_COUNTER
+        FROM {{schema | safe}}.METIS_DATA_USED_TO_EVALUATE_SHAP
+        WHERE MODEL_NAME = '{{model_name | safe}}'
+            AND VALUE NOT IN ('None', 'none', 'nan', 'NaN')
+    {% if feature is not none and feature_value is not none %}
+        AND TABLE_ID IN (SELECT {{ entity_id | safe }}
+        FROM {{ucv_ucv_table_name | safe}}
+            WHERE {{feature | safe}} = '{{feature_value | safe}}')
+    {% endif %}
+    {% if start_date_picker is not none and end_date_picker is not none %}
+        AND TABLE_ID IN (SELECT {{ entity_id | safe }}
+        FROM {{ucv_ucv_table_name | safe}}
+            WHERE {{feature | safe}} < '{{end_date_picker | safe}}'
+            AND {{feature | safe}} > '{{start_date_picker | safe}}'
+        )
+    {% endif %}
+    ),
+    ACTUAL_VALUES AS (
+        SELECT * FROM ACTUAL_VALUES_PRE
+        WHERE ROW_COUNTER <= {{sample_size | safe}}
+        AND FEATURE IN (SELECT FEATURE FROM IDENTIFY_TOP_X_FEATURES)
+    ),
+    JOIN_PREVIOUS_VIEWS AS (
+        SELECT
+            *,
+            INITCAP(REPLACE(FEATURE, '_', ' ')) AS FEATURE_CLEAN
+        FROM ACTUAL_VALUES
+            LEFT JOIN SHAP_VALUES USING(TABLE_ID, FEATURE)
+    )
+SELECT
+    TABLE_ID,
+    FEATURE_CLEAN,
+    SHAP_VALUE,
+    ACTUAL_VALUE
+FROM JOIN_PREVIOUS_VIEWS

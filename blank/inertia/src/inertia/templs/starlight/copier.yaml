@@ -1,0 +1,29 @@
+_min_copier_version: "9.0.0"
+_templates_suffix: ""
+_exclude:
+  - node_modules/
+  - dist/
+  - .astro/
+  - bun.lock
+  - package-lock.json
+
+project_title:
+  type: str
+  default: "My Docs"
+  help: The title displayed in the site header and browser tab.
+
+project_slug:
+  type: str
+  default: "{{ project_title | lower | replace(' ', '-') }}"
+  help: The package name used in package.json (kebab-case recommended).
+
+include_github_actions:
+  type: bool
+  default: true
+  help: Include a GitHub Actions workflow for deploying to GitHub Pages.
+
+github_actions_path:
+  type: str
+  default: "."
+  when: "{{ include_github_actions }}"
+  help: Path to the documentation site within the repo (for monorepo setups).

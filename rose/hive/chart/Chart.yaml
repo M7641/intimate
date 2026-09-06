@@ -1,0 +1,11 @@
+apiVersion: v2
+name: hive
+description: A replica-aware Axum service that makes horizontal scaling observable.
+type: application
+
+# The chart's own version. Bump on any template change.
+version: 0.1.0
+
+# The version of the app the chart deploys by default. Kept in step with the
+# Cargo package version; overridable per-release via `image.tag`.
+appVersion: "0.1.0"

@@ -1,0 +1,118 @@
+# Canonical question → SQL pairs. The LLM reads these as in-context
+# examples in the system prompt. Each example teaches both a Redshift
+# pattern and an idiomatic retail filter.
+#
+# Quality bar: every example here should pass against a real warehouse.
+# If you can't run it, don't add it.
+
+examples:
+  - question: "What were total LFL sales last week vs the same week last year?"
+    sql: |
+      WITH latest AS (
+        SELECT MAX(date_week) AS wk FROM sales_product_week
+      ),
+      this_year AS (
+        SELECT SUM(s.sales_retail) AS retail
+        FROM sales_product_week s
+        JOIN dim__lfl_stores l USING (store_id)
+        JOIN latest ON s.date_week = latest.wk
+        WHERE l.lfl = TRUE
+      ),
+      last_year AS (
+        SELECT SUM(s.sales_retail) AS retail
+        FROM sales_product_week s
+        JOIN dim__lfl_stores l USING (store_id)
+        JOIN latest ON s.date_week = DATEADD(year, -1, latest.wk)
+        WHERE l.lfl = TRUE
+      )
+      SELECT
+        ty.retail                                   AS retail_ty,
+        ly.retail                                   AS retail_ly,
+        (ty.retail - ly.retail) / NULLIF(ly.retail, 0) AS yoy_growth
+      FROM this_year ty, last_year ly
+      LIMIT 1;
+    why: "LFL filter + YoY math + LIMIT. Demonstrates the canonical join pattern."
+
+  - question: "Top 10 products by revenue in the Garden department last 4 weeks"
+    sql: |
+      SELECT
+        p.product_id,
+        p.short_code,
+        p.product_name,
+        SUM(s.sales_retail) AS retail_4w
+      FROM sales_product_week s
+      JOIN dim__products p USING (product_id)
+      WHERE p.department = 'Garden'
+        AND s.date_week >= DATEADD(week, -4, (SELECT MAX(date_week) FROM sales_product_week))
+      GROUP BY p.product_id, p.short_code, p.product_name
+      ORDER BY retail_4w DESC
+      LIMIT 10;
+    why: "department filter + rolling 4-week window + GROUP BY + product-friendly columns."
+
+  - question: "Show the WSSI for the last 13 weeks with YoY growth"
+    sql: |
+      SELECT
+        date_week,
+        sales_retail,
+        sales_retail_ly,
+        (sales_retail - sales_retail_ly) / NULLIF(sales_retail_ly, 0) AS yoy_growth,
+        stock_retail,
+        intake_retail
+      FROM wssi__total
+      ORDER BY date_week DESC
+      LIMIT 13;
+    why: "Single-table WSSI roll-up, YoY ratio with NULLIF guard."
+
+  - question: "Forecast vs actual for SKU 12345678 on the linecard, by week"
+    sql: |
+      SELECT
+        week,
+        region,
+        sales_units,
+        is_forecast,
+        CASE WHEN is_forecast THEN 'forecast' ELSE 'actual' END AS kind
+      FROM rangeplan__linecard
+      WHERE product_id = '12345678'
+      ORDER BY region, week
+      LIMIT 1000;
+    why: "Linecard primary table, forecast/actual split via is_forecast flag."
+
+  - question: "How many stores in the South region are currently trading?"
+    sql: |
+      SELECT COUNT(*) AS open_stores
+      FROM dim__stores
+      WHERE region = 'South'
+        AND closed_date IS NULL
+      LIMIT 1;
+    why: "Dimension-only query, current-state filter on dim__stores.closed_date."
+
+  - question: "Stock cover (weeks) for product 12345678 across regions"
+    sql: |
+      WITH avg13 AS (
+        SELECT
+          product_id,
+          region,
+          AVG(sales_units) AS avg_units_13w
+        FROM rangeplan__linecard
+        WHERE product_id = '12345678'
+          AND week BETWEEN DATEADD(week, 1, CURRENT_DATE) AND DATEADD(week, 13, CURRENT_DATE)
+          AND is_forecast = TRUE
+        GROUP BY product_id, region
+      ),
+      latest_stock AS (
+        SELECT product_id, region, stock_units
+        FROM rangeplan__linecard
+        WHERE product_id = '12345678'
+          AND week = (SELECT MAX(week) FROM rangeplan__linecard
+                      WHERE product_id = '12345678' AND is_forecast = FALSE)
+      )
+      SELECT
+        s.product_id,
+        s.region,
+        s.stock_units,
+        a.avg_units_13w,
+        s.stock_units / NULLIF(a.avg_units_13w, 0) AS stock_cover_weeks
+      FROM latest_stock s
+      JOIN avg13 a USING (product_id, region)
+      LIMIT 100;
+    why: "Stock cover calculation as documented in glossary; current-week stock vs 13-week forward avg."

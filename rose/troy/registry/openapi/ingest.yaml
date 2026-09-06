@@ -1,0 +1,56 @@
+# ingest.yaml — the TEXT-AT-THE-EDGE boundary.
+#
+# Untrusted JSON arrives from heterogeneous clients. OpenAPI wins here: rich
+# value constraints native (JSON Schema), human-readable payloads, universal
+# client support. The `components/schemas` block IS plain JSON Schema and is
+# reused directly for runtime validation (see python/troy/ingest.py) — no
+# codegen step required to enforce the contract.
+openapi: 3.1.0
+info:
+  title: Troy Ingestion API
+  version: 1.0.0
+  description: >
+    Accepts customer records from external systems. Every payload is validated
+    against IngestCustomer before it crosses the wall into the trusted interior.
+paths:
+  /v1/customers:
+    post:
+      summary: Ingest a single customer record
+      operationId: ingestCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IngestCustomer"
+      responses:
+        "202":
+          description: Accepted — payload passed validation
+        "422":
+          description: Rejected — payload violated the schema
+components:
+  schemas:
+    IngestCustomer:
+      type: object
+      additionalProperties: false   # closed schema: unknown fields are rejected
+      required: [customer_id, email, tier]
+      properties:
+        customer_id:
+          type: string
+          pattern: "^cust_[a-z0-9]+$"
+          description: Stable external customer identifier.
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        tier:
+          type: string
+          enum: [free, starter, professional, enterprise]
+        annual_revenue:
+          type: number
+          minimum: 0
+          maximum: 1000000000000   # 1e12 — JSON Schema requires a literal here
+          description: Optional self-reported annual revenue in GBP.
+        signup_country:
+          type: string
+          pattern: "^[A-Z]{2}$"     # ISO 3166-1 alpha-2

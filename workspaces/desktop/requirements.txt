@@ -1,0 +1,27 @@
+# --- Infrastructure
+jupyterlab==4.5.7
+notebook==7.5.6
+# JupyterHub >=5.3 REQUIS : c'est la 1re version qui lit JUPYTERHUB_XSRF_ANONYMOUS_IP_CIDRS,
+# l'échappatoire qui corrige le 403 "XSRF cookie does not match" derrière le proxy Istio
+# (en 4.x le token est haché sur l'IP proxy variable, sans désactivation possible).
+# Contrepartie 5.x : Authenticator.allow_all=False par défaut -> activé dans jupyterhub_config.py.
+jupyterhub>=5.3,<6
+jupyter-server-proxy==4.5.0
+
+# --- UX JupyterLab ---
+jupyterlab-git==0.53.0
+jupytext>=1.16,<2
+nbconvert>=7.16,<8
+
+# Widgets
+ipywidgets>=8.1,<9
+jupyterlab_widgets>=3.0,<4
+
+# LSP / autocomplétion / formatage
+jupyterlab-lsp==5.3.0
+jupyter-lsp==2.3.1
+python-lsp-server[all]==1.14.0
+python-lsp-black>=2.0,<3
+
+# Inspecteur de variables
+lckr-jupyterlab-variableinspector==3.2.4

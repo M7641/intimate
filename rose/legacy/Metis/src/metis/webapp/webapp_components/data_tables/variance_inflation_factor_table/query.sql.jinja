@@ -1,0 +1,25 @@
+WITH
+    FILTERED_VIEW AS (
+        SELECT *
+        FROM {{ schema | safe }}.METIS_SHAP_VALUES_FOR_MODEL_EXPLAIN
+        WHERE MODEL_NAME = '{{ model_name | safe}}'
+    ),
+    PIVOT_VIEW AS (
+        SELECT *
+          FROM FILTERED_VIEW
+            PIVOT(SUM(SHAP_VALUE) FOR FEATURE IN (
+                {%- for feature in fields_to_explain_with %}
+                '{{ feature }}' {% if not loop.last %}, {% endif %}
+                {%- endfor %}
+                )
+            ) AS p (
+            TABLE_ID,
+            MODEL_NAME,
+            {%- for feature in fields_to_explain_with %}
+            {{ feature }} {% if not loop.last %}, {% endif %}
+            {%- endfor %}
+        )
+    )
+SELECT
+    *
+FROM PIVOT_VIEW

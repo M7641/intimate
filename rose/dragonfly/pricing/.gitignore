@@ -1,0 +1,3 @@
+.venv/
+plugins/target/
+__pycache__/

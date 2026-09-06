@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+#
+# cocoon — a thin convenience wrapper over `moon run` for the cocoon application
+# family, so you can drive a project's tasks from anywhere without cd-ing into it.
+#
+#   cocoon docs dev          ->  moon run cocoon-docs:dev
+#   cocoon docs build        ->  moon run cocoon-docs:build
+#   cocoon tako build        ->  moon run tako:build
+#   cocoon docs              ->  list the docs project's tasks
+#
+# It is sugar, not a second source of truth: every task is still defined once, in
+# that project's moon.yml, and runs with moon's caching and affected-awareness —
+# the same way CI runs it.
+set -euo pipefail
+
+# Resolve this script's real path even when invoked via a PATH symlink, so the
+# repo root is found regardless of the current working directory.
+source_path="${BASH_SOURCE[0]}"
+while [ -L "$source_path" ]; do
+  dir="$(cd -P "$(dirname "$source_path")" >/dev/null 2>&1 && pwd)"
+  target="$(readlink "$source_path")"
+  case "$target" in
+    /*) source_path="$target" ;;
+    *) source_path="$dir/$target" ;;
+  esac
+done
+script_dir="$(cd -P "$(dirname "$source_path")" >/dev/null 2>&1 && pwd)"
+# The script lives at <repo>/cocoon/cocoon, so the repo root is one level up.
+repo_root="$(cd "$script_dir/.." >/dev/null 2>&1 && pwd)"
+
+usage() {
+  cat <<'EOF'
+cocoon — run a cocoon project's moon tasks from anywhere (no cd needed).
+
+Usage:
+  cocoon <app> <task> [-- <args...>]   run `moon run <project>:<task>`
+  cocoon <app>                         list that project's tasks
+  cocoon -h | --help                   show this help
+
+Apps (cocoon/apps): docs, tako, data_view, redhouse, snowhouse, nyx, augur
+Common docs tasks:  dev, build, preview, lint, install
+
+Examples:
+  cocoon docs dev
+  cocoon docs build
+  cocoon tako lint
+EOF
+}
+
+case "${1:-}" in
+  "" | -h | --help | help)
+    usage
+    exit 0
+    ;;
+esac
+
+app="$1"
+shift
+
+# Map a cocoon app name to its moon project id. Most projects use their bare
+# name; these two were renamed to avoid global moon-id collisions.
+case "$app" in
+  docs) project="cocoon-docs" ;;
+  nyx) project="cocoon-nyx" ;;
+  *) project="$app" ;;
+esac
+
+# Run moon from the repo root so it resolves the workspace no matter where the
+# caller stands.
+cd "$repo_root"
+
+# No task given: show the project (its task list) instead of erroring.
+if [ "$#" -eq 0 ]; then
+  exec moon project "$project"
+fi
+
+task="$1"
+shift
+
+# Forward any trailing args through moon's `--` passthrough to the task command.
+if [ "$#" -gt 0 ]; then
+  exec moon run "$project:$task" -- "$@"
+fi
+exec moon run "$project:$task"

@@ -1,0 +1,15 @@
+extends: existence
+message: "Remove the emoji. House style: no emojis, ever."
+# warning, not error: the pre-commit hook blocks on errors, and the project
+# table in ARCHITECTURE.md uses emoji markers on purpose. Advisory for now.
+level: warning
+nonword: true
+tokens:
+  # Pictographs, emoticons, transport, flags, misc symbols, dingbats, and the
+  # variation selector that turns a plain glyph into an emoji. Deliberately
+  # NOT arrows (U+2190–U+21FF) or dashes — those are punctuation we use.
+  - '[\x{1F000}-\x{1FAFF}]'
+  - '[\x{2600}-\x{26FF}]'
+  - '[\x{2700}-\x{27BF}]'
+  - '[\x{2B00}-\x{2BFF}]'
+  - '\x{FE0F}'

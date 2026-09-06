@@ -1,0 +1,12 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'application'
+language: 'typescript'
+
+tasks:
+  # This frontend uses npm (package-lock.json). `install` is a dep of the
+  # inherited `lint` task so `moon ci` materialises node_modules before tsc.
+  install:
+    command: 'npm ci'
+    toolchain: 'system'
+    options:
+      cache: false

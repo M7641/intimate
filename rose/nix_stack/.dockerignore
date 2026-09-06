@@ -1,0 +1,9 @@
+# Build outputs and deps rebuilt inside the image — never ship them in the
+# build context (keeps uploads small and builds cache-clean).
+backend/target/
+frontend/node_modules/
+frontend/dist/
+
+# Nix / tooling artifacts irrelevant to the image build.
+.direnv/
+result

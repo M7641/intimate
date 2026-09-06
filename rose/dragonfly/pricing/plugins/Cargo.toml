@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = ["shared", "default", "retail", "wholesale"]
+
+# Shared release profile: small, optimised WASM modules.
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true

@@ -1,0 +1,22 @@
+[project]
+name = "m"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "cookiecutter>=2.6.0",
+    "dbt-core>=1.8.6",
+    "dbt-redshift>=1.8.1",
+    "dbt-snowflake>=1.8.3",
+    "numpy>=2.1.1",
+    "polars>=1.7.1",
+    "sqlalchemy>=2.0.35",
+    "typer>=0.12.5",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pre-commit>=3.8.0",
+    "pytest>=8.3.3",
+]

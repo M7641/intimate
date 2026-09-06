@@ -1,0 +1,40 @@
+---
+import '../styles/global.css';
+import Background from '../components/Background.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+const SITE_TITLE = 'Cocoon Docs';
+const fullTitle = title === SITE_TITLE ? title : `${title} — ${SITE_TITLE}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{fullTitle}</title>
+    {description && <meta name="description" content={description} />}
+    {/* Resolve the theme before first paint so there is no flash. One of four
+        named themes; defaults to celestial (the signature night theme). */}
+    <script is:inline>
+      (() => {
+        const themes = ['celestial', 'sky', 'cyber', 'industry'];
+        const stored = localStorage.getItem('docs-theme');
+        document.documentElement.dataset.theme = themes.includes(stored)
+          ? stored
+          : 'celestial';
+      })();
+    </script>
+  </head>
+  <body>
+    <Background />
+    <slot />
+  </body>
+</html>

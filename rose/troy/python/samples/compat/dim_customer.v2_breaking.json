@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rose.dev/troy/marts/dim_customer",
+  "title": "dim_customer",
+  "description": "Candidate v2 that INTENTIONALLY breaks the contract — used to demonstrate the compat checker rejecting it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["customer_key", "tier", "region"],
+  "properties": {
+    "customer_key": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["starter", "professional", "enterprise"]
+    },
+    "region": {
+      "type": "string"
+    }
+  }
+}

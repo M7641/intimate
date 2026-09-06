@@ -1,0 +1,96 @@
+# ── Container-image testing: the three axes ───────────────────────────────────
+# Paste these tasks into the project's moon.yml. Each answers a different
+# question with the tool native to it, instead of forcing everything through one
+# shell + curl smoke script.
+#
+# Replace throughout:
+#   myapp:prod            → the image name:tag your Dockerfile builds
+#   localhost/myapp:prod  → the FULLY-QUALIFIED ref for Podman (bare tag for Docker)
+#   backend               → the dir holding the app + its runtime test (if nested)
+#
+# Invariants (see references/architecture.md for the why):
+#   • Every test task deps on ~:image-build, so you never test a stale image.
+#   • Every image task is `toolchain: 'system'` (it shells out to podman/trivy,
+#     not a moon-managed toolchain) and `cache: false` (its effect is a live
+#     container or a fresh scan — never a cacheable file output).
+#   • Structure + hygiene read a `podman save` tarball with the tar driver, so no
+#     daemon socket is ever mounted. Only image-test needs the live socket.
+
+tasks:
+  # Build the production image (multi-stage). Not cached: the built image lives
+  # in the engine's store, not the workspace, so moon can't hash it as an output.
+  image-build:
+    command: 'podman build -t myapp:prod -f Dockerfile .'
+    toolchain: 'system'
+    options:
+      cache: false
+
+  # ── Runtime: does it behave when containerised? ─────────────────────────────
+  # The ONLY language-specific task. testcontainers drives the live image over
+  # HTTP and tears it down on drop. Point it at Podman's socket and disable ryuk
+  # (Podman auto-removes; ryuk cohabits poorly), then run the app's own test.
+  #
+  # --- Rust variant (cargo-nextest) ---
+  image-test:
+    script: |
+      if [ -z "${DOCKER_HOST:-}" ]; then
+        sock="$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}' 2>/dev/null || true)"
+        [ -n "$sock" ] && export DOCKER_HOST="unix://$sock"
+      fi
+      export TESTCONTAINERS_RYUK_DISABLED=true
+      export IMAGE_REF="${IMAGE_REF:-localhost/myapp:prod}"
+      cd backend && cargo nextest run --test image_it
+    toolchain: 'system'
+    deps: ['~:image-build']
+    options:
+      cache: false
+  #
+  # --- Python variant (pytest) — use INSTEAD of the block above ---
+  # image-test:
+  #   script: |
+  #     if [ -z "${DOCKER_HOST:-}" ]; then
+  #       sock="$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}' 2>/dev/null || true)"
+  #       [ -n "$sock" ] && export DOCKER_HOST="unix://$sock"
+  #     fi
+  #     export TESTCONTAINERS_RYUK_DISABLED=true
+  #     export IMAGE_REF="${IMAGE_REF:-localhost/myapp:prod}"
+  #     uv run pytest tests/test_image.py
+  #   toolchain: 'system'
+  #   deps: ['~:image-build']
+  #   options:
+  #     cache: false
+
+  # ── Structure: is the image assembled correctly? ────────────────────────────
+  # Declarative assertions on files + metadata via container-structure-test (a
+  # proto-pinned host binary), against a saved tarball (tar driver — no socket).
+  # Unchanged across languages: it reads the built image, not the source.
+  image-structure:
+    script: |
+      tar="$(mktemp).tar"
+      trap 'rm -f "$tar"' EXIT
+      podman save --format docker-archive -o "$tar" myapp:prod
+      container-structure-test test --driver tar --image "$tar" --config structure-test.yaml
+    toolchain: 'system'
+    deps: ['~:image-build']
+    options:
+      cache: false
+
+  # ── Hygiene: is it safe? ────────────────────────────────────────────────────
+  # Trivy (proto-pinned host binary) fails the build on HIGH/CRITICAL CVEs.
+  # Scans a saved tarball; podman only exports the image. Unchanged across
+  # languages — though a non-scratch base gives Trivy an OS + packages to scan,
+  # so this axis does real work for interpreted apps.
+  image-scan:
+    script: |
+      tar="$(mktemp).tar"
+      trap 'rm -f "$tar"' EXIT
+      podman save --format docker-archive -o "$tar" myapp:prod
+      trivy image --input "$tar" --severity HIGH,CRITICAL --exit-code 1 --no-progress
+    toolchain: 'system'
+    deps: ['~:image-build']
+    options:
+      cache: false
+
+  # One command for all three axes.
+  image-check:
+    deps: ['~:image-test', '~:image-structure', '~:image-scan']

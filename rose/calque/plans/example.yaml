@@ -1,0 +1,9 @@
+name: orders-api
+rate_limit_rps: 5
+endpoints:
+  - path: "/orders/{id}"
+    method: GET
+    variants:
+      - { path_params: { id: 123 } } # happy path → 200
+      - { path_params: { id: 999999 } } # missing → 404 shape
+      - { path_params: { id: "abc" } } # invalid → 400 / validation shape

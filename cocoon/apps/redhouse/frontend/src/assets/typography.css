@@ -1,0 +1,20 @@
+/* Canonical type. The actual families come from the theme tokens
+   (--font-sans = Geist, --font-mono = Geist Mono), self-hosted via fontsource.
+   No external font requests live here anymore. */
+:root {
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    font-weight: 400;
+}
+
+.link-font {
+    font-size: 0.875rem;
+    font-family: var(--font-sans);
+    font-weight: 500;
+}
+
+.code-font {
+    font-size: 0.875rem;
+    font-family: var(--font-mono);
+    font-weight: 400;
+}

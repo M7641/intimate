@@ -1,0 +1,639 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CYBER EXTREME THEME — Neon Cyberpunk for Starlight
+   Activated via :root[data-cyber='true']
+   ═══════════════════════════════════════════════════════════════════ */
+
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Fira+Code:wght@400;700&display=swap");
+
+/* ─── Keyframe Animations ─────────────────────────────────────── */
+
+@keyframes cyber-hue-rotate {
+    0% {
+        filter: hue-rotate(0deg);
+    }
+    100% {
+        filter: hue-rotate(360deg);
+    }
+}
+
+@keyframes cyber-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes cyber-flicker {
+    0% {
+        opacity: 0.97;
+    }
+    5% {
+        opacity: 0.95;
+    }
+    10% {
+        opacity: 0.98;
+    }
+    15% {
+        opacity: 0.94;
+    }
+    20% {
+        opacity: 0.98;
+    }
+    50% {
+        opacity: 0.96;
+    }
+    80% {
+        opacity: 0.98;
+    }
+    90% {
+        opacity: 0.95;
+    }
+    100% {
+        opacity: 0.98;
+    }
+}
+
+@keyframes cyber-glitch {
+    0% {
+        clip-path: inset(40% 0 61% 0);
+        transform: translate(-2px, 2px);
+    }
+    20% {
+        clip-path: inset(92% 0 1% 0);
+        transform: translate(1px, -1px);
+    }
+    40% {
+        clip-path: inset(43% 0 1% 0);
+        transform: translate(-1px, 3px);
+    }
+    60% {
+        clip-path: inset(25% 0 58% 0);
+        transform: translate(3px, 1px);
+    }
+    80% {
+        clip-path: inset(54% 0 7% 0);
+        transform: translate(-3px, -2px);
+    }
+    100% {
+        clip-path: inset(58% 0 43% 0);
+        transform: translate(2px, -3px);
+    }
+}
+
+@keyframes cyber-border-flow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes cyber-scanline-move {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(4px);
+    }
+}
+
+@keyframes cyber-text-flicker {
+    0%,
+    19.999%,
+    22%,
+    62.999%,
+    64%,
+    64.999%,
+    70%,
+    100% {
+        opacity: 1;
+        text-shadow:
+            0 0 5px #00ffff,
+            0 0 10px #00ffff,
+            0 0 20px #00ffff;
+    }
+    20%,
+    21.999%,
+    63%,
+    63.999%,
+    65%,
+    69.999% {
+        opacity: 0.85;
+        text-shadow: none;
+    }
+}
+
+/* ─── Color Variables ─────────────────────────────────────────── */
+
+:root[data-cyber="true"] {
+    /* Core backgrounds */
+    --sl-color-bg: #0a0a1a;
+    --sl-color-bg-nav: #0d0d24;
+    --sl-color-bg-sidebar: #080818;
+    --sl-color-bg-inline-code: rgba(0, 255, 255, 0.08);
+
+    /* Text colors */
+    --sl-color-text: #e0e0ff;
+    --sl-color-text-accent: #00ffff;
+
+    /* Gray scale — violet/blue tinted */
+    --sl-color-gray-1: #c8c8ff;
+    --sl-color-gray-2: #9898d0;
+    --sl-color-gray-3: #6868a0;
+    --sl-color-gray-4: #484878;
+    --sl-color-gray-5: #2a2a50;
+    --sl-color-gray-6: #181838;
+    --sl-color-gray-7: #0e0e28;
+
+    /* Accents — magenta neon */
+    --sl-color-accent-high: #ff00ff;
+    --sl-color-accent: #cc00cc;
+    --sl-color-accent-low: rgba(255, 0, 255, 0.15);
+
+    /* Text invert — used as text on accent backgrounds (e.g. active sidebar item) */
+    --sl-color-text-invert: #0a0a1a;
+
+    /* White/black adjustments */
+    --sl-color-white: #f0f0ff;
+    --sl-color-black: #050510;
+
+    /* Hairline/border */
+    --sl-color-hairline-shade: rgba(0, 255, 255, 0.15);
+    --sl-color-hairline-light: rgba(0, 255, 255, 0.08);
+    --sl-color-hairline: rgba(0, 255, 255, 0.12);
+
+    /* Badge overrides */
+    --sl-badge-default-bg: rgba(0, 255, 255, 0.12);
+    --sl-badge-default-border: rgba(0, 255, 255, 0.4);
+
+    /* Image styling */
+    --image-shadow:
+        0 0 10px rgba(0, 255, 255, 0.4), 0 0 30px rgba(255, 0, 255, 0.2);
+    --image-border: 1px solid rgba(0, 255, 255, 0.3);
+    --image-inversion: none;
+
+    /* Fonts */
+    --sl-font: "Share Tech Mono", "Fira Code", monospace;
+    --sl-font-mono: "Fira Code", monospace;
+
+    /* Text shadow for body text */
+    text-shadow: 0 0 1px rgba(0, 255, 255, 0.3);
+}
+
+/* ─── Typography ──────────────────────────────────────────────── */
+
+:root[data-cyber="true"] h1,
+:root[data-cyber="true"] h2,
+:root[data-cyber="true"] h3,
+:root[data-cyber="true"] h4,
+:root[data-cyber="true"] h5,
+:root[data-cyber="true"] h6 {
+    font-family: "Orbitron", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+:root[data-cyber="true"] h1 {
+    text-shadow:
+        0 0 7px #00ffff,
+        0 0 15px #00ffff,
+        0 0 30px #00ffff,
+        0 0 50px #ff00ff;
+    animation: cyber-text-flicker 8s infinite;
+}
+
+:root[data-cyber="true"] h2 {
+    text-shadow:
+        0 0 5px #00ffff,
+        0 0 12px #00ffff,
+        0 0 25px #ff00ff;
+}
+
+:root[data-cyber="true"] h3,
+:root[data-cyber="true"] h4 {
+    text-shadow:
+        0 0 4px #00ffff,
+        0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* ─── Scanlines Overlay ───────────────────────────────────────── */
+
+:root[data-cyber="true"] body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.08) 0px,
+        rgba(0, 0, 0, 0.08) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    animation: cyber-scanline-move 0.3s linear infinite;
+}
+
+/* ─── CRT Flicker Overlay ─────────────────────────────────────── */
+
+:root[data-cyber="true"] body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9998;
+    background: transparent;
+    animation: cyber-flicker 4s infinite;
+}
+
+/* ─── Grid Background ─────────────────────────────────────────── */
+
+:root[data-cyber="true"] body {
+    background-color: #0a0a1a;
+    background-image:
+        linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+/* ─── Navigation ──────────────────────────────────────────────── */
+
+:root[data-cyber="true"] nav.sidebar {
+    border-right: 1px solid rgba(0, 255, 255, 0.15);
+}
+
+:root[data-cyber="true"] .header {
+    border-bottom: 1px solid rgba(0, 255, 255, 0.15);
+}
+
+/* ─── Links — Glitch Hover ────────────────────────────────────── */
+
+:root[data-cyber="true"] a {
+    color: #00ffff;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+:root[data-cyber="true"] a:hover {
+    color: #ff00ff;
+    text-shadow:
+        0 0 5px #ff00ff,
+        0 0 15px #ff00ff;
+}
+
+:root[data-cyber="true"] .sl-markdown-content a:hover::before {
+    content: attr(href);
+    position: absolute;
+    top: -2px;
+    left: 2px;
+    color: #ff0040;
+    z-index: -1;
+    animation: cyber-glitch 0.3s infinite;
+    pointer-events: none;
+    opacity: 0.6;
+    clip-path: inset(0);
+}
+
+/* ─── Code Blocks ─────────────────────────────────────────────── */
+
+:root[data-cyber="true"] .expressive-code {
+    --ec-codeBg: #050515;
+    --ec-codeSelectionBg: rgba(0, 255, 255, 0.15);
+    --ec-codeFg: #b0ffb0;
+    --ec-frm-edActTabBg: #0a0a2a;
+    --ec-frm-edActTabIndBtm: #00ffff;
+    --ec-brdCol: rgba(0, 255, 255, 0.3);
+    --ec-frm-edTabBarBg: #080828;
+    --ec-frm-edTabBarBrdBtm: rgba(0, 255, 255, 0.2);
+    --ec-frm-tooltipBg: #0a0a2a;
+}
+
+:root[data-cyber="true"] .expressive-code pre {
+    border-left: 3px solid #00ffff;
+    box-shadow:
+        inset 0 0 30px rgba(0, 255, 255, 0.03),
+        0 0 15px rgba(0, 255, 255, 0.1);
+    position: relative;
+}
+
+:root[data-cyber="true"] .expressive-code pre code {
+    text-shadow: 0 0 3px rgba(0, 255, 100, 0.4);
+}
+
+:root[data-cyber="true"] .expressive-code .frame {
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 255, 255, 0.02) 0%,
+        transparent 50%,
+        rgba(255, 0, 255, 0.02) 100%
+    );
+}
+
+/* Animated border on code blocks */
+:root[data-cyber="true"] .expressive-code .frame::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(
+        90deg,
+        #00ffff,
+        #ff00ff,
+        #00ffff,
+        #ff00ff,
+        #00ffff
+    );
+    background-size: 300% 100%;
+    animation: cyber-border-flow 4s linear infinite;
+    z-index: -1;
+    border-radius: 5px;
+    opacity: 0.3;
+}
+
+/* Inline code */
+:root[data-cyber="true"] :not(pre) > code {
+    background: rgba(0, 255, 255, 0.08);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    color: #00ffcc;
+    text-shadow: 0 0 3px rgba(0, 255, 204, 0.3);
+    padding: 0.15em 0.35em;
+    border-radius: 3px;
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────── */
+
+:root[data-cyber="true"] .sidebar-content a[aria-current="page"],
+:root[data-cyber="true"] .sidebar-content a[aria-current="true"] {
+    color: #0a0a1a;
+    font-weight: 700;
+    text-shadow: none;
+    border-inline-start-color: #00ffff;
+}
+
+:root[data-cyber="true"] .sidebar-content a:hover {
+    color: #ff00ff;
+    text-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
+}
+
+/* ─── Cards & Aside ───────────────────────────────────────────── */
+
+:root[data-cyber="true"] .card {
+    background: rgba(13, 13, 36, 0.8);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    box-shadow:
+        0 0 10px rgba(0, 255, 255, 0.05),
+        inset 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-cyber="true"] .card:hover {
+    border-color: rgba(0, 255, 255, 0.5);
+    box-shadow:
+        0 0 20px rgba(0, 255, 255, 0.15),
+        inset 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-cyber="true"] .starlight-aside {
+    border-color: rgba(0, 255, 255, 0.3);
+    background: rgba(0, 255, 255, 0.04);
+}
+
+/* ─── Tables ──────────────────────────────────────────────────── */
+
+:root[data-cyber="true"] table {
+    border-color: rgba(0, 255, 255, 0.2);
+}
+
+:root[data-cyber="true"] th {
+    background: rgba(0, 255, 255, 0.08);
+    font-family: "Orbitron", sans-serif;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    letter-spacing: 0.05em;
+    color: #00ffff;
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+}
+
+:root[data-cyber="true"] td {
+    border-color: rgba(0, 255, 255, 0.1);
+}
+
+:root[data-cyber="true"] tr:hover td {
+    background: rgba(0, 255, 255, 0.04);
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────── */
+
+:root[data-cyber="true"] ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+:root[data-cyber="true"] ::-webkit-scrollbar-track {
+    background: #0a0a1a;
+    border-left: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+:root[data-cyber="true"] ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ff00ff, #00ffff);
+    border-radius: 4px;
+    box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
+}
+
+:root[data-cyber="true"] ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #ff40ff, #40ffff);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* ─── Search ──────────────────────────────────────────────────── */
+
+:root[data-cyber="true"] .search-input,
+:root[data-cyber="true"] input[type="search"] {
+    border-color: rgba(0, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+:root[data-cyber="true"] .search-input:focus,
+:root[data-cyber="true"] input[type="search"]:focus {
+    border-color: #00ffff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+/* ─── Buttons ─────────────────────────────────────────────────── */
+
+:root[data-cyber="true"] button,
+:root[data-cyber="true"] .action.primary {
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    transition: all 0.2s ease;
+}
+
+:root[data-cyber="true"] button:hover,
+:root[data-cyber="true"] .action.primary:hover {
+    border-color: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+
+/* ─── Theme Selector Styling ──────────────────────────────────── */
+
+:root[data-cyber="true"] starlight-theme-select select {
+    color: #00ffff;
+    text-shadow: 0 0 3px rgba(0, 255, 255, 0.5);
+}
+
+/* ─── Pagination ──────────────────────────────────────────────── */
+
+:root[data-cyber="true"] .pagination-links a {
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+:root[data-cyber="true"] .pagination-links a:hover {
+    border-color: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+/* ─── TOC (Table of Contents) ─────────────────────────────────── */
+
+:root[data-cyber="true"] starlight-toc a {
+    color: var(--sl-color-gray-2);
+}
+
+:root[data-cyber="true"] starlight-toc a[aria-current="true"] {
+    color: #00ffff;
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.4);
+}
+
+/* ─── Blockquotes ─────────────────────────────────────────────── */
+
+:root[data-cyber="true"] blockquote {
+    border-left: 3px solid #ff00ff;
+    background: rgba(255, 0, 255, 0.04);
+    color: #d0d0ff;
+}
+
+/* ─── Horizontal Rules ────────────────────────────────────────── */
+
+:root[data-cyber="true"] hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #00ffff,
+        #ff00ff,
+        #00ffff,
+        transparent
+    );
+    opacity: 0.5;
+}
+
+/* ─── Selection Color ─────────────────────────────────────────── */
+
+:root[data-cyber="true"] ::selection {
+    background: rgba(255, 0, 255, 0.3);
+    color: #ffffff;
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+
+/* ─── Pulse Breathing on Accent Elements ──────────────────────── */
+
+:root[data-cyber="true"] .sl-badge {
+    animation: cyber-pulse 3s ease-in-out infinite;
+}
+
+/* ─── Images & Iframes ────────────────────────────────────────── */
+
+:root[data-cyber="true"] .sl-markdown-content img {
+    border: var(--image-border);
+    box-shadow: var(--image-shadow);
+    transition: box-shadow 0.3s ease;
+}
+
+:root[data-cyber="true"] .sl-markdown-content img:hover {
+    box-shadow:
+        0 0 15px rgba(0, 255, 255, 0.5),
+        0 0 40px rgba(255, 0, 255, 0.3);
+}
+
+:root[data-cyber="true"] .sl-markdown-content iframe {
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    box-shadow:
+        0 0 10px rgba(0, 255, 255, 0.3),
+        0 0 30px rgba(255, 0, 255, 0.15);
+}
+
+/* ─── Mobile Menu ─────────────────────────────────────────────── */
+
+:root[data-cyber="true"] .mobile-preferences {
+    border-top: 1px solid rgba(0, 255, 255, 0.15);
+}
+
+/* ─── Footer ──────────────────────────────────────────────────── */
+
+:root[data-cyber="true"] footer {
+    border-top: 1px solid rgba(0, 255, 255, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ACCESSIBILITY — Reduced Motion
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+    :root[data-cyber="true"] body::after {
+        animation: none;
+    }
+
+    :root[data-cyber="true"] body::before {
+        animation: none;
+    }
+
+    :root[data-cyber="true"] h1 {
+        animation: none;
+        text-shadow: 0 0 7px #00ffff;
+    }
+
+    :root[data-cyber="true"] h2 {
+        text-shadow: 0 0 5px #00ffff;
+    }
+
+    :root[data-cyber="true"] h3,
+    :root[data-cyber="true"] h4 {
+        text-shadow: 0 0 4px #00ffff;
+    }
+
+    :root[data-cyber="true"] .sl-markdown-content a:hover::before {
+        animation: none;
+        display: none;
+    }
+
+    :root[data-cyber="true"] .expressive-code .frame::before {
+        animation: none;
+    }
+
+    :root[data-cyber="true"] .sl-badge {
+        animation: none;
+    }
+
+    :root[data-cyber="true"] * {
+        transition-duration: 0s !important;
+    }
+}

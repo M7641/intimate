@@ -1,0 +1,12 @@
+global-include *.yml
+global-include *.yaml
+global-include *.jinja
+global-include *.sql
+global-include *.css
+global-include *.svg
+global-include Dockerfile.workflow
+global-include Dockerfile.webapp
+
+global-include *.js
+global-include *.json
+global-include *.html

@@ -1,0 +1,26 @@
+# gauge config for the Axum (Rust) example — run with:
+#   uv run gauge run --config examples/axum/gauge.toml
+image = "gauge-axum-example"
+
+[build]
+context = "examples/axum"
+
+[container]
+port = 8080
+# memory = "64m"   # Rust runs comfortably in a tiny cap — try it
+
+[ready]
+url = "http://127.0.0.1:8080/health"
+timeout = 30
+
+[load]
+# Axum publishes no OpenAPI spec by default, so drive a single endpoint. /work
+# does CPU + memory work. (Add utoipa to the app to expose /openapi.json and use
+# `openapi_url` instead, like the FastAPI example.)
+url = "http://127.0.0.1:8080/work"
+requests = 1500
+concurrency = 32
+
+[output]
+dir = "examples/axum/report"
+interval = 0.1   # Rust serves the load fast — sample often to catch the curve

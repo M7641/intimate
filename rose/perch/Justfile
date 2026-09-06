@@ -1,0 +1,43 @@
+# perch — commandes de dev / déploiement
+
+default:
+    @just --list
+
+# Vérifie le binaire Rust en local (pas de Docker).
+check:
+    cd app && cargo check --release
+
+# Lance le binaire en local sur :8080 — pas de Lambda, juste Axum nu.
+run:
+    cd app && cargo run --release
+
+# Build l'image OCI en local (sans push) pour vérifier le Dockerfile.
+image:
+    docker build --platform=linux/arm64 -t perch:dev app
+
+# Déploiement complet — build image, push ECR, deploy Lambda + CloudFront.
+up:
+    pulumi up
+
+# Détruit toute la stack. ECR est `force_delete=true` donc les images partent.
+destroy:
+    pulumi destroy
+
+# Tail les logs CloudWatch en live (nécessite awscli + pulumi stack).
+logs:
+    aws logs tail $(pulumi stack output log_group) --follow --format short
+
+# Smoke tests contre la stack déployée.
+smoke:
+    @URL=$(pulumi stack output cloudfront_url); \
+     echo "GET $URL/"        && curl -sf $URL/ && echo && \
+     echo "GET $URL/healthz" && curl -sf $URL/healthz | jq && \
+     echo "GET $URL/env"     && curl -sf $URL/env | jq
+
+# Bascule l'alias `live` vers une version antérieure (rollback en 1 commande).
+# Usage : just rollback 4
+rollback version:
+    aws lambda update-alias \
+      --function-name $(pulumi stack output function_name) \
+      --name live \
+      --function-version {{version}}

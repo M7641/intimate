@@ -1,0 +1,17 @@
+from database.composites.insert_data import insert_data
+import asyncio
+
+
+async def log_message(message: str, user: str, timestamp: str) -> None:
+    """
+    Log a message to the daily_logs table.
+    """
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(
+        None,
+        lambda: insert_data(
+            copy_of_data={"log_message": message, "log_timestamp": timestamp, "log_user": user},
+            destination_table="{{ webapp_name }}" + "_logs",
+            schema="sandpit",
+        ),
+    )

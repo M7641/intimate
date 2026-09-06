@@ -1,0 +1,17 @@
+[project]
+name = "sthree"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Mike", email = "michael@eyecatching.co.uk" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "boto3>=1.38.27",
+    "polars>=1.31.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

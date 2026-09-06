@@ -1,0 +1,66 @@
+[package]
+name = "data_view"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+# Librairies internes : couche DB unifiée + scaffolding HTTP partagé.
+database = { workspace = true }
+service-kit = { workspace = true }
+# CLI unifiée (serve/dev/deploy) — remplace l'ancien cli.py Python.
+ouroboros = { workspace = true }
+# Shared, declarative deploy spec (single source of truth, shared with `warden`).
+deploy-catalog = { workspace = true }
+clap = { workspace = true }
+# Gestion du groupe de processus pour le teardown du serveur vite (commande `start`).
+libc = "0.2"
+
+axum = { workspace = true, features = ["json"] }
+tokio = { workspace = true, features = ["full"] }
+tower-http = { workspace = true, features = ["catch-panic", "compression-gzip", "cors", "fs", "trace"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["json", "fmt"] }
+metrics = { workspace = true }
+metrics-exporter-prometheus = { workspace = true }
+regex = { workspace = true }
+r2d2 = { workspace = true }
+utoipa = { workspace = true }
+utoipa-swagger-ui = { workspace = true }
+
+# OpenTelemetry (opt-in via la feature `otel`)
+opentelemetry = { workspace = true, optional = true }
+opentelemetry_sdk = { workspace = true, optional = true }
+opentelemetry-otlp = { workspace = true, optional = true }
+tracing-opentelemetry = { workspace = true, optional = true }
+
+[features]
+# data_view targets real warehouses only (Redshift wire + Snowflake REST). The
+# in-memory duckdb/sqlite backends were dev-only scaffolding: empty of data and
+# a heavy native dependency. Local dev now runs against a seeded Postgres
+# container (`data_view start`), so they're gone. (tako-api still ships duckdb.)
+default = ["postgres", "snowflake"]
+postgres = ["database/postgres"]
+snowflake = ["database/snowflake"]
+otel = ["opentelemetry", "opentelemetry_sdk", "opentelemetry-otlp", "tracing-opentelemetry"]
+
+[[bin]]
+name = "data_view"
+path = "src/main.rs"
+
+[dev-dependencies]
+# Disposable Postgres container (also serves the Redshift wire-compatible path
+# and backs the mock Snowflake REST server).
+testcontainers = { workspace = true }
+testcontainers-modules = { workspace = true }
+# Sync Postgres client: seed the container + run the mock's proxied queries.
+postgres = { workspace = true }
+# Test HTTP client against the running server.
+reqwest = { workspace = true, features = ["blocking", "json"] }
+serde_json = { workspace = true }
+# Tiny sync HTTP server for the mock Snowflake REST endpoint.
+tiny_http = { workspace = true }
+
+[lints]
+workspace = true

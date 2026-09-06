@@ -1,0 +1,28 @@
+[package]
+name = "nyx"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+rig-core = { version = "0.32", features = ["derive"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "process"] }
+clap = { workspace = true }
+clap_complete = "4"
+async-trait = { workspace = true }
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+schemars = "0.8"
+ratatui = { version = "0.30", features = ["crossterm"] }
+
+# Local inference (candle)
+candle-core = "0.9"
+candle-transformers = "0.9"
+reqwest = { workspace = true, features = ["blocking"] }
+tokenizers = { version = "0.22", default-features = false, features = ["onig"] }
+
+[features]
+metal = ["candle-core/metal", "candle-transformers/metal"]
+
+[lints]
+workspace = true

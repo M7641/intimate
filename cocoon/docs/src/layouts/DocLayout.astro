@@ -1,0 +1,66 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import ThemeSelect from '../components/ThemeSelect.astro';
+import { buildNav } from '../lib/nav';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  headings: Heading[];
+}
+
+const { title, description, headings } = Astro.props;
+const nav = await buildNav();
+const pathname = Astro.url.pathname;
+---
+
+<BaseLayout title={title} description={description}>
+  <header class="site-header">
+    <button
+      class="menu-toggle"
+      type="button"
+      aria-label="Toggle navigation"
+      aria-expanded="false">☰</button
+    >
+    <a class="site-title" href="/">Cocoon <span>Docs</span></a>
+    <div class="header-actions">
+      <ThemeSelect />
+    </div>
+  </header>
+
+  <div class="layout">
+    <Sidebar nav={nav} pathname={pathname} />
+    <main class="content">
+      {/* data-pagefind-body scopes the search index to real content only. */}
+      <article class="prose" data-pagefind-body>
+        <h1>{title}</h1>
+        <slot />
+      </article>
+    </main>
+    <TableOfContents headings={headings} />
+  </div>
+
+  <script>
+    // Mobile: the menu button slides the off-canvas sidebar in and out.
+    const toggle = document.querySelector<HTMLButtonElement>('.menu-toggle');
+    toggle?.addEventListener('click', () => {
+      const open = document.body.toggleAttribute('data-sidebar-open');
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+    // Tapping a link closes it again.
+    document.querySelector('.sidebar')?.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('a')) {
+        document.body.removeAttribute('data-sidebar-open');
+        toggle?.setAttribute('aria-expanded', 'false');
+      }
+    });
+  </script>
+</BaseLayout>

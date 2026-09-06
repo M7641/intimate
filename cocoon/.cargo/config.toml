@@ -1,0 +1,5 @@
+# Workspace-wide cargo aliases. Config is discovered by walking up from the
+# invocation directory, so these work anywhere inside `cocoon/`.
+#
+# (The `cv` alias lived here until the CV moved out to `../cv` as a standalone
+# Typst document — it is built with `typst compile`, not cargo.)

@@ -1,0 +1,5 @@
+name: example-smoke
+steps:
+  - { wait_for: networkidle }
+  - { screenshot: after-load }
+  - { capture_delta: initial-idle }

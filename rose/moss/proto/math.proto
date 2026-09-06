@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package math;
+
+service MathService {
+  rpc Add(AddRequest) returns (AddResponse);
+  rpc Predict(PredictRequest) returns (PredictResponse);
+}
+
+message AddRequest {
+  double a = 1;
+  double b = 2;
+}
+
+message AddResponse {
+  double result = 1;
+}
+
+message PredictRequest {
+  repeated double features = 1;
+}
+
+message PredictResponse {
+  double prediction = 1;
+  string model_version = 2;
+}

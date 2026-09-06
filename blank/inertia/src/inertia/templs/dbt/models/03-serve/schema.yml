@@ -1,0 +1,17 @@
+version: 2
+
+models:
+
+  - name: table
+    description: description
+
+    config:
+      materialized: table
+      tags:
+        - serve
+
+    columns:
+      - name: branch
+        data_type: text
+        data_tests:
+          - not_null

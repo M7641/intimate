@@ -1,0 +1,46 @@
+[project]
+name = "destiny"
+version = "0.1.0"
+description = "Destiny"
+readme = "README.md"
+authors = [
+    { name = "Mike", email = "michael@eyecatching.co.uk" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "haversine>=2.9.0",
+    "requests>=2.32.5",
+    "typer>=0.19.2",
+    "pure",
+    "ouroboros",
+    "rich>=13.0.0",
+]
+
+[tool.uv.sources]
+pure = { workspace = true }
+ouroboros = { workspace = true }
+
+[project.scripts]
+destiny = "destiny.cli:app"
+
+[tool.pytest.ini_options]
+# `--ignore=mutants` keeps `moon run destiny:test` clean if a mutmut working copy
+# is present (trampoline-instrumented code fails outside mutmut's own harness).
+addopts = ["--import-mode=importlib", "--ignore=mutants"]
+python_files = ["test_*.py", "*_test.py"]
+
+# Mutation testing (mutmut). Prototype scope: the postmacode feature, which has
+# both example and property tests — a good target to show mutants getting killed.
+# mutmut copies the project into `mutants/`, mutates `paths_to_mutate` one change
+# at a time, and re-runs the selected tests; a surviving mutant = a missing
+# assertion. Slow + non-deterministic → runs nightly, never as a PR gate
+# (`moon run destiny:mutation`, runInCI: false).
+[tool.mutmut]
+paths_to_mutate = ["src/destiny/postmacode/postmacode.py"]
+tests_dir = ["src/destiny/postmacode/postmacode_test.py"]
+also_copy = ["src/"]
+do_not_mutate = ["*_test.py", "*_bench.py"]
+
+[build-system]
+requires = ["uv_build>=0.9.0,<0.10.0"]
+build-backend = "uv_build"

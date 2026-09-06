@@ -1,0 +1,60 @@
+# bacon.toml — continuous check/lint/test feedback loop
+# Usage:
+#   bacon           → cargo check on save
+#   bacon clippy    → lint on save
+#   bacon test      → run tests on save
+#   bacon serve     → run the API server, restarting it on change (hot reload)
+#
+# For the full dev loop (frontend + hot-reloading backend), use: data_view start
+
+default_job = "check"
+
+# Debounce file events: one editor "save" often lands as several writes in quick
+# succession (the write, then format-on-save / organize-imports rewriting the
+# file). Without this, each write re-runs the job — the "runs three times on one
+# save" symptom. 2s coalesces a save + format burst into a single run.
+grace_period = "2s"
+
+[jobs.check]
+command = ["cargo", "check", "--color", "always"]
+need_stdout = false
+
+[jobs.check-all]
+command = ["cargo", "check", "--workspace", "--color", "always"]
+need_stdout = false
+
+[jobs.clippy]
+command = ["cargo", "clippy", "--color", "always", "--", "-W", "clippy::all"]
+need_stdout = false
+
+[jobs.clippy-all]
+command = ["cargo", "clippy", "--workspace", "--color", "always", "--", "-W", "clippy::all"]
+need_stdout = false
+
+[jobs.test]
+command = ["cargo", "test", "--color", "always"]
+need_stdout = true
+
+[jobs.doc]
+command = ["cargo", "doc", "--no-deps", "--color", "always"]
+need_stdout = false
+
+[jobs.doc-open]
+command = ["cargo", "doc", "--no-deps", "--open", "--color", "always"]
+need_stdout = false
+on_success = "back"
+
+# Run the API server and hot-reload it on change. Used by `data_view start`
+# (via `bacon --headless -j serve`) and runnable on its own with `bacon serve`.
+[jobs.serve]
+command = ["cargo", "run", "--", "serve"]
+need_stdout = true
+# A server never exits on its own, so wait-for-completion would never restart it;
+# kill the running server and start a fresh one on each change instead.
+background = false
+on_change_strategy = "kill_then_restart"
+# SIGTERM the process tree (not SIGKILL), so the server runs its graceful
+# shutdown and closes the DB pool cleanly on every reload.
+kill = ["pkill", "-TERM", "-P"]
+# Watch only the Rust sources; frontend/vite writes must not restart the backend.
+watch = ["src", "Cargo.toml"]

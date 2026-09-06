@@ -1,0 +1,52 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+// Only h2/h3 — deeper levels make the rail noisy, matching Starlight's default.
+const toc = Astro.props.headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{
+  toc.length > 0 && (
+    <aside class="toc" aria-label="On this page">
+      <h2 class="toc__title">On this page</h2>
+      <ul>
+        {toc.map((h) => (
+          <li class={`toc__item toc__item--h${h.depth}`}>
+            <a href={`#${h.slug}`}>{h.text}</a>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  )
+}
+
+<script>
+  // Scroll-spy: mark the TOC entry whose heading is currently in view.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.toc a')];
+  if (links.length > 0) {
+    const byId = new Map(
+      links.map((link) => [link.getAttribute('href')!.slice(1), link]),
+    );
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          for (const link of links) link.removeAttribute('data-active');
+          byId.get(entry.target.id)?.setAttribute('data-active', 'true');
+        }
+      },
+      { rootMargin: '0px 0px -80% 0px', threshold: 0 },
+    );
+    for (const heading of document.querySelectorAll('article :is(h2, h3)[id]')) {
+      observer.observe(heading);
+    }
+  }
+</script>

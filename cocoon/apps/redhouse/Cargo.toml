@@ -1,0 +1,45 @@
+[package]
+name = "redhouse"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+# Librairies internes : couche DB unifiée + scaffolding HTTP partagé.
+# Redshift speaks the Postgres wire protocol, so the only backend is `postgres`
+# (see the features below). The workspace dep is default-features=false.
+database = { workspace = true }
+service-kit = { workspace = true }
+# CLI unifiée (serve/dev/deploy) — remplace l'ancien cli.py Python.
+ouroboros = { workspace = true }
+# Shared, declarative deploy spec (single source of truth, shared with `warden`).
+deploy-catalog = { workspace = true }
+clap = { workspace = true }
+# Gestion du groupe de processus pour le teardown du serveur vite (commande `start`).
+libc = "0.2"
+
+axum = { workspace = true, features = ["json"] }
+tokio = { workspace = true, features = ["full"] }
+tower-http = { workspace = true, features = ["catch-panic", "compression-gzip", "cors", "fs", "trace"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["json", "fmt"] }
+metrics = { workspace = true }
+metrics-exporter-prometheus = { workspace = true }
+regex = { workspace = true }
+r2d2 = { workspace = true }
+utoipa = { workspace = true }
+utoipa-swagger-ui = { workspace = true }
+
+[features]
+# Redshift-only app: Redshift speaks the Postgres wire protocol, so the fixed
+# connector is `postgres`. No local/dev backends.
+default = ["postgres"]
+postgres = ["database/postgres"]
+
+[[bin]]
+name = "redhouse"
+path = "src/main.rs"
+
+[lints]
+workspace = true

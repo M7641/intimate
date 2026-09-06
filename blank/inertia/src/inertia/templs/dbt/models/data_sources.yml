@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+
+  - name: data_sources
+    description: description
+    schema: stage
+    tables:
+      - name: table
+        description: description
+        freshness:
+          error_after: {count: 1, period: day}
+        loaded_at_field: "peakauditcreatedat"

@@ -1,0 +1,51 @@
+# cargo-deny config — supply-chain gate for the Rust crates.
+# Run via `moon run :audit --query "language=rust"` (the `audit` task on each crate),
+# which passes `--config $workspaceRoot/.config/deny.toml`. cargo-deny only
+# auto-discovers `<cwd>/deny.toml`, so any manual run needs the flag too:
+#   cargo-deny check --config .config/deny.toml advisories bans sources
+# Docs: https://embarkstudios.github.io/cargo-deny
+
+[advisories]
+# Pull from the RustSec advisory DB. Unmaintained/yanked crates are warnings so
+# they surface without blocking; actual vulnerabilities (default) are denied.
+db-urls = ["https://github.com/rustsec/advisory-db"]
+unmaintained = "workspace"
+yanked = "warn"
+
+[licenses]
+version = 2
+# NOTE: the `licenses` check is opt-in (not in the default `audit:rust` run).
+# The first-party crates have no `license` field, which cargo-deny v2 treats as
+# an error. Enable it once internal crates set `publish = false` (then
+# private.ignore skips them) or add a `license` field. Run it with:
+#   cargo-deny check --config .config/deny.toml advisories bans sources licenses
+private = { ignore = true }
+# Allow-list of licenses we accept. Anything outside this list fails the check.
+allow = [
+  "MIT",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Unicode-3.0",
+  "Unicode-DFS-2016",
+  "Zlib",
+  "MPL-2.0",
+  "CC0-1.0",
+]
+confidence-threshold = 0.8
+# Per-crate runs (no workspace) mean the shared allow-list always has entries a
+# given crate doesn't use — don't fail on that.
+unused-allowed-license = "allow"
+
+[bans]
+# Flag duplicate versions of the same crate (bloat / drift) as a warning.
+multiple-versions = "warn"
+wildcards = "warn"
+
+[sources]
+# Only crates.io and the git deps we explicitly trust.
+unknown-registry = "deny"
+unknown-git = "warn"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

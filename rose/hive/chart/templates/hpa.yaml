@@ -1,0 +1,40 @@
+{{- if .Values.autoscaling.enabled }}
+# The HorizontalPodAutoscaler adjusts the replica count to keep a metric near a
+# target. Here: add pods when average CPU rises above 60% of the REQUEST, remove
+# them when it falls — between the min and max floor/ceiling. This is the piece
+# that lets the fleet earn its keep: it shrinks to `minReplicas` when idle (you
+# stop paying for capacity you aren't using) and grows toward `maxReplicas`
+# under load (you serve the spike instead of falling over).
+#
+# It scales on `requests.cpu`, which is why getting the request right in
+# values.yaml matters: too high and the pod looks idle and never scales up; too
+# low and it looks saturated and scales up forever.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "hive.fullname" . }}
+  labels:
+    {{- include "hive.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "hive.fullname" . }}
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+  behavior:
+    # Scale up fast (a spike is happening NOW) but scale down slowly, so a brief
+    # dip in traffic doesn't rip out pods you'll need again seconds later —
+    # "flapping" churns pods and hurts more than the few idle ones it saves.
+    scaleUp:
+      stabilizationWindowSeconds: 0
+    scaleDown:
+      stabilizationWindowSeconds: 300
+{{- end }}

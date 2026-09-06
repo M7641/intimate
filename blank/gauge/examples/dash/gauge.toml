@@ -1,0 +1,25 @@
+# gauge config for the Dash example — run with:
+#   uv run gauge run --config examples/dash/gauge.toml
+image = "gauge-dash-example"
+
+[build]
+context = "examples/dash"
+
+[container]
+port = 8050
+# memory = "400m"   # uncomment to watch it get OOM-killed under a cap
+
+[ready]
+url = "http://127.0.0.1:8050/"
+timeout = 30
+
+[load]
+# Dash serves a cached layout at /, so hammer the /work route that does real
+# CPU + memory work. (Dash has no OpenAPI spec, so we use a single URL.)
+url = "http://127.0.0.1:8050/work"
+requests = 2000
+concurrency = 16
+
+[output]
+dir = "examples/dash/report"
+interval = 0.3

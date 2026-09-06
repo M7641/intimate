@@ -1,0 +1,28 @@
+# Moon workspace — repo root. Lists every project (id -> path) and the VCS config.
+# TEMPLATE: replace the example projects with the target repo's real projects.
+#
+# ID rules:
+#   - globally unique; convention for nested paths is `/` -> `-`
+#     (io/database -> database ; rose/quartz/frontend -> quartz-frontend)
+#   - a project's `language` (set in its moon.yml) selects which task file it
+#     inherits.
+#
+# Dependencies:
+#   - Rust (Cargo workspace) inter-crate deps are INFERRED from Cargo.toml — do
+#     NOT restate them here or in moon.yml.
+#   - Python/TS deps are declared per-project via `dependsOn` in moon.yml.
+$schema: 'https://moonrepo.dev/schemas/workspace.json'
+
+projects:
+  # --- examples, delete these ---
+  # Rust (Cargo workspace) — deps inferred from Cargo.toml:
+  my-app: 'apps/my-app'
+  my-lib: 'crates/my-lib'
+  # Python (uv workspace):
+  core: 'packages/core'
+  # TypeScript frontend:
+  web: 'apps/web'
+
+vcs:
+  client: 'git'
+  defaultBranch: 'main'   # set to the target repo's real default branch

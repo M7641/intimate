@@ -1,0 +1,11 @@
+WITH
+    EXPLAINING_MODEL_PERFORMANCE AS (
+        SELECT
+            *
+        FROM {{ schema | safe }}.METIS_EXPLAINING_MODEL_VALIDATION
+        WHERE MODEL_NAME = '{{ model_name | safe }}'
+    )
+SELECT
+    METRIC,
+    METRIC_VALUE
+FROM EXPLAINING_MODEL_PERFORMANCE

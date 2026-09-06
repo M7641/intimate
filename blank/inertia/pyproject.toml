@@ -1,0 +1,24 @@
+[project]
+name = "inertia"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Mike", email = "michael@eyecatching.co.uk" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "copier>=9.11.0",
+    "typer>=0.20.0",
+]
+
+[project.scripts]
+inertia = "inertia.cli:app"
+
+[tool.uv]
+package = true
+
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10.0"]
+build-backend = "uv_build"

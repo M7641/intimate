@@ -1,0 +1,44 @@
+---
+import Search from 'astro-pagefind/components/Search.astro';
+import type { NavGroup } from '../lib/nav';
+
+interface Props {
+  nav: NavGroup[];
+  pathname: string;
+}
+
+const { nav, pathname } = Astro.props;
+const normalise = (path: string) => path.replace(/\/+$/, '') || '/';
+const current = normalise(pathname);
+---
+
+<nav class="sidebar" aria-label="Main navigation">
+  <div class="sidebar-search" data-pagefind-ignore>
+    <Search className="pagefind-ui" />
+  </div>
+  <a
+    href="/"
+    class="sidebar-link sidebar-link--home"
+    aria-current={current === '/' ? 'page' : undefined}>Overview</a
+  >
+  {
+    nav.map((group) => (
+      <div class="sidebar-group">
+        <h2 class="sidebar-group__label">{group.label}</h2>
+        <ul>
+          {group.items.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class="sidebar-link"
+                aria-current={current === normalise(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</nav>

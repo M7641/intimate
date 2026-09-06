@@ -1,0 +1,81 @@
+
+{% if database_name == 'redshift' %}
+redshift:
+  outputs:
+    dev:
+      type: redshift
+      user: "{{ '{{' }} env_var('REDSHIFT_USERNAME') {{ '}}' }}"
+      dbname: "{{ '{{' }} env_var('TENANT') {{ '}}' }}"
+      host: "{{ '{{' }} env_var('REDSHIFT_HOST') {{ '}}' }}"
+      password: "{{ '{{' }} env_var('REDSHIFT_PASSWORD') {{ '}}' }}"
+      port: "{{ '{{' }} env_var('REDSHIFT_PORT') | as_number {{ '}}' }}"
+      schema: "sandpit"
+      threads: 3
+    test:
+      type: redshift
+      user: "{{ '{{' }} env_var('REDSHIFT_USERNAME') {{ '}}' }}"
+      dbname: "{{ '{{' }} env_var('TENANT') {{ '}}' }}"
+      host: "{{ '{{' }} env_var('REDSHIFT_HOST') {{ '}}' }}"
+      password: "{{ '{{' }} env_var('REDSHIFT_PASSWORD') {{ '}}' }}"
+      port: "{{ '{{' }} env_var('REDSHIFT_PORT') | as_number {{ '}}' }}"
+      schema: "transform"
+      threads: 3
+    prod:
+      type: redshift
+      user: "{{ '{{' }} env_var('REDSHIFT_USERNAME') {{ '}}' }}"
+      dbname: "{{ '{{' }} env_var('TENANT') {{ '}}' }}"
+      host: "{{ '{{' }} env_var('REDSHIFT_HOST') {{ '}}' }}"
+      password: "{{ '{{' }} env_var('REDSHIFT_PASSWORD') {{ '}}' }}"
+      port: "{{ '{{' }} env_var('REDSHIFT_PORT') | as_number {{ '}}' }}"
+      schema: "publish"
+      threads: 3
+  target: dev
+{% endif %}
+{% if database_name == 'snowflake' %}
+snowflake:
+  target: user
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ '{{' }} env_var('SNOWFLAKE_ACCOUNT') {{ '}}' }}"
+      database: "{{ '{{' }} env_var('SNOWFLAKE_DATABASE') {{ '}}' }}"
+      warehouse: "{{ '{{' }} env_var('SNOWFLAKE_WAREHOUSE') {{ '}}' }}"
+      role: "{{ '{{' }} env_var('SNOWFLAKE_ROLE') {{ '}}' }}"
+      authenticator: oauth
+      token: "{{ '{{' }} env_var('ACCESS_TOKEN') {{ '}}' }}"
+      user: "EXT_NIMBUS_PRD_POC"
+      schema: "INBOUND"
+      retry_on_database_errors: true
+      reuse_connections: true
+      client_session_keep_alive: true
+      threads: 3
+    test:
+      type: snowflake
+      account: "{{ '{{' }} env_var('SNOWFLAKE_ACCOUNT') {{ '}}' }}"
+      database: "{{ '{{' }} env_var('SNOWFLAKE_DATABASE') {{ '}}' }}"
+      warehouse: "{{ '{{' }} env_var('SNOWFLAKE_WAREHOUSE') {{ '}}' }}"
+      role: "{{ '{{' }} env_var('SNOWFLAKE_ROLE') {{ '}}' }}"
+      authenticator: oauth
+      token: "{{ '{{' }} env_var('ACCESS_TOKEN') {{ '}}' }}"
+      user: "EXT_NIMBUS_PRD_POC"
+      schema: "INBOUND"
+      threads: 3
+      retry_on_database_errors: true
+      reuse_connections: true
+      client_session_keep_alive: true
+    prod:
+      type: snowflake
+      account: "{{ '{{' }} env_var('SNOWFLAKE_ACCOUNT') {{ '}}' }}"
+      database: "{{ '{{' }} env_var('SNOWFLAKE_DATABASE') {{ '}}' }}"
+      warehouse: "{{ '{{' }} env_var('SNOWFLAKE_WAREHOUSE') {{ '}}' }}"
+      role: "{{ '{{' }} env_var('SNOWFLAKE_ROLE') {{ '}}' }}"
+      authenticator: oauth
+      token: "{{ '{{' }} env_var('ACCESS_TOKEN') {{ '}}' }}"
+      user: "EXT_NIMBUS_PRD_POC"
+      schema: "INBOUND"
+      retry_on_database_errors: true
+      reuse_connections: true
+      client_session_keep_alive: true
+      threads: 3
+  target: dev
+{% endif %}

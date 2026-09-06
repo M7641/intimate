@@ -1,0 +1,23 @@
+{
+  "name": "sample_data",
+  "version": 1,
+  "description": "Sample dataset for testing ingestion pipeline",
+  "source": "test_system",
+  "pattern": "batch",
+  "compatibility": "BACKWARD",
+  "keys": {
+    "business_key": ["id"],
+    "relationships": {}
+  },
+  "columns": [
+    {
+      "name": "id",
+      "type": "Int64",
+      "constraints": { "not_null": true, "unique": true }
+    },
+    { "name": "name", "type": "String", "constraints": { "not_null": true } },
+    { "name": "age", "type": "Int64", "constraints": { "min": 0, "max": 150 } },
+    { "name": "score", "type": "Float64" },
+    { "name": "active", "type": "Boolean" }
+  ]
+}

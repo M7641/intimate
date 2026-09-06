@@ -1,0 +1,23 @@
+# gauge config for the Rama (Rust) example — run with:
+#   uv run gauge run --config examples/rama/gauge.toml
+image = "gauge-rama-example"
+
+[build]
+context = "examples/rama"
+
+[container]
+port = 8080
+# memory = "32m"   # Rama runs in a very small cap — try it
+
+[ready]
+url = "http://127.0.0.1:8080/health"
+timeout = 30
+
+[load]
+url = "http://127.0.0.1:8080/work"
+requests = 1500
+concurrency = 32
+
+[output]
+dir = "examples/rama/report"
+interval = 0.1   # fast server — sample often to catch the curve

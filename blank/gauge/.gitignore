@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+
+# Rust example build output (examples compile inside Docker; this is only for
+# anyone building them locally)
+target/
+
+# Generated run artifacts (keep the configs, drop the outputs)
+gauge-report/
+**/report/
+run.json
+run-docker.json

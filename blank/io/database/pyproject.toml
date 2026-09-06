@@ -1,0 +1,47 @@
+[project]
+name = "database"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Mike", email = "michael@eyecatching.co.uk" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pure",
+    "sthree",
+    "jinja2>=3.1.6",
+    "polars>=1.34.0",
+    "pydantic>=2.11.10",
+    "generic-connection-pool>=0.7.0",
+]
+
+[tool.uv.sources]
+pure = { workspace = true }
+sthree = { workspace = true }
+
+[project.optional-dependencies]
+libsql = [
+    "libsql>=0.1.11",
+]
+redshift = [
+    "psycopg[binary,pool]>=3.2.11",
+]
+snowflake = [
+    "snowflake-connector-python>=3.16.0",
+]
+duckdb = [
+    "duckdb>=1.3.2",
+]
+mssql = [
+    "pymssql>=2.3.9",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# pytest : dépendance mutualisée à la racine, config rootdir-locale ici
+# (sinon blank/ remonte sur sys.path et shadow les membres, dont io/ vs stdlib).
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]

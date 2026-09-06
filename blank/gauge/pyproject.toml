@@ -1,0 +1,29 @@
+[project]
+name = "gauge"
+version = "0.1.0"
+description = "Measure the exact memory + CPU footprint of a containerized web app under load."
+readme = "README.md"
+authors = [
+    { name = "Mike", email = "michael@eyecatching.co.uk" }
+]
+requires-python = ">=3.11"
+dependencies = ["typer>=0.12", "matplotlib>=3.8"]
+
+[project.scripts]
+gauge = "gauge.cli:main"
+
+[tool.pytest.ini_options]
+# Path-based imports so co-located `*_test.py` files with duplicate basenames
+# across the package don't collide. Benchmarks (`*_bench.py`) are opt-in, not
+# collected by the normal run.
+addopts = ["--import-mode=importlib"]
+python_files = ["test_*.py", "*_test.py"]
+
+[dependency-groups]
+# Extra deps for the examples/ apps — installed with `uv sync --group examples`,
+# kept out of the core package so `gauge` itself stays tiny.
+examples = ["dash>=2", "fastapi>=0.110", "uvicorn>=0.29"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

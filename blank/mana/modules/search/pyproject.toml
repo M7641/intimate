@@ -1,0 +1,38 @@
+[project]
+name = "mana-search"
+version = "0.1.0"
+description = "Nearest-neighbour search over embeddings (KDTree on any OS, ScaNN on Linux)."
+readme = "README.md"
+requires-python = ">=3.12"
+# A hard boundary: the searcher box carries its own ANN backends. scann is
+# Linux-only (guarded at import); scikit-learn provides the cross-platform KDTree.
+dependencies = [
+    "pure",
+    "torch>=2.7.1",
+    "numpy>=2.0",
+    "joblib>=1.5.2",
+    "scikit-learn>=1.7.2",
+    "scann>=1.4.2 ; platform_system=='Linux'",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["uv_build>=0.9.26,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# A standalone top-level package, crate-style: import as `search`, no `mana.`
+# prefix. The distribution is named `mana-search` only to namespace it in the
+# workspace; the importable module is bare `search`.
+# Flat layout (module-root = ""): the package sits at modules/search/search/,
+# no src/ nesting — same as the root `mana` package.
+module-root = ""
+module-name = "search"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]

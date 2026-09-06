@@ -1,0 +1,101 @@
+# git
+.git
+.github
+
+# tool caches
+.hypothesis
+.mypy_cache
+.pytest_cache
+.tox
+.coverage
+.coverage.*
+
+# Notebooks
+*.ipynb
+
+
+# Copied from .gitignore
+##############################
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# dbt
+target/
+dbt_packages/
+logs/
+.user.yml
+*dbt.log
+
+# IDE files
+.idea/
+.vscode/
+*.DS_Store
+*.Rhistory
+.Rproj.user/
+*.Rproj
+
+# virtual environment
+venv/
+.venv/
+
+# environment variables
+.env
+.env*
+*.env
+*.swp
+
+# cached files
+*.__pycache__/
+*.pyc
+
+# notebook checkpoints
+*.ipynb_checkpoints
+
+# log files
+*.log
+
+# data
+*.pkl
+*.pk
+*.pk.gz
+*.pkl.gz
+*.tsv
+*.parquet
+*.pqt
+*.xls
+*.xlsx
+*.xlsb
+*.xlsm
+*.s3cache
+*.hdf5
+
+# images
+*.jpg
+*.bmp
+*.pdf
+*.svg
+*.eps
+
+# pip files
+pip-wheel-metadata/
+
+# hydra
+outputs/
+
+# Node modules
+node_modules/

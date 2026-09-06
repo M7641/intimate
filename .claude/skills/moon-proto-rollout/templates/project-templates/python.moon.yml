@@ -1,0 +1,8 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'library'        # or 'application' for a deployable/CLI
+language: 'python'
+# Python internal deps are NOT inferred — declare them so `--affected` re-tests
+# dependents. IDs must match entries in .moon/workspace.yml.
+# dependsOn:
+#   - 'core'
+#   - 'database'

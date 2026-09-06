@@ -1,0 +1,14 @@
+WITH
+    REGRESSION_VALIDATION AS (
+        SELECT
+            TABLE_ID,
+            TARGET,
+            MODEL_PREDICTION AS PREDICTED,
+            RANK() OVER(
+                PARTITION BY 1
+                ORDER BY UNIFORM(0::FLOAT, 1::FLOAT, RANDOM())
+            ) AS TAKE_ME
+        FROM {{ model_validation_table | safe }}
+        QUALIFY TAKE_ME <= {{ sample_size | safe }}
+    )
+SELECT * FROM REGRESSION_VALIDATION

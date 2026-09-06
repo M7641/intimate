@@ -1,0 +1,526 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Cocoon Docs — a hand-rolled clone of the Starlight look, in plain CSS.
+
+   Four themes in two day/night families, selected via `data-theme` on <html>:
+     celestial (night)  ·  sky (day)     — indigo night-sky / luminous dawn
+     cyber (night)      ·  industry (day)   — neon cyberpunk / brass-and-iron
+
+   The celestial and cyber palettes are ported from data_view's themes; sky
+   and industry are their daytime mirrors. celestial lives in :root so it is
+   both the no-JS fallback and the `data-theme="celestial"` value.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  --font-mono:
+    ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  --header-height: 3.75rem;
+  --sidebar-width: 17rem;
+  --toc-width: 15rem;
+  --content-max: 45rem;
+  --radius: 0.5rem;
+
+  /* celestial (night) — ported from data_view/themes/celestial_theme.css */
+  --color-bg: oklch(0.17 0.042 271);
+  --color-bg-elevated: oklch(0.236 0.052 268);
+  --color-bg-inset: oklch(0.22 0.042 268);
+  --color-border: oklch(0.32 0.05 266);
+  --color-text: oklch(0.943 0.016 270);
+  --color-text-muted: oklch(0.69 0.044 266);
+  --color-accent: oklch(0.7 0.132 265);
+  --color-accent-strong: oklch(0.82 0.12 265);
+  --color-accent-contrast: oklch(0.17 0.042 271);
+  --shiki-mode: dark;
+
+  --aside-note: oklch(0.7 0.132 265);
+  --aside-tip: oklch(0.8 0.13 195);
+  --aside-caution: oklch(0.85 0.132 90);
+  --aside-danger: oklch(0.65 0.2 25);
+}
+
+/* sky — a crystalline blue daytime sky (Shinkai-style): azure surfaces, deep
+   slate ink, a vivid sky-blue primary and warm sun-gold for caution. */
+[data-theme='sky'] {
+  --color-bg: oklch(0.93 0.035 235);
+  --color-bg-elevated: oklch(0.97 0.02 235);
+  --color-bg-inset: oklch(0.9 0.04 235);
+  --color-border: oklch(0.85 0.04 235);
+  --color-text: oklch(0.3 0.06 250);
+  --color-text-muted: oklch(0.46 0.05 245);
+  --color-accent: oklch(0.55 0.16 245);
+  --color-accent-strong: oklch(0.44 0.17 250);
+  --color-accent-contrast: oklch(0.99 0.01 235);
+  --shiki-mode: light;
+
+  --aside-note: oklch(0.55 0.16 245);
+  --aside-tip: oklch(0.55 0.12 175);
+  --aside-caution: oklch(0.66 0.13 70);
+  --aside-danger: oklch(0.58 0.18 25);
+}
+
+/* cyber (night) — ported from data_view/themes/cyber_theme.css */
+[data-theme='cyber'] {
+  --color-bg: #0a0a1a;
+  --color-bg-elevated: #0d0d24;
+  --color-bg-inset: #181838;
+  --color-border: rgba(0, 255, 255, 0.18);
+  --color-text: #e0e0ff;
+  --color-text-muted: #9898d0;
+  --color-accent: #00ffff;
+  --color-accent-strong: #5ffbff;
+  --color-accent-contrast: #050510;
+  --shiki-mode: dark;
+
+  --aside-note: #00ffff;
+  --aside-tip: #00ffcc;
+  --aside-caution: #ffd000;
+  --aside-danger: #ff0040;
+}
+
+/* industry (day) — the cyber family's daytime mirror: parchment and iron,
+   copper primary and verdigris accent in place of cyan and magenta. */
+[data-theme='industry'] {
+  --color-bg: #efe7d6;
+  --color-bg-elevated: #e6dcc6;
+  --color-bg-inset: #ddd1b7;
+  --color-border: #cabfa3;
+  --color-text: #2a241b;
+  --color-text-muted: #6b6151;
+  --color-accent: #b5651d;
+  --color-accent-strong: #8a4a12;
+  --color-accent-contrast: #fbf6ea;
+  --shiki-mode: light;
+
+  --aside-note: #b5651d;
+  --aside-tip: #2f6f5e;
+  --aside-caution: #9a6f00;
+  --aside-danger: #a3331f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-height) + 1rem);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--color-accent-strong);
+  text-decoration: underline;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: var(--header-height);
+  padding: 0 1.5rem;
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.site-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-text);
+}
+.site-title span {
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+.site-title:hover {
+  text-decoration: none;
+}
+
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.theme-select select {
+  appearance: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.4rem 1.8rem 0.4rem 0.7rem;
+  cursor: pointer;
+  /* chevron */
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    right 0.95rem center,
+    right 0.65rem center;
+  background-size:
+    0.3rem 0.3rem,
+    0.3rem 0.3rem;
+  background-repeat: no-repeat;
+}
+.theme-select select:hover {
+  border-color: var(--color-accent);
+}
+
+.menu-toggle {
+  display: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+/* ── Layout grid ────────────────────────────────────────────────────────── */
+
+.layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr) var(--toc-width);
+  max-width: 90rem;
+  margin: 0 auto;
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────────── */
+
+.sidebar {
+  position: sticky;
+  top: var(--header-height);
+  align-self: start;
+  height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+  padding: 1.5rem 1rem;
+  border-right: 1px solid var(--color-border);
+}
+
+.sidebar-search {
+  margin-bottom: 1rem;
+}
+
+.sidebar-group {
+  margin-top: 1.5rem;
+}
+.sidebar-group__label {
+  margin: 0 0 0.5rem;
+  padding: 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+.sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar-link {
+  display: block;
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+.sidebar-link:hover {
+  color: var(--color-text);
+  background: var(--color-bg-elevated);
+  text-decoration: none;
+}
+.sidebar-link[aria-current='page'] {
+  color: var(--color-accent-strong);
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  font-weight: 600;
+}
+.sidebar-link--home {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* ── Content ────────────────────────────────────────────────────────────── */
+
+.content {
+  min-width: 0;
+  padding: 2.5rem 3rem;
+}
+.prose {
+  max-width: var(--content-max);
+}
+
+.prose h1 {
+  font-size: 2.1rem;
+  line-height: 1.2;
+  margin: 0 0 1.5rem;
+  letter-spacing: -0.02em;
+}
+.prose h2 {
+  font-size: 1.45rem;
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.prose h3 {
+  font-size: 1.15rem;
+  margin: 2rem 0 0.75rem;
+}
+.prose p,
+.prose li {
+  color: var(--color-text);
+}
+.prose :is(h1, h2, h3, h4) {
+  scroll-margin-top: calc(var(--header-height) + 1rem);
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--color-bg-inset);
+  padding: 0.15em 0.4em;
+  border-radius: 0.3rem;
+}
+.prose pre {
+  font-family: var(--font-mono);
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  overflow-x: auto;
+  line-height: 1.5;
+}
+.prose pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.prose blockquote {
+  margin: 1.25rem 0;
+  padding: 0.25rem 1rem;
+  border-left: 3px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+.prose th,
+.prose td {
+  text-align: left;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--color-border);
+}
+.prose th {
+  background: var(--color-bg-elevated);
+  font-weight: 600;
+}
+.prose tr:nth-child(even) td {
+  background: var(--color-bg-elevated);
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 2.5rem 0;
+}
+
+/* ── Asides (the remark-asides clone) ───────────────────────────────────── */
+
+.aside {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid var(--aside-color, var(--aside-note));
+  border-radius: var(--radius);
+  background: color-mix(
+    in srgb,
+    var(--aside-color, var(--aside-note)) 10%,
+    transparent
+  );
+}
+.aside--note {
+  --aside-color: var(--aside-note);
+}
+.aside--tip {
+  --aside-color: var(--aside-tip);
+}
+.aside--caution {
+  --aside-color: var(--aside-caution);
+}
+.aside--danger {
+  --aside-color: var(--aside-danger);
+}
+.aside__title {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--aside-color, var(--aside-note));
+}
+.aside > :last-child {
+  margin-bottom: 0;
+}
+
+/* ── Table of contents ──────────────────────────────────────────────────── */
+
+.toc {
+  position: sticky;
+  top: var(--header-height);
+  align-self: start;
+  height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+  padding: 2.5rem 1rem;
+  font-size: 0.85rem;
+}
+.toc__title {
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+.toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.toc__item a {
+  display: block;
+  padding: 0.25rem 0;
+  color: var(--color-text-muted);
+}
+.toc__item--h3 a {
+  padding-left: 1rem;
+}
+.toc__item a:hover {
+  color: var(--color-text);
+  text-decoration: none;
+}
+.toc__item a[data-active='true'] {
+  color: var(--color-accent-strong);
+  font-weight: 600;
+}
+
+/* ── Shiki: pick the light or dark code colours per theme family ─────────── */
+
+:root,
+[data-theme='cyber'] {
+  /* dark families use the dark Shiki variables (set below) */
+}
+[data-theme='sky'] .astro-code,
+[data-theme='sky'] .astro-code span,
+[data-theme='industry'] .astro-code,
+[data-theme='industry'] .astro-code span {
+  color: var(--shiki-light) !important;
+  background-color: var(--shiki-light-bg) !important;
+  font-style: var(--shiki-light-font-style) !important;
+  font-weight: var(--shiki-light-font-weight) !important;
+  text-decoration: var(--shiki-light-text-decoration) !important;
+}
+:root .astro-code,
+:root .astro-code span,
+[data-theme='celestial'] .astro-code,
+[data-theme='celestial'] .astro-code span,
+[data-theme='cyber'] .astro-code,
+[data-theme='cyber'] .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+/* ── Pagefind search UI — themed to match ───────────────────────────────── */
+
+.pagefind-ui {
+  --pagefind-ui-primary: var(--color-accent);
+  --pagefind-ui-text: var(--color-text);
+  --pagefind-ui-background: var(--color-bg-elevated);
+  --pagefind-ui-border: var(--color-border);
+  --pagefind-ui-tag: var(--color-bg-inset);
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: var(--radius);
+  --pagefind-ui-font: var(--font-sans);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 72rem) {
+  .layout {
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  }
+  .toc {
+    display: none;
+  }
+}
+
+@media (max-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .menu-toggle {
+    display: grid;
+    place-items: center;
+  }
+  .content {
+    padding: 1.5rem;
+  }
+  .sidebar {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    z-index: 40;
+    width: min(20rem, 80vw);
+    background: var(--color-bg);
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+  body[data-sidebar-open] .sidebar {
+    transform: translateX(0);
+    box-shadow: 0 0 0 100vmax color-mix(in srgb, #000 50%, transparent);
+  }
+}

@@ -1,0 +1,98 @@
+# Workspace racine de `cocoon` — produits Rust (et leurs frontends/CLI Python).
+#
+#   crates/   librairies réutilisables (couche DB, scaffolding HTTP, schéma, parse…)
+#   apps/     binaires déployables (tako, data_view, redhouse, snowhouse, nyx)
+#             + warden : la couche de contrôle qui déploie les autres apps.
+#
+# Un seul `target/`, un seul `Cargo.lock`, versions et lints centralisés.
+# Compiler/tester tout : `cargo build --workspace` / `cargo test --workspace`.
+[workspace]
+resolver = "2"
+members = ["crates/*", "apps/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+
+# ── Dépendances partagées (≥2 membres) ───────────────────────────────────────
+# Source de vérité unique pour les VERSIONS. Les membres ajoutent leurs features
+# via `dep = { workspace = true, features = [...] }`. Les dépendances propres à un
+# seul crate (candle, aws-sdk, fjall, vortex, rig-core…) restent inline.
+[workspace.dependencies]
+# Runtime async / web
+tokio = { version = "1" }
+axum = { version = "0.8" }
+tower = "0.5"
+tower-http = { version = "0.6" }
+
+# Sérialisation
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Données
+polars = { version = "0.52.0" }
+
+# Base de données (connecteurs + pool)
+r2d2 = "0.8"
+postgres = { version = "0.19", features = ["with-serde_json-1", "with-chrono-0_4"] }
+# Async sibling of `postgres` (same wire driver, no hidden blocking runtime) +
+# its async pool. Spike for moving the Postgres/Redshift connector off the sync
+# client. `Row`/`Type` are the very types `postgres` re-exports, so the row->JSON
+# conversion is shared verbatim.
+tokio-postgres = { version = "0.7", features = ["with-serde_json-1", "with-chrono-0_4"] }
+deadpool-postgres = "0.14"
+postgres-native-tls = "0.5"
+native-tls = "0.2"
+rust_decimal = { version = "1", features = ["db-postgres"] }
+duckdb = { version = "1.4.3", features = ["bundled"] }
+rusqlite = { version = "0.33", features = ["bundled"] }
+
+# In-memory TTL cache (query-result caching in service-kit)
+moka = { version = "0.12", features = ["sync"] }
+
+# Observabilité
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+metrics = "0.24"
+metrics-exporter-prometheus = "0.16"
+opentelemetry = "0.28"
+opentelemetry_sdk = { version = "0.28", features = ["rt-tokio"] }
+opentelemetry-otlp = { version = "0.28", features = ["grpc-tonic"] }
+tracing-opentelemetry = "0.29"
+
+# Documentation d'API (OpenAPI / Swagger)
+utoipa = { version = "5", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "9", features = ["axum"] }
+
+# Client HTTP
+reqwest = { version = "0.12" }
+
+# Tests d'intégration : conteneurs jetables (Postgres) + serveur mock léger
+testcontainers = { version = "0.24", features = ["blocking"] }
+testcontainers-modules = { version = "0.12", features = ["postgres", "blocking"] }
+tiny_http = "0.12"
+
+# Divers transverses
+bytes = "1.11"
+async-trait = "0.1"
+chrono = { version = "0.4" }
+uuid = { version = "1.11", features = ["v4"] }
+thiserror = "2"
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+regex = "1"
+
+# Librairies internes (path) — référencées via `dep.workspace = true`
+schema = { path = "crates/schema" }
+database = { path = "crates/database", default-features = false }
+blobs = { path = "crates/blobs" }
+faker = { path = "crates/faker" }
+keyvalue = { path = "crates/keyvalue" }
+service-kit = { path = "crates/service-kit" }
+ouroboros = { path = "crates/ouroboros" }
+deploy-catalog = { path = "crates/deploy-catalog" }
+
+# ── Politique de lints héritée par tous les membres ([lints] workspace = true) ─
+# Niveau "warn" ici ; la CI (clippy -- -D warnings) les transforme en erreurs.
+[workspace.lints.clippy]
+all = "warn"

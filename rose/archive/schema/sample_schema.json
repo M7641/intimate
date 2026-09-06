@@ -1,0 +1,43 @@
+{
+  "name": "sample_data",
+  "version": "1.0.0",
+  "columns": {
+    "id": {
+      "type": "int64",
+      "nullable": false,
+      "description": "Unique identifier for each record",
+      "validations": {
+        "unique": true
+      }
+    },
+    "name": {
+      "type": "string",
+      "nullable": false,
+      "description": "Person's full name",
+      "validations": {
+        "valid_values": [
+          "John Doe",
+          "Jane Smith",
+          "Bob Johnson",
+          "Alice Williams",
+          "Charlie Brown"
+        ]
+      }
+    },
+    "email": {
+      "type": "string",
+      "nullable": false,
+      "description": "Email address"
+    },
+    "age": {
+      "type": "int64",
+      "nullable": false,
+      "description": "Age in years"
+    },
+    "city": {
+      "type": "string",
+      "nullable": false,
+      "description": "City of residence"
+    }
+  }
+}

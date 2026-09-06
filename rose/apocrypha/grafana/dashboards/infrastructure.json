@@ -1,0 +1,178 @@
+{
+  "uid": "infrastructure",
+  "title": "Infrastructure",
+  "description": "OTel Collector throughput, backend health, and infrastructure metrics",
+  "tags": ["observability", "infrastructure", "collector"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Collector — Spans Received",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(otelcol_receiver_accepted_spans_total[5m])) by (receiver)",
+          "legendFormat": "{{ receiver }} accepted"
+        },
+        {
+          "expr": "sum(rate(otelcol_receiver_refused_spans_total[5m])) by (receiver)",
+          "legendFormat": "{{ receiver }} refused"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": { "drawStyle": "line", "fillOpacity": 10 }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Collector — Spans Exported",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(otelcol_exporter_sent_spans_total[5m])) by (exporter)",
+          "legendFormat": "{{ exporter }} sent"
+        },
+        {
+          "expr": "sum(rate(otelcol_exporter_send_failed_spans_total[5m])) by (exporter)",
+          "legendFormat": "{{ exporter }} failed"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": { "drawStyle": "line", "fillOpacity": 10 }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Collector — Dropped Spans",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(increase(otelcol_processor_dropped_spans_total[1h]))",
+          "legendFormat": "Dropped (1h)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 100 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Collector — Log Records",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(otelcol_receiver_accepted_log_records_total[5m])) by (receiver)",
+          "legendFormat": "{{ receiver }} received"
+        },
+        {
+          "expr": "sum(rate(otelcol_exporter_sent_log_records_total[5m])) by (exporter)",
+          "legendFormat": "{{ exporter }} exported"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": { "drawStyle": "line", "fillOpacity": 10 }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Collector — Metric Points",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(otelcol_receiver_accepted_metric_points_total[5m])) by (receiver)",
+          "legendFormat": "{{ receiver }} received"
+        },
+        {
+          "expr": "sum(rate(otelcol_exporter_sent_metric_points_total[5m])) by (exporter)",
+          "legendFormat": "{{ exporter }} exported"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": { "drawStyle": "line", "fillOpacity": 10 }
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Backend Health",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "up{job=~\"tempo|loki|pyroscope|otel-collector\"}",
+          "legendFormat": "{{ job }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+          ],
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Collector — Queue Size",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "otelcol_exporter_queue_size",
+          "legendFormat": "{{ exporter }} queue"
+        },
+        {
+          "expr": "otelcol_exporter_queue_capacity",
+          "legendFormat": "{{ exporter }} capacity"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 5 }
+        }
+      }
+    }
+  ],
+  "time": { "from": "now-1h", "to": "now" },
+  "refresh": "30s"
+}

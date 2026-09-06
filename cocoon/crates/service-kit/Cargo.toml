@@ -1,0 +1,38 @@
+[package]
+name = "service-kit"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+name = "service_kit"
+path = "src/lib.rs"
+
+[dependencies]
+# Backend minimal (postgres : pur Rust, léger). Les apps ajoutent duckdb/snowflake/sqlite.
+database = { workspace = true, features = ["postgres"] }
+
+tokio = { workspace = true, features = ["rt", "time", "macros", "signal"] }
+axum = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+r2d2 = { workspace = true }
+# In-memory TTL cache for query results (see `state::AppState`).
+moka = { workspace = true }
+metrics = { workspace = true }
+metrics-exporter-prometheus = { workspace = true }
+utoipa = { workspace = true }
+utoipa-swagger-ui = { workspace = true }
+# Shared tower-http layers (see `layers` module): tracing, panic catching and
+# size-gated response compression.
+tower-http = { workspace = true, features = ["trace", "catch-panic", "compression-gzip"] }
+
+# Sortie terminale stylée pour les CLIs des apps (serve/dev/deploy).
+# `anstream` strippe automatiquement les couleurs hors TTY (pipe, CI).
+anstyle = "1"
+anstream = "1"
+tracing-subscriber = { workspace = true, features = ["fmt"] }
+
+[lints]
+workspace = true

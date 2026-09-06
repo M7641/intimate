@@ -1,0 +1,16 @@
+version: 2
+
+# Les sources `raw.*` ne sont pas des tables DuckDB : ce sont les Parquet posés
+# par le writer Iceberg dans le « bucket ». dbt-duckdb sait pointer dessus via
+# `external_location` (le `{name}` est substitué par le nom de la table).
+#
+# Le glob `data/*.parquet` lit le snapshot COURANT (append-only => tous les
+# fichiers). Le time-travel par snapshot, lui, reste l'affaire du catalogue
+# Iceberg (`galicia snapshots` / `count_at`), pas de dbt.
+sources:
+  - name: raw
+    meta:
+      external_location: "read_parquet('{{ env_var('GALICIA_WAREHOUSE', '../warehouse') }}/raw/{name}/data/*.parquet', union_by_name = true)"
+    tables:
+      - name: customers
+      - name: orders

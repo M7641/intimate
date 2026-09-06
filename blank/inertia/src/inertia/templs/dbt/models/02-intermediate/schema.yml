@@ -1,0 +1,18 @@
+version: 2
+
+models:
+
+  - name: table
+    description: description
+
+    config:
+      materialized: table
+      tags:
+        - int
+        - intermediate
+
+    columns:
+      - name: branch
+        data_type: text
+        data_tests:
+          - not_null

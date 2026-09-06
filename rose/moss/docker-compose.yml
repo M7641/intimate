@@ -1,0 +1,24 @@
+services:
+  math_server:
+    build: .
+    image: moss:latest
+    command: ["math_server"]
+    environment:
+      BIND_ADDR: "0.0.0.0:50051"
+      RUST_LOG: "info"
+    # No ports: published — only reachable from the gateway on the internal network.
+    expose:
+      - "50051"
+
+  gateway:
+    build: .
+    image: moss:latest
+    command: ["gateway"]
+    environment:
+      BIND_ADDR: "0.0.0.0:3000"
+      MATH_SERVICE_URL: "http://math_server:50051"
+      RUST_LOG: "info"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - math_server

@@ -1,0 +1,4 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'library'
+language: 'python'
+# Base lib — no internal deps. Everything depending on pure re-tests when it changes.

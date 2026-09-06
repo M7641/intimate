@@ -1,0 +1,12 @@
+_min_copier_version: "9.0.0"
+
+webapp_name:
+  type: str
+  help: The name of the web application.
+
+database_connector:
+  type: str
+  help: The database connector to use.
+  choices:
+    - snowflake
+    - redshift

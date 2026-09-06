@@ -1,0 +1,38 @@
+cabal-version:      3.0
+name:               kairos
+version:            0.1.0
+synopsis:           Allen's interval algebra and a bi-temporal query layer
+description:        A small, pure exploration of temporal reasoning in Haskell.
+                    The library models the 13 Allen interval relations and a
+                    bi-temporal fact store; the test-suite checks the algebra's
+                    laws with QuickCheck.
+build-type:         Simple
+
+-- A reusable block of compiler flags. Treat warnings seriously: -Wall is what
+-- tells you when a pattern match is non-exhaustive (a missed relation, say).
+common warnings
+    ghc-options: -Wall
+
+library
+    import:           warnings
+    hs-source-dirs:   src
+    exposed-modules:  Kairos.Interval
+                      Kairos.Allen
+                      Kairos.Bitemporal
+    build-depends:    base >=4 && <5
+    default-language: Haskell2010
+
+executable kairos
+    import:           warnings
+    hs-source-dirs:   app
+    main-is:          Main.hs
+    build-depends:    base, kairos
+    default-language: Haskell2010
+
+test-suite kairos-test
+    import:           warnings
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test
+    main-is:          Spec.hs
+    build-depends:    base, kairos, QuickCheck
+    default-language: Haskell2010

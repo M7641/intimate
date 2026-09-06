@@ -1,0 +1,80 @@
+[package]
+name = "tako"
+version.workspace = true
+edition.workspace = true
+
+# `tako` is a lib + thin bin. All logic lives in the library (src/lib.rs) so it
+# uses `crate::` paths and is reachable by tests/benches; src/main.rs just awaits
+# `tako::run()`. The CLI exposes `serve` (default) plus the feature-gated test
+# tooling (gen-data / test-upload / benchmark / bench-parse) under `testing`.
+
+[dependencies]
+# Internal workspace libraries
+service-kit = { workspace = true }
+schema = { workspace = true }
+# database is default-features=false at the workspace level: enable explicitly
+# the backends tako needs (duckdb for local upload, postgres for Redshift).
+database = { workspace = true, features = ["duckdb", "postgres", "snowflake"] }
+blobs = { workspace = true }
+
+# Async runtime / web
+tokio = { workspace = true, features = ["full"] }
+axum = { workspace = true, features = ["multipart", "macros"] }
+# OpenAPI: the `#[utoipa::path]` / `ToSchema` derives live here; the Swagger UI
+# mount comes from service-kit (which owns utoipa-swagger-ui).
+utoipa = { workspace = true }
+# `util` provides `ServiceExt::oneshot`, used by the end-to-end router tests.
+tower = { workspace = true, features = ["util"] }
+tower-http = { workspace = true, features = ["fs", "timeout"] }
+tower_governor = "0.8"
+
+# Serialization / data
+serde = { workspace = true }
+serde_json = { workspace = true }
+bytes = { workspace = true }
+polars = { workspace = true, features = ["csv", "parquet", "json", "avro", "dtype-struct", "ipc_streaming"] }
+
+# File parsing: Vortex columnar format, bridged into Polars via Arrow IPC
+# (formerly the tako-parse crate).
+vortex = "0.73"
+arrow = { version = "58", features = ["ipc"] }
+
+# Observability
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+console-subscriber = "0.5"
+
+# Misc
+chrono = { workspace = true, features = ["serde"] }
+uuid = { workspace = true }
+thiserror = { workspace = true }
+sysinfo = "0.37.2"
+dotenvy = "0.15.7"
+
+clap = { workspace = true }
+anyhow = { workspace = true }
+
+# ── Test/bench tooling (the `testing` module) ─────────────────────────────────
+# Only pulled in with the `testing` feature, which is OFF by default — production
+# builds (`cargo build --release`) exclude this code and these dependencies
+# entirely. Criterion drives `bench-parse` via its programmatic API (the bench
+# lives in the binary, not a separate `[[bench]]` target).
+reqwest = { workspace = true, features = ["multipart"], optional = true }
+criterion = { version = "0.5", optional = true }
+# Seeded synthetic-data generator. Optional so production builds skip it; the
+# `testing` feature (CLI) pulls it in, and it is a dev-dependency below so plain
+# `cargo test` has it too.
+faker = { workspace = true, optional = true }
+
+# ── Test-only dependencies ────────────────────────────────────────────────────
+[dev-dependencies]
+faker = { workspace = true }
+
+[features]
+default = []
+# Compile the test-tooling subcommands (gen-data / test-upload / benchmark /
+# bench-parse). Enable with `cargo run --features testing -- <subcommand>`.
+testing = ["dep:reqwest", "dep:criterion", "dep:faker"]
+
+[lints]
+workspace = true

@@ -1,0 +1,10 @@
+name: perch
+runtime:
+  name: python
+  options:
+    virtualenv: .venv
+description: Axum sur Lambda + CloudFront — production-grade pour ~$0/mois idle.
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: ""

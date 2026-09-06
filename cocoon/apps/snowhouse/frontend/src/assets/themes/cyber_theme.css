@@ -1,0 +1,69 @@
+/* Cyber: neon cyberpunk, kept in sync with the basecamp cyber mode.
+   Cyan (#00ffff) is the primary brand neon (links, focus, primary actions);
+   magenta (#ff00ff) is the accent. Surfaces are a near-black blue (#0a0a1a),
+   the same family as basecamp's --sl-color-bg. Neon accents are kept as exact
+   hex so they match basecamp precisely; surfaces use oklch where it reads
+   cleanly. */
+.cyber {
+  --background: #0a0a1a;
+  --foreground: #e0e0ff;
+  --card: #0d0d24;
+  --card-foreground: #e0e0ff;
+  --popover: #0d0d24;
+  --popover-foreground: #e0e0ff;
+  --primary: #00ffff;
+  --primary-foreground: #050510;
+  --secondary: #181838;
+  --secondary-foreground: #c8c8ff;
+  --muted: #181838;
+  --muted-foreground: #9898d0;
+  --accent: #ff00ff;
+  --accent-foreground: #f0f0ff;
+  --destructive: #ff0040;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 255, 255, 0.18);
+  --input: rgba(0, 255, 255, 0.22);
+  --ring: #00ffff;
+  --chart-1: #00ffff;
+  --chart-2: #ff00ff;
+  --chart-3: #00ffcc;
+  --chart-4: #b0ffb0;
+  --chart-5: #4d7bff;
+  --sidebar: #080818;
+  --sidebar-foreground: #e0e0ff;
+  --sidebar-primary: #00ffff;
+  --sidebar-primary-foreground: #050510;
+  --sidebar-accent: #ff00ff;
+  --sidebar-accent-foreground: #f0f0ff;
+  --sidebar-border: rgba(0, 255, 255, 0.15);
+  --sidebar-ring: #00ffff;
+  --font-sans: "Geist Variable", Geist, ui-sans-serif, system-ui, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
+
+  /* Data-viz severity scale — vivid bases tuned to the cyber surface */
+  --sev-critical: oklch(0.7 0.22 20);
+  --sev-warning: oklch(0.86 0.16 95);
+  --sev-info: oklch(0.78 0.16 230);
+  --sev-neutral: oklch(0.7 0.04 280);
+  --sev-success: oklch(0.86 0.17 171);
+
+  --hover: #00ffff;
+  --active-hover: #ff00ff;
+
+  --radius: 0.5rem;
+  --shadow-x: 0px;
+  --shadow-y: 4px;
+  --shadow-blur: 8px;
+  --shadow-spread: -2px;
+  --shadow-opacity: 0.1;
+  --shadow-color: hsl(0 0% 0%);
+  --shadow-2xs: 0px 4px 8px -2px hsl(0 0% 0% / 0.05);
+  --shadow-xs: 0px 4px 8px -2px hsl(0 0% 0% / 0.05);
+  --shadow-sm: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 1px 2px -3px hsl(0 0% 0% / 0.10);
+  --shadow: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 1px 2px -3px hsl(0 0% 0% / 0.10);
+  --shadow-md: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 2px 4px -3px hsl(0 0% 0% / 0.10);
+  --shadow-lg: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 4px 6px -3px hsl(0 0% 0% / 0.10);
+  --shadow-xl: 0px 4px 8px -2px hsl(0 0% 0% / 0.10), 0px 8px 10px -3px hsl(0 0% 0% / 0.10);
+  --shadow-2xl: 0px 4px 8px -2px hsl(0 0% 0% / 0.25);
+}

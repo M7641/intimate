@@ -1,0 +1,17 @@
+extends: existence
+message: "'%s' is passive voice. Prefer the active form."
+level: suggestion
+ignorecase: true
+raw:
+  - \b(am|are|were|being|is|been|was|be)\b\s*
+tokens:
+  - '[\w]+ed'
+  - built
+  - given
+  - held
+  - known
+  - made
+  - run
+  - seen
+  - taken
+  - written

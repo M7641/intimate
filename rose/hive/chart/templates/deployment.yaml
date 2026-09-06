@@ -1,0 +1,104 @@
+# The Deployment is the controller that turns "I want N identical pods of this
+# version" into reality and keeps it true: if a pod dies it makes another; if you
+# change the image it rolls pods over one batch at a time. Everything below is a
+# knob on HOW it does that.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hive.fullname" . }}
+  labels:
+    {{- include "hive.labels" . | nindent 4 }}
+spec:
+  # When the HPA is enabled it owns `replicas`, so we OMIT it here — otherwise
+  # every `helm upgrade` would reset the count and fight the autoscaler.
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+
+  # Roll pods over without ever dropping below the desired capacity.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.rollingUpdate.maxSurge }}
+
+  selector:
+    matchLabels:
+      {{- include "hive.selectorLabels" . | nindent 6 }}
+
+  template:
+    metadata:
+      labels:
+        {{- include "hive.labels" . | nindent 8 }}
+    spec:
+      # Give the pod time to drain in-flight requests after SIGTERM before the
+      # kubelet SIGKILLs it. Must cover the in-app drain pause + longest request.
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+
+      {{- if .Values.topologySpread.enabled }}
+      # Spread replicas across nodes. `ScheduleAnyway` means "prefer to spread,
+      # but don't leave a pod Pending if you can't" — availability guidance, not
+      # a hard gate that could block a deploy on a small cluster.
+      topologySpreadConstraints:
+        - maxSkew: {{ .Values.topologySpread.maxSkew }}
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "hive.selectorLabels" . | nindent 14 }}
+      {{- end }}
+
+      containers:
+        - name: hive
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.containerPort }}
+
+          env:
+            # The Downward API: Kubernetes injects the pod's own identity as env
+            # vars. This is how a pod can honestly answer "who am I / where am I"
+            # — the whole reason `/` can reveal the load-balancing.
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: HIVE_WARMUP_MS
+              value: {{ .Values.warmupMs | quote }}
+
+          # Liveness → "restart me if wedged". Readiness → "route to me or not".
+          # They point at DIFFERENT endpoints on purpose (see the app + README).
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.liveness.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readiness.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+
+          # The scheduler places pods by `requests`; the HPA scales on them.
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          # Defence in depth: a static binary on scratch already has no shell,
+          # but declaring the security posture makes it auditable and lets a
+          # restrictive PodSecurity policy admit the pod.
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]

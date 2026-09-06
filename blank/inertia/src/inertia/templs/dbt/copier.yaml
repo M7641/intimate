@@ -1,0 +1,10 @@
+project_name:
+  type: str
+  help: The name of the dbt project.
+
+database_name:
+  type: str
+  help: The name of the database profile to use in dbt.
+  choices:
+    - redshift
+    - snowflake

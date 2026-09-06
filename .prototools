@@ -1,0 +1,43 @@
+# proto toolchain manifest — the single source of tool versions for this repo.
+# Built-in proto tools (rust/python/node/bun/uv) need no plugin. The long-tail
+# lint/security/schema tools are NOT built-in, so each has a VENDORED plugin manifest
+# under proto-plugins/ (file:// locators) — a reviewed thin pointer to the tool's
+# OFFICIAL upstream releases, rather than fetching a community plugin at runtime.
+
+# — versions (top-level shorthand) —
+proto = "0.57.4"
+moon = "2.3.2"
+rust = "stable"
+python = "latest"
+node = "latest"
+bun = "latest"
+uv = "latest"
+ruff = "latest"
+ty = "latest"
+gitleaks = "latest"
+lefthook = "latest"
+sqruff = "latest"
+vale = "latest"
+cargo-deny = "latest"
+cargo-nextest = "latest"
+atlas = "latest"
+trivy = "latest"
+container-structure-test = "latest"
+
+[env]
+# supply-chain cooldown — no dependency uploaded in the last 48h enters a lock
+UV_EXCLUDE_NEWER = "48 hours"
+
+# — vendored plugins for the non-built-in tools (see proto-plugins/) —
+[plugins]
+ruff = "file://./proto-plugins/ruff.toml"
+ty = "file://./proto-plugins/ty.toml"
+gitleaks = "file://./proto-plugins/gitleaks.toml"
+lefthook = "file://./proto-plugins/lefthook.toml"
+sqruff = "file://./proto-plugins/sqruff.toml"
+vale = "file://./proto-plugins/vale.toml"
+cargo-deny = "file://./proto-plugins/cargo-deny.toml"
+cargo-nextest = "file://./proto-plugins/cargo-nextest.toml"
+atlas = "file://./proto-plugins/atlas.toml"
+trivy = "file://./proto-plugins/trivy.toml"
+container-structure-test = "file://./proto-plugins/container-structure-test.toml"

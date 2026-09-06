@@ -1,0 +1,14 @@
+[project]
+name = "troy"
+version = "0.1.0"
+description = "Runtime consumers of the troy contract registry (ingestion + dbt marts)"
+requires-python = ">=3.12"
+dependencies = [
+    "jsonschema>=4.20",
+    "pyyaml>=6.0",
+    "pydantic>=2.5",
+]
+
+[tool.uv]
+# Not an installable package — just a runnable demo with pinned deps.
+package = false

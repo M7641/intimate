@@ -1,0 +1,50 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'library'
+language: 'python'
+
+# THE GRAPH — declared, not inferred from a script. destiny depends on pure + py-ouroboros.
+dependsOn:
+  - 'pure'
+  - 'py-ouroboros'
+
+# Tâches PROPRES à destiny (prototype de perf-gate). Les tâches communes
+# (sync/test/lint/typecheck/audit) sont héritées de .moon/tasks/python.yml.
+tasks:
+  # Perf gate : mesure les benchmarks du hot path puis échoue si une régression
+  # dépasse le seuil (BENCH_MAX_REGRESSION, défaut 25%) vs .benchmarks/baseline.json.
+  # `runInCI` par défaut → c'est le gate exécuté par `moon ci`.
+  bench:
+    command: 'bash'
+    args:
+      - '-c'
+      - 'uv run --no-sync pytest -o python_files="*_bench.py" --benchmark-only --benchmark-json=.benchmarks/current.json && uv run --no-sync python bench_gate.py .benchmarks/baseline.json .benchmarks/current.json'
+    toolchain: 'system'
+    deps: ['~:sync']
+    options:
+      # Le résultat dépend de la machine + d'un fichier externe : pas hashable.
+      cache: false
+
+  # Régénère la baseline committée (à lancer sur un runner stable). Jamais en CI.
+  bench-update:
+    command: 'uv'
+    args:
+      ['run', '--no-sync', 'pytest', '-o', 'python_files=*_bench.py',
+       '--benchmark-only', '--benchmark-json=.benchmarks/baseline.json']
+    toolchain: 'system'
+    deps: ['~:sync']
+    options:
+      cache: false
+      runInCI: false
+
+  # Mutation testing (mutmut). Mutates the code (see [tool.mutmut] in pyproject)
+  # and re-runs the tests: a SURVIVING mutant = a missing assertion. Slow and
+  # non-deterministic → never a PR gate; run nightly, then triage survivors
+  # (`uv run mutmut results` / `uv run mutmut show <id>`).
+  mutation:
+    command: 'uv'
+    args: ['run', '--no-sync', 'mutmut', 'run']
+    toolchain: 'system'
+    deps: ['~:sync']
+    options:
+      cache: false
+      runInCI: false

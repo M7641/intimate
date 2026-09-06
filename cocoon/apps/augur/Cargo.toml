@@ -1,0 +1,31 @@
+[package]
+name = "augur"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+# HTTP surface: the single `/v1/completions` endpoint Zed's edit prediction calls.
+axum = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "signal"] }
+clap = { workspace = true, features = ["env"] }
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Local inference (candle) — kept inline like the rest of the workspace.
+candle-core = "0.9"
+candle-transformers = "0.9"
+reqwest = { workspace = true, features = ["blocking"] }
+tokenizers = { version = "0.22", default-features = false, features = ["onig"] }
+
+# Metal is enabled automatically on macOS (where this runs) and left off
+# elsewhere, so `cargo build --workspace` still compiles on non-Apple CI with
+# no feature flags to remember.
+[target.'cfg(target_os = "macos")'.dependencies]
+candle-core = { version = "0.9", features = ["metal"] }
+candle-transformers = { version = "0.9", features = ["metal"] }
+
+[lints]
+workspace = true

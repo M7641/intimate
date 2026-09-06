@@ -1,0 +1,26 @@
+# `warden` — the cocoon control layer.
+#
+# A CLI that deploys the *other* cocoon apps into the Nimbus tenant it is run
+# against. It holds only that tenant's `API_KEY` (a deploy token) and reads every
+# app's deploy shape from `deploy-catalog`, so it transports no data credentials.
+[package]
+name = "warden"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+# The read + deploy client for Nimbus, and the shared catalogue of app deploy specs.
+# (Deliberately no `service-kit`: that pulls axum + a database backend, weight a
+# deploy CLI has no use for. `warden` keeps its own tiny terminal helpers.)
+ouroboros = { workspace = true }
+deploy-catalog = { workspace = true }
+clap = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[[bin]]
+name = "warden"
+path = "src/main.rs"
+
+[lints]
+workspace = true

@@ -1,0 +1,16 @@
+[project]
+name = "nyx"
+version = "0.1.0"
+description = "CLI agents powered by Claude"
+readme = "README.md"
+authors = [
+    { name = "Mike", email = "michael@eyecatching.co.uk" }
+]
+requires-python = ">=3.12"
+
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+bindings = "bin"

@@ -1,0 +1,38 @@
+:root {
+    --font-neue-display-pro: 'Neue Haas Grotesk Display Pro', 'neue-haas-grotesk-display', sans-serif;
+    --font-ibm-plex-mono: 'IBM Plex Mono', monospace;
+    --font-ibm-plex-sans: 'IBM Plex Sans', sans-serif;
+    --font-default: 'Neue Haas Grotesk Display', sans-serif;
+  }
+
+.typography-default-strong {
+    font-size: 0.875rem;
+    font-family: var(--font-neue-display-pro);
+    font-weight: 600;
+}
+
+body {
+    font-family: var(--font-neue-display-pro);
+}
+h1 {
+    font-size: 140%;
+    font-weight: 600;
+    font-family: var(--font-neue-display-pro)
+}
+h2 {
+    font-size: 130%;
+    font-weight: 600;
+    font-family: var(--font-neue-display-pro)
+}
+h3 {
+    font-size: 110%;
+    font-weight: 600;
+    margin-top: 5px;
+    font-family: var(--font-neue-display-pro);
+}
+h5 {
+    font-size: 110%;
+    font-weight: 500;
+    margin-top: 5px;
+    font-family: var(--font-neue-display-pro);
+}

@@ -1,0 +1,47 @@
+# bacon.toml — continuous check/lint/test feedback loop
+# Usage:
+#   bacon           → cargo check on save
+#   bacon clippy    → lint on save
+#   bacon test      → run tests on save
+#
+# For the API server with hot reload, use: cargo w-start
+
+default_job = "check"
+
+# Run the API server with hot reload — restarts on any change. Uses the default
+# Snowflake connector; needs the SNOWFLAKE_* env vars set.
+[jobs.serve]
+command = ["cargo", "run", "--", "serve"]
+need_stdout = true
+background = false
+on_change_strategy = "kill_then_restart"
+kill = ["kill", "-s", "INT"]
+
+[jobs.check]
+command = ["cargo", "check", "--color", "always"]
+need_stdout = false
+
+[jobs.check-all]
+command = ["cargo", "check", "--workspace", "--color", "always"]
+need_stdout = false
+
+[jobs.clippy]
+command = ["cargo", "clippy", "--color", "always", "--", "-W", "clippy::all"]
+need_stdout = false
+
+[jobs.clippy-all]
+command = ["cargo", "clippy", "--workspace", "--color", "always", "--", "-W", "clippy::all"]
+need_stdout = false
+
+[jobs.test]
+command = ["cargo", "test", "--color", "always"]
+need_stdout = true
+
+[jobs.doc]
+command = ["cargo", "doc", "--no-deps", "--color", "always"]
+need_stdout = false
+
+[jobs.doc-open]
+command = ["cargo", "doc", "--no-deps", "--open", "--color", "always"]
+need_stdout = false
+on_success = "back"

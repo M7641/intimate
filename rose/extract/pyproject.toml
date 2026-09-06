@@ -1,0 +1,43 @@
+[project]
+name = "extract"
+version = "0.0.1"
+description = "PoC: extraction de features produit (texte + image) via un VLM 4-8 GB, piloté par schéma"
+requires-python = ">=3.11"
+dependencies = [
+  "torch>=2.2",
+  "transformers>=4.49",
+  "accelerate>=0.30",
+  "pillow>=10.0",
+  "polars>=1.0",
+  "typer>=0.12",
+  "rich>=13.0",
+  "vortex-data>=0.73.0",
+  "requests>=2.34.2",
+  "beautifulsoup4>=4.14.3",
+  "lxml>=6.1.1",
+  "torchvision>=0.27.0",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+extract = "extract.cli:app"
+extract-scrape = "extract.scrape:main"
+
+[tool.pytest.ini_options]
+# Tests are co-located beside the code they cover (Rust-style): each module
+# folder holds module.py next to test_module.py. importlib mode lets several
+# `test_*.py` share a basename across folders; pythonpath makes `extract`
+# importable straight from the source tree.
+testpaths = ["src/extract"]
+addopts = "--import-mode=importlib"
+pythonpath = ["src"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/extract"]
+exclude = ["**/test_*.py", "**/conftest.py"]

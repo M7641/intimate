@@ -1,0 +1,23 @@
+# Vendored proto plugin for ty (Astral's type checker). Authored here — no community
+# plugin exists. Points at OFFICIAL astral-sh/ty releases (cargo-dist scheme, like ruff:
+# no `v` tag prefix, no version in filename, binary nested under an arch-named dir).
+name = "ty"
+type = "cli"
+
+[resolve]
+git-url = "https://github.com/astral-sh/ty"
+
+[platform.linux]
+download-file = "ty-{arch}-unknown-linux-{libc}.tar.gz"
+archive-prefix = "ty-{arch}-unknown-linux-{libc}"
+
+[platform.macos]
+download-file = "ty-{arch}-apple-darwin.tar.gz"
+archive-prefix = "ty-{arch}-apple-darwin"
+
+[platform.windows]
+download-file = "ty-{arch}-pc-windows-msvc.zip"
+archive-prefix = "ty-{arch}-pc-windows-msvc"
+
+[install]
+download-url = "https://github.com/astral-sh/ty/releases/download/{version}/{download_file}"

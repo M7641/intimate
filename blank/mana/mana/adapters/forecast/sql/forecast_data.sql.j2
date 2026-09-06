@@ -1,0 +1,146 @@
+with
+
+    trim_out_of_stock as (
+        select distinct
+            product_id,
+            location_id,
+            stock_units
+        from {{ schema }}.history_weekly
+        where data_start_date = (
+            select max(data_start_date) from {{ schema }}.history_weekly
+        )
+        and stock_units > 2 -- worth coming back to and doing more throughly.
+    ),
+
+    max_selling_price as (
+        select
+            max(selling_price) as max_selling_price
+        from {{ schema }}.history_weekly
+    ),
+
+    pre_max_stock_units AS (
+        select
+            product_id || '-' || location_id AS unique_id,
+            data_start_date,
+            SUM(stock_units) AS price_level_agg_stock_units
+        from {{ schema }}.history_weekly
+        group BY unique_id, data_start_date
+    ),
+
+    max_unit_stock_position AS (
+        SELECT
+            unique_id,
+            max(price_level_agg_stock_units) AS max_stock_position
+        FROM pre_max_stock_units
+        GROUP BY unique_id
+    ),
+
+    product_hierarchy AS (
+        select
+            product_id,
+            max(category_level1) as category_level1,
+            max(category_level2) as category_level2,
+            max(category_level3) as category_level3,
+            max(category_level4) as category_level4
+        from {{ schema }}.stg_product_hierarchy
+        group by product_id
+    ),
+
+    history_weekly_create_new_id AS (
+        SELECT
+            *,
+            product_id || '-' || location_id                                as unique_id
+        FROM {{ schema }}.history_weekly
+    ),
+
+    elastics as (
+        select
+            product_id as product_id,
+            elasticity as elasticity,
+            group_ref as location_id
+        from {{ schema }}.{{ pricing_elasticity_results }}
+        qualify row_number() over(partition by product_id order by created_at desc) = 1
+    ),
+
+    history_weekly as (
+        select
+            location_id,
+            product_id || '-' || location_id                                as unique_id,
+            category_level1,
+            category_level2,
+            category_level3,
+            category_level4,
+            data_start_date                                                     as ds,
+            max(markdown_flag)                                                  as markdown_flag,
+            sum(sales_units)                                                    as y,
+            (coalesce(sum(stock_units) , 0) -  sum(sales_units) + sum(returns_units)) / max(max_stock_position) as stock_position_post_sale,
+            avg(selling_price)                                                  as selling_price,
+            1 - (avg(selling_price) / abs(avg(list_price)))                     as weekly_avg_discount,
+            avg(selling_price) / avg(max_selling_price)                         as price_ranking,
+            max(elasticity)                                                     as elasticity
+        from history_weekly_create_new_id
+        left join product_hierarchy using(product_id)
+        left join max_unit_stock_position using(unique_id)
+        left join elastics using(product_id, location_id)
+        cross join max_selling_price
+        where (product_id, location_id) in (
+            select product_id, location_id from trim_out_of_stock
+        )
+        and data_start_date <= current_date() - interval '{{ validation_window }} weeks'
+        {% if location_id is defined and location_id is not none %}
+        and location_id = '{{ location_id }}'
+        {% endif %}
+        {%- if product_category is defined and product_category is not none %}
+        and category_level1 ilike '{{ product_category }}'
+        {% endif %}
+        {%- if product_ids is defined and product_ids is not none %}
+        and product_id in (
+            {%- for product_id in product_ids -%}
+                '{{ product_id }}'{% if not loop.last %}, {% endif %}
+            {%- endfor -%}
+        )
+        {%- endif -%}
+        group by 1, 2, 3, 4, 5, 6, 7
+    ),
+    final_transformations as (
+        select
+            unique_id,
+            location_id,
+            ds,
+            markdown_flag,
+            category_level1,
+            category_level2,
+            category_level3,
+            category_level4,
+            coalesce(
+                price_ranking,
+                lag(price_ranking) ignore nulls over (
+                    partition by unique_id
+                    order by ds desc
+                )
+            ) AS price_ranking,
+            coalesce(weekly_avg_discount, 0) as weekly_avg_discount,
+            y,
+            elasticity
+        from history_weekly
+        qualify rank() over(partition by unique_id order by ds desc) < 52
+        {%- if take_sample_products is defined and take_sample_products is not none %}
+        and dense_rank() over(order by unique_id desc) <= {{ take_sample_products }}
+        {%- else %}
+        {% endif %}
+        {%- if location_id is not none %}
+        and location_id = '{{ location_id }}'
+        {%- endif %}
+    )
+select
+    unique_id,
+    ds,
+    category_level1,
+    category_level2,
+    category_level3,
+    category_level4,
+    price_ranking,
+    elasticity,
+    y
+from final_transformations
+order by ds desc

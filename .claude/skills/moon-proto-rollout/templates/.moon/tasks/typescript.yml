@@ -1,0 +1,12 @@
+# Tasks inherited ONLY by typescript projects (scoping = inheritedBy, not filename).
+$schema: 'https://moonrepo.dev/schemas/tasks.json'
+
+inheritedBy:
+  language: 'typescript'
+
+tasks:
+  lint:
+    # Type-only check (tsc --noEmit). Add `test`/`build` tasks here if the target
+    # has a test runner (vitest/jest) or bundler you want moon to orchestrate.
+    command: 'npx tsc --noEmit'
+    toolchain: 'system'

@@ -1,0 +1,11 @@
+# Declarative dev toolchain managed by mise.
+# Pre-installed at build into a shared dir (MISE_DATA_DIR=/opt/mise) so the tools are
+# present from day one, and activated for interactive shells via the rc files.
+# NOTE: infra Node stays on NodeSource (non-interactive); this `node` is for your shells.
+[tools]
+uv = "latest"
+bun = "latest"
+node = "latest"
+lefthook = "latest"
+gitleaks = "latest"
+"ubi:quarylabs/sqruff" = "latest"

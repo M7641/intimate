@@ -1,0 +1,37 @@
+WITH
+    FILTERED_VIEW AS (
+        SELECT *
+        FROM {{ schema | safe }}.METIS_SHAP_VALUES_FOR_MODEL_EXPLAIN
+        WHERE MODEL_NAME = '{{ model_name | safe}}'
+    {% if feature is not none and feature_value is not none %}
+        AND TABLE_ID IN (SELECT {{ entity_id | safe }}
+        FROM {{ucv_ucv_table_name | safe}}
+            WHERE {{feature | safe}} = '{{feature_value | safe}}')
+    {% endif %}
+    {% if start_date_picker is not none and end_date_picker is not none %}
+        AND TABLE_ID IN (SELECT {{ entity_id | safe }}
+        FROM {{ucv_ucv_table_name | safe}}
+            WHERE {{feature | safe}} < '{{end_date_picker | safe}}'
+            AND {{feature | safe}} > '{{start_date_picker | safe}}'
+        )
+    {% endif %}
+    ),
+    PIVOT_VIEW AS (
+        SELECT *
+          FROM FILTERED_VIEW
+            PIVOT(SUM(SHAP_VALUE) FOR FEATURE IN (
+                {%- for feature in fields_to_explain_with %}
+                '{{ feature }}' {% if not loop.last %}, {% endif %}
+                {%- endfor %}
+                )
+            ) AS p (
+            TABLE_ID,
+            MODEL_NAME,
+            {%- for feature in fields_to_explain_with %}
+            {{ feature }} {% if not loop.last %}, {% endif %}
+            {%- endfor %}
+        )
+    )
+SELECT
+    *
+FROM PIVOT_VIEW

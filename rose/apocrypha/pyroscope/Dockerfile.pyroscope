@@ -1,0 +1,7 @@
+FROM grafana/pyroscope:1.4.0
+
+COPY pyroscope.yaml /etc/pyroscope/config.yaml
+
+EXPOSE 4040
+
+ENTRYPOINT ["pyroscope", "-config.file=/etc/pyroscope/config.yaml"]

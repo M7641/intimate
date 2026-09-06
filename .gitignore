@@ -1,0 +1,123 @@
+# Repo-root ignores. Scope: artifacts that any project in this monorepo can
+# produce. Anything specific to one project belongs in that project's own
+# .gitignore (there are ~24 of them).
+
+# — OS —
+.DS_Store
+
+# — Python (uv workspaces: blank/, rose/*) —
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+
+# uv.lock is COMMITTED everywhere, apps and libraries alike: it pins the dev/CI
+# environment and is never imposed on downstream consumers.
+# (uv.lock intentionally NOT ignored.)
+
+# Python packaging output
+build/
+dist/
+*.egg-info/
+
+# Test, coverage and type-check caches
+.pytest_cache/
+.hypothesis/
+.benchmarks/
+mutants/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.ruff_cache/
+
+# Jupyter (legacy notebooks under rose/legacy/)
+.ipynb_checkpoints/
+
+# — Rust (cocoon workspace + rose/*) —
+target/
+**/*.rs.bk
+
+# Commit the lockfile of anything that DEPLOYS (binaries, services, workspaces
+# that build an app); leave it ignored for libraries (consumers re-resolve).
+# Default is "ignore"; each application is re-included below with a `!` negation.
+# https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html
+Cargo.lock
+
+# Applications (deployable) — track their Cargo.lock:
+!/cocoon/Cargo.lock
+!/rose/galicia-rs/Cargo.lock
+!/rose/incinerate/Cargo.lock
+!/rose/moss/Cargo.lock
+!/rose/nameless/Cargo.lock
+!/rose/siren/Cargo.lock
+!/rose/nix_stack/backend/Cargo.lock
+!/rose/perch/app/Cargo.lock
+!/rose/troy/rust/Cargo.lock
+!/rose/vive/restate_pipeline/Cargo.lock
+
+# — Node / TypeScript (Vite, Astro, React, SolidJS frontends) —
+node_modules/
+.astro/
+*.tsbuildinfo
+npm-debug.log*
+
+# Playwright e2e artifacts
+**/test-results/
+**/playwright-report/
+**/playwright/.cache/
+
+# — Haskell / cabal (rose/kairos) —
+dist-newstyle/
+
+# — Nix (rose/nix_stack) —
+result
+result-*
+
+# — Typst / LaTeX (cv/) —
+*.aux
+*.fdb_latexmk
+*.fls
+*.out
+*.synctex.gz
+*.toc
+
+# — Vale: `vale sync` downloads style packages into the StylesPath. Our own
+# House style and the vocabulary are tracked; anything fetched is not.
+/.config/vale/styles/*
+!/.config/vale/styles/House/
+!/.config/vale/styles/config/
+
+# — moon: local build cache + docker scaffolding —
+# Regenerated, never committed. Share the cache between CI/devs via REMOTE
+# caching, not git.
+.moon/cache
+.moon/docker
+
+# — Local data and scratch output —
+*.log
+*.parquet
+*.zip
+*.duckdb
+duckdb.db
+duck_db_data/
+datadb/
+data.arvo
+data.csv
+data.json
+data.parquet
+
+# — Secrets and machine-local config —
+.env
+.env.*
+!.env.example
+
+# Claude Code config. The shared half (CLAUDE.md, skills/, hooks/,
+# settings.json) IS the deliverable — it is symlinked into ~/.claude/ by the
+# sync-* pre-push jobs, so it must stay tracked. Only machine-local files here.
+.claude/settings.local.json
+.claude/*.local.json
+
+# — Personal CV — keep local, do not publish —
+/cv/

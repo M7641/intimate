@@ -1,0 +1,39 @@
+.cyber {
+  --font-sans: Outfit, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: Fira Code, monospace;
+
+  --background: oklch(0.18 0.04 280);
+  --foreground: oklch(0.95 0.03 190);
+  --card: oklch(0.23 0.05 285);
+  --card-foreground: oklch(0.95 0.03 190);
+  --popover: oklch(0.23 0.05 285);
+  --popover-foreground: oklch(0.95 0.03 190);
+  --primary: oklch(0.78 0.2 330);
+  --primary-foreground: oklch(0.18 0.04 280);
+  --secondary: oklch(0.3 0.06 285);
+  --secondary-foreground: oklch(0.95 0.03 190);
+  --muted: oklch(0.3 0.06 285);
+  --muted-foreground: oklch(0.72 0.06 200);
+  --accent: oklch(0.72 0.18 195);
+  --accent-foreground: oklch(0.18 0.04 280);
+  --destructive: oklch(0.65 0.25 20);
+  --border: oklch(0.78 0.2 330 / 25%);
+  --input: oklch(0.78 0.2 330 / 20%);
+  --ring: oklch(0.72 0.18 195);
+  --chart-1: oklch(0.78 0.2 330);
+  --chart-2: oklch(0.72 0.18 195);
+  --chart-3: oklch(0.82 0.18 130);
+  --chart-4: oklch(0.86 0.16 90);
+  --chart-5: oklch(0.7 0.2 280);
+  --sidebar: oklch(0.23 0.05 285);
+  --sidebar-foreground: oklch(0.95 0.03 190);
+  --sidebar-primary: oklch(0.78 0.2 330);
+  --sidebar-primary-foreground: oklch(0.18 0.04 280);
+  --sidebar-accent: oklch(0.72 0.18 195);
+  --sidebar-accent-foreground: oklch(0.18 0.04 280);
+  --sidebar-border: oklch(0.78 0.2 330 / 25%);
+  --sidebar-ring: oklch(0.72 0.18 195);
+
+  --radius: 0.625rem;
+}

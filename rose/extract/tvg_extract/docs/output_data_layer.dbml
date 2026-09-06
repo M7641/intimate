@@ -1,0 +1,60 @@
+// Output data layer — `extract` module
+// The three Snowflake tables of the two-stage pipeline. Mirrors the inline DDL
+// in output.py (init_table / init_concept_table / init_final_table).
+// Render at https://dbdiagram.io.
+
+Project extract_output {
+  database_type: 'Snowflake'
+  Note: '''
+    Two stages, three layers, all incremental — never a full refresh.
+
+    L1 raw   (llm_product_hierarchy_proto): per-product FREE-TEXT product_type
+             from the LLM. Written by `extract hierarchy`; new ids only (anti-join).
+    L2 tree  (llm_hierarchy_concept_proto): the canonical concept taxonomy with
+             persisted centroids, so condensing only embeds the new batch. One
+             level (product_type) today; supports a nested tree via LEVELS.
+    L3 final (llm_product_hierarchy_final_proto): per-product CANONICAL label,
+             the ML-ready output. L2+L3 written by `extract condense`.
+
+    Defaults: schema=sandpit; table names above are the function defaults.
+  '''
+}
+
+// ---- L1: raw, per-product free text (Stage 1 output) ----
+Table sandpit.llm_product_hierarchy_proto {
+  id            varchar       [pk, not null, note: 'source product_id; idempotency key']
+  product_type  varchar       [note: 'generated product type (free text)']
+  model         varchar       [note: 'checkpoint that produced the row']
+  schema_domain varchar       [note: 'extraction schema, e.g. "product type"']
+  created_at    timestamp     [not null, default: `current_timestamp`]
+  updated_at    timestamp     [not null, default: `current_timestamp`]
+  Note: 'Raw open-text product_type. Written by `extract hierarchy`.'
+}
+
+// ---- L2: the canonical concept taxonomy (Stage 2) ----
+Table sandpit.llm_hierarchy_concept_proto {
+  concept_id  integer       [pk, not null]
+  level       varchar       [not null, note: 'one of LEVELS (e.g. product_type)']
+  parent_id   integer       [note: 'parent concept (null at the top level) — the tree']
+  canonical   varchar       [note: 'the canonical label (most frequent surface form)']
+  centroid    varchar       [note: 'json array of floats: the embedding centroid']
+  support     integer       [not null, note: 'rows assigned to this concept']
+  status      varchar       [not null, note: "'pending' until min-support, then 'active'"]
+  created_at  timestamp     [not null, default: `current_timestamp`]
+  updated_at  timestamp     [not null, default: `current_timestamp`]
+  Note: 'Canonical concept tree + centroids. Maintained by `extract condense`.'
+}
+
+// ---- L3: per-product canonical label (Stage 2 output, ML-ready) ----
+Table sandpit.llm_product_hierarchy_final_proto {
+  id           varchar       [pk, not null, note: 'source product_id']
+  product_type varchar       [note: "canonical product_type, or 'unallocated'"]
+  created_at   timestamp     [not null, default: `current_timestamp`]
+  updated_at   timestamp     [not null, default: `current_timestamp`]
+  Note: 'Final ML training table. Written + reconciled by `extract condense`.'
+}
+
+// L2 is a self-referential tree (for a multi-level taxonomy via LEVELS).
+Ref: sandpit.llm_hierarchy_concept_proto.parent_id > sandpit.llm_hierarchy_concept_proto.concept_id
+// Each product flows raw -> final; condense maps L1 text onto L2 concepts into L3.
+Ref: sandpit.llm_product_hierarchy_final_proto.id - sandpit.llm_product_hierarchy_proto.id

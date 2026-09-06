@@ -1,0 +1,40 @@
+# Workspace virtuel : ne produit aucun paquet, sert de plan de contrôle au cluster.
+# Orchestration (lint/test/build) : voir le mise.toml racine — ce workspace s'y
+# branche, il n'a pas son propre task runner. Linters/type-checkers (ruff, ty) sont
+# des tools mise globaux lancés repo-wide ; leur config est une affaire repo, pas ici.
+# Voir reviews/workspaces.md.
+
+[tool.uv.workspace]
+members = [
+    "pure",
+    "io/database",
+    "io/sftper",
+    "io/sthree",
+    "ouroboros",
+    "destiny",
+    "inertia",
+    "gauge",
+]
+# mana/ lives under blank/ for tidiness but is its OWN uv workspace (own root, own
+# lock): uv forbids a workspace member from being a workspace root. Excluded so
+# blank never tries to absorb it, even if `members` later becomes a glob.
+exclude = ["mana"]
+
+[dependency-groups]
+# Testing-standards tooling, prototyped on blank/destiny:
+#   pytest-benchmark — perf-gate (hot-path benchmark vs committed baseline)
+#   hypothesis       — property-based testing
+#   mutmut           — mutation testing (nightly, not a PR gate)
+dev = [
+    "pytest>=8.4.2",
+    "pytest-benchmark>=4.0.0",
+    "hypothesis>=6.0.0",
+    "mutmut>=3.0.0",
+]
+
+[tool.uv]
+required-version = ">=0.11"
+default-groups = ["dev"]
+# Supply-chain cooldown (rolling 48h): no version uploaded in the last 48h enters the
+# lock. Travels with the project even outside mise. Mirrors UV_EXCLUDE_NEWER (root mise.toml).
+exclude-newer = "48 hours"

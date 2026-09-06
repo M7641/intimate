@@ -1,0 +1,25 @@
+.modal-title {
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 600; /* should be 500 */
+}
+
+.modal-detail {
+    color: #687387;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 14px;
+}
+
+.modal-content {
+    box-shadow: 0 12px 16px -8px rgb(185 185 201 / 48%);
+    padding-bottom: 30px;
+}
+
+.p-backdrop {
+    background-color: white;
+}
+
+.loading-modal > div {
+  padding: 0 0 12px 0;
+}

@@ -1,0 +1,12 @@
+# Rust
+rust/target/
+
+# Generated code (regenerated from the registry — never hand-edited)
+rust/src/gen/
+python/troy/gen/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+# uv.lock committed everywhere — see reviews/lockfiles.md

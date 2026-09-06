@@ -1,0 +1,65 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'library'
+language: 'python'
+
+tasks:
+  # Build the production image (multi-stage → scratch). Not cached by moon:
+  # the built image lives in the container engine's store, not the workspace,
+  # so moon can't hash it as a file output.
+  image-build:
+    command: 'podman build -t nix-stack:prod -f Dockerfile .'
+    toolchain: 'system'
+    options:
+      cache: false
+
+  # ── Three axes of image testing (see README) ──────────────────────────────
+  # Each answers a different question with the tool native to it, instead of
+  # forcing everything through shell + curl.
+
+  # Runtime: does it behave when containerised? testcontainers drives the real
+  # image over HTTP and tears it down on drop. We point it at Podman's socket and
+  # disable ryuk (Podman auto-removes; ryuk cohabits poorly), then run the test.
+  image-test:
+    script: |
+      if [ -z "${DOCKER_HOST:-}" ]; then
+        sock="$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}' 2>/dev/null || true)"
+        [ -n "$sock" ] && export DOCKER_HOST="unix://$sock"
+      fi
+      export TESTCONTAINERS_RYUK_DISABLED=true
+      export IMAGE_REF="${IMAGE_REF:-localhost/nix-stack:prod}"
+      cd backend && cargo nextest run --test image_it
+    toolchain: 'system'
+    deps: ['~:image-build']
+    options:
+      cache: false
+
+  # Structure: is the image assembled correctly? Declarative assertions on files
+  # + metadata via container-structure-test (proto-pinned host binary), against a
+  # saved tarball (tar driver — no daemon socket). podman only exports the image.
+  image-structure:
+    script: |
+      tar="$(mktemp).tar"
+      trap 'rm -f "$tar"' EXIT
+      podman save --format docker-archive -o "$tar" nix-stack:prod
+      container-structure-test test --driver tar --image "$tar" --config structure-test.yaml
+    toolchain: 'system'
+    deps: ['~:image-build']
+    options:
+      cache: false
+
+  # Hygiene: is it safe? Trivy (proto-pinned host binary) fails the build on
+  # HIGH/CRITICAL CVEs. Scans a saved tarball; podman only exports the image.
+  image-scan:
+    script: |
+      tar="$(mktemp).tar"
+      trap 'rm -f "$tar"' EXIT
+      podman save --format docker-archive -o "$tar" nix-stack:prod
+      trivy image --input "$tar" --severity HIGH,CRITICAL --exit-code 1 --no-progress
+    toolchain: 'system'
+    deps: ['~:image-build']
+    options:
+      cache: false
+
+  # One command for all three axes.
+  image-check:
+    deps: ['~:image-test', '~:image-structure', '~:image-scan']

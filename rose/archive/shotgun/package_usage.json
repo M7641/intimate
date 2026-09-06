@@ -1,0 +1,9 @@
+{
+  "database": [
+    "dbt-core",
+    "dbt-redshift",
+    "dbt-snowflake",
+    "polars",
+    "sqlalchemy"
+  ]
+}

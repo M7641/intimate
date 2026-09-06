@@ -1,0 +1,17 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'library'
+language: 'rust'
+
+# The crate has no default features, so its own lint/test tasks must name the
+# backends to build. This set covers every backend a consumer actually uses
+# (duckdb, sqlite, postgres, snowflake); the postgres-async spike is excluded.
+tasks:
+  test:
+    command: 'cargo nextest run --no-tests=pass --no-default-features --features duckdb,sqlite,postgres,snowflake'
+    toolchain: 'system'
+  test-doc:
+    command: 'cargo test --doc --no-default-features --features duckdb,sqlite,postgres,snowflake'
+    toolchain: 'system'
+  lint:
+    command: 'cargo clippy --all-targets --no-default-features --features duckdb,sqlite,postgres,snowflake -- -D warnings'
+    toolchain: 'system'

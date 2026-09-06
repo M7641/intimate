@@ -1,0 +1,36 @@
+[package]
+name = "calque"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time", "fs", "sync", "signal"] }
+futures = "0.3"
+
+# UI path — drive Chrome over the DevTools Protocol (0.9 is tokio-based)
+chromiumoxide = "0.9"
+
+# API path — fetch OpenAPI specs and sample live endpoints
+reqwest = { version = "0.13", default-features = false, features = ["json", "query", "rustls"] }
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+
+# Serialization (the reflection bundle is JSON; recipes/plans are YAML)
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml_ng = "0.10"
+
+# URL parsing — same-origin checks + slugs when crawling
+url = "2"
+
+# Time — run ids
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+
+# Error handling
+anyhow = "1"
+
+# Observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

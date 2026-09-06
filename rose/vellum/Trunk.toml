@@ -1,0 +1,9 @@
+# Trunk builds the wasm bundle and serves it with live reload.
+#   trunk serve --open
+
+[build]
+target = "index.html"
+
+[serve]
+port = 8080
+open = false

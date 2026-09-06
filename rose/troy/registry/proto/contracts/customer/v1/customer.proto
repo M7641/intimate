@@ -1,0 +1,48 @@
+// customer.proto — internal service contract (Rust Axum <-> Python).
+//
+// This is the BINARY-INSIDE boundary: both ends are services we control and
+// regenerate together. Protobuf wins here on wire size, codegen maturity, and
+// breaking-change detection (`buf breaking`).
+//
+// Value constraints are expressed below as `(buf.validate)` comments. In the
+// production path (`buf generate`) these become real protovalidate annotations
+// enforced at runtime by the protovalidate library in BOTH languages. The
+// runnable Rust demo in ../../rust mirrors them in code (see src/main.rs),
+// because this machine has no system protoc/buf — it compiles this plain
+// proto3 with `protox` instead.
+
+syntax = "proto3";
+
+package contracts.customer.v1;
+
+// A customer as passed between the Axum enrichment API and the Python service.
+message Customer {
+  // (buf.validate.field).string.pattern = "^cust_[a-z0-9]+$"
+  string customer_id = 1;
+
+  // (buf.validate.field).string.email = true
+  string email = 2;
+
+  Tier tier = 3;
+
+  // (buf.validate.field).double = { gte: 0, lte: 1e12 }
+  double annual_revenue = 4;
+}
+
+// proto3 enums MUST have a zero value meaning "unset" — this is what makes
+// adding new tiers later a backward-compatible change.
+enum Tier {
+  TIER_UNSPECIFIED = 0;
+  TIER_FREE = 1;
+  TIER_STARTER = 2;
+  TIER_PROFESSIONAL = 3;
+  TIER_ENTERPRISE = 4;
+}
+
+// The RPC surface. With `buf generate` + the tonic plugin this produces a Rust
+// server trait + client, and a Python async stub. (Plain prost-build ignores
+// services, so the runnable demo only exercises the Customer message.)
+service CustomerService {
+  // Enrich a customer record (e.g. attach derived attributes) and return it.
+  rpc EnrichCustomer(Customer) returns (Customer);
+}

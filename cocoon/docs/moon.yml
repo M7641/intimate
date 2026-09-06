@@ -1,0 +1,46 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'application'
+language: 'typescript'
+
+tasks:
+  # This site uses bun (bun.lock). `install` is a dep of the build/lint tasks so
+  # `moon ci` materialises node_modules first.
+  install:
+    command: 'bun install --frozen-lockfile'
+    toolchain: 'system'
+    options:
+      cache: false
+
+  # Override the inherited `lint` (plain `tsc --noEmit`): Astro's checker
+  # understands `.astro` files and the `astro:content` virtual modules that bare
+  # tsc cannot resolve.
+  lint:
+    command: 'bun run astro check'
+    toolchain: 'system'
+    deps: ['~:install']
+    # Fully replace the inherited `tsc --noEmit` args, not merge with them.
+    options:
+      mergeArgs: 'replace'
+
+  build:
+    command: 'bun run build'
+    toolchain: 'system'
+    deps: ['~:install']
+    outputs: ['dist']
+
+  dev:
+    command: 'bun run dev'
+    toolchain: 'system'
+    deps: ['~:install']
+    options:
+      cache: false
+      persistent: true
+
+  # `astro preview` serves the built `dist/`, so it depends on a fresh build.
+  preview:
+    command: 'bun run preview'
+    toolchain: 'system'
+    deps: ['~:build']
+    options:
+      cache: false
+      persistent: true

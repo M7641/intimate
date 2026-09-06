@@ -1,0 +1,116 @@
+# Hand-curated schema for the NL→SQL pilot.
+#
+# Adding a table here is a deliberate act: it widens what the LLM is
+# allowed to query (safety.py reads this same file for its allowlist).
+# Keep the set small and high-signal. Phase 2 may auto-enrich each
+# entry with dbt manifest metadata (from_manifest.py), but the
+# human-written descriptions stay authoritative.
+
+tables:
+  sales_product_week:
+    full_name: "saleshub.sales_product_week"
+    grain: "one row per (date_week, product_id, store_id) — actual store-level sales for one ISO week"
+    primary_key: [date_week, product_id, store_id]
+    columns:
+      date_week:    { type: date,    desc: "Monday of the ISO week" }
+      product_id:   { type: text,    desc: "8-digit product SKU; FK to dim__products" }
+      store_id:     { type: text,    desc: "3-letter store code; FK to dim__stores" }
+      sales_units:  { type: numeric, desc: "units sold that week, store-level" }
+      sales_retail: { type: numeric, desc: "revenue ex-VAT in GBP" }
+      sales_cost:   { type: numeric, desc: "cost-of-sale in GBP" }
+    foreign_keys:
+      - { col: product_id, ref: "dim__products.product_id" }
+      - { col: store_id,   ref: "dim__stores.store_id" }
+    typical_filters:
+      - "JOIN dim__lfl_stores USING (store_id) WHERE lfl = TRUE  -- LFL questions"
+      - "WHERE date_week BETWEEN :start_date AND :end_date       -- always bound time"
+
+  dim__products:
+    full_name: "retail.dim__products"
+    grain: "one row per product (current attributes)"
+    primary_key: [product_id]
+    columns:
+      product_id:     { type: text, desc: "8-digit product SKU" }
+      short_code:     { type: text, desc: "buyer-facing product code; not a primary key" }
+      product_name:   { type: text, desc: "long display name" }
+      department:     { type: text, desc: "e.g. 'Garden', 'Toys', 'Pets'" }
+      type_group:     { type: text, desc: "sub-department grouping" }
+      supplier_id:    { type: text, desc: "FK to dim__suppliers_current" }
+    typical_filters:
+      - "WHERE department = 'Garden'  -- filter by department"
+      - "WHERE type_group ILIKE '%plant%'  -- type-group keyword search"
+
+  dim__stores:
+    full_name: "retail.dim__stores"
+    grain: "one row per store (current attributes)"
+    primary_key: [store_id]
+    columns:
+      store_id:    { type: text, desc: "3-letter store code" }
+      store_name:  { type: text, desc: "long display name" }
+      region:      { type: text, desc: "geographic region: 'North', 'South', 'East', 'West'" }
+      grade:       { type: text, desc: "store grade ZZ..8 (size band)" }
+      opened_date: { type: date, desc: "date the store first traded" }
+      closed_date: { type: date, desc: "NULL if currently trading" }
+
+  dim__lfl_stores:
+    full_name: "retail.dim__lfl_stores"
+    grain: "one row per store with the boolean LFL eligibility for the current period"
+    primary_key: [store_id]
+    columns:
+      store_id: { type: text, desc: "3-letter store code; FK to dim__stores.store_id" }
+      lfl:      { type: bool, desc: "TRUE iff the store was trading in both this period and the comparable prior period" }
+    typical_filters:
+      - "WHERE lfl = TRUE  -- the canonical LFL filter; always join this table for LFL math"
+
+  dim__dates:
+    full_name: "retail.dim__dates"
+    grain: "one row per calendar date, with ISO-week + trading-week mappings"
+    primary_key: [calendar_date]
+    columns:
+      calendar_date:    { type: date, desc: "the date itself" }
+      date_week:        { type: date, desc: "Monday of the ISO week containing this date" }
+      date_weeknum:     { type: text, desc: "ISO week as 'YYYY-WW' string" }
+      cal_start_week:   { type: date, desc: "trading-week start (often == date_week, not always)" }
+      year:             { type: integer, desc: "ISO year" }
+    typical_filters:
+      - "JOIN dim__dates ON date_week = ...  -- when you need the year/week label"
+
+  wssi__total:
+    full_name: "saleshub.wssi__total"
+    grain: "one row per date_week — total-level Weekly Sales / Stock / Intake aggregate"
+    primary_key: [date_week]
+    columns:
+      date_week:        { type: date,    desc: "Monday of the ISO week" }
+      sales_retail:     { type: numeric, desc: "TY retail sales this week, all stores, GBP" }
+      sales_retail_ly:  { type: numeric, desc: "LY retail sales for the same week-of-year" }
+      stock_retail:     { type: numeric, desc: "closing stock at retail price" }
+      intake_retail:    { type: numeric, desc: "inbound goods this week at retail" }
+    typical_filters:
+      - "ORDER BY date_week DESC LIMIT 13  -- last quarter"
+      - "WHERE date_week >= DATEADD(year, -1, CURRENT_DATE)  -- rolling year"
+
+  rangeplan__linecard:
+    full_name: "rangeplan.linecard"
+    grain: "one row per (product_id, region, week) — 52 historical + 52 forecast weeks per (product, region)"
+    primary_key: [product_id, region, week]
+    columns:
+      product_id:     { type: text,    desc: "8-digit SKU; FK to dim__products" }
+      region:         { type: text,    desc: "'Total', 'North', or 'South' (warehouse aggregation)" }
+      week:           { type: date,    desc: "Monday of the ISO week" }
+      sales_units:    { type: numeric, desc: "actuals if past week, forecast if future" }
+      sales_units_ly: { type: numeric, desc: "last-year same-week actuals" }
+      stock_units:    { type: numeric, desc: "stock on hand" }
+      po_units:       { type: numeric, desc: "purchase orders inbound" }
+      is_forecast:    { type: bool,    desc: "TRUE iff this row is forecast, FALSE iff it is actual" }
+    typical_filters:
+      - "WHERE product_id = :product_id AND region = 'Total'  -- single-product, total"
+      - "WHERE is_forecast = TRUE  -- forecast-only slice"
+
+  dim__product_categories:
+    full_name: "saleshub.dim__product_categories"
+    grain: "one row per (product_id, category_level, category_value)"
+    primary_key: [product_id, category_level]
+    columns:
+      product_id:     { type: text, desc: "8-digit SKU" }
+      category_level: { type: text, desc: "'department', 'type_group', 'class', 'subclass'" }
+      category_value: { type: text, desc: "the value for that level (e.g. 'Garden')" }

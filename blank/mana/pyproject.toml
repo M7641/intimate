@@ -1,0 +1,69 @@
+[project]
+name = "mana"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Mike", email = "michael@eyecatching.co.uk" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pure",
+    "database[redshift, snowflake]",
+    "mana-search",
+    "polars>=1.32.0",
+    "rich>=14.1.0",
+    "torch>=2.7.1",
+    "torchaudio>=2.7.1",
+    "torchvision>=0.22.1",
+    "typer>=0.24.0",
+    "onnx>=1.19.1",
+    "onnxscript>=0.5.6",
+    "onnxruntime>=1.23.2",
+    "scikit-learn>=1.7.2",
+    "torchsummary>=1.5.1",
+    "transformers[torch]>=4.57.3",
+    "joblib>=1.5.2",
+]
+
+[tool.uv]
+# Supply-chain cooldown (rolling 48h): no version uploaded in the last 48h enters the
+# lock. Mirrors UV_EXCLUDE_NEWER in .prototools [env].
+exclude-newer = "48 hours"
+
+[tool.uv.workspace]
+# Each member draws a hard box around one section with heavy or platform-specific
+# deps the core shouldn't carry. The root `mana` package composes the members.
+# First box: search (ANN backends — scann is Linux-only).
+members = ["modules/*"]
+
+[tool.uv.sources]
+# pure/database sont des membres du workspace blank/ (déclarés editable là-bas).
+# mana vit désormais sous blank/mana/ mais reste un workspace séparé : on les
+# consomme en editable via un chemin relatif, sinon uv voit deux URLs en conflit
+# pour `pure` (directory non-editable vs workspace editable). Voir reviews/workspaces.md.
+pure = { path = "../pure", editable = true }
+database = { path = "../io/database", editable = true }
+# Workspace members are resolved from modules/ rather than an index.
+mana-search = { workspace = true }
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+examples = ["numpy>=2.0"]
+
+[project.scripts]
+mana = "mana.cli:app"
+
+[tool.ruff.lint.per-file-ignores]
+# __init__.py modules re-export the public API; their "unused" imports are intentional.
+"__init__.py" = ["F401"]
+
+[build-system]
+requires = ["uv_build>=0.9.26,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# Flat layout: the `mana` package sits at the project root (no src/). Workspace
+# members are standalone crate-style packages (e.g. `search`), not `mana.*`
+# subpackages, so `mana` is a plain regular package with its own __init__.py.
+module-root = ""

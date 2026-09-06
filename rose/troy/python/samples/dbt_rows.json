@@ -1,0 +1,5 @@
+[
+  { "customer_key": "9b74c9897bac770ffc029102a200c5de", "tier": "enterprise", "annual_revenue": 5000000 },
+  { "customer_key": "0cc175b9c0f1b6a831c399e269772661", "tier": "free", "annual_revenue": null },
+  { "customer_key": "NOT-A-VALID-KEY",                  "tier": "platinum",   "annual_revenue": -10 }
+]

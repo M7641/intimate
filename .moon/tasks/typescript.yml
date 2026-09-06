@@ -1,0 +1,15 @@
+# Tasks inherited ONLY by typescript projects (scoping = inheritedBy).
+$schema: 'https://moonrepo.dev/schemas/tasks.json'
+
+inheritedBy:
+  language: 'typescript'
+
+tasks:
+  lint:
+    # Type-only check, mirroring the old mise lint:ts (ts-each.sh -> tsc).
+    # Depends on each project's own `install` task (package managers differ —
+    # bun vs npm — so the command is defined per-project in its moon.yml), making
+    # `moon ci` self-contained: node_modules is materialised before tsc runs.
+    command: 'npx tsc --noEmit'
+    toolchain: 'system'
+    deps: ['~:install']

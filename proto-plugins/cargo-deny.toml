@@ -1,0 +1,19 @@
+# Vendored proto plugin for cargo-deny. Authored here — no community plugin exists.
+# Points at OFFICIAL EmbarkStudios/cargo-deny releases (no `v` tag prefix; version IS
+# in the asset filename; binary nested under an arch-named dir).
+name = "cargo-deny"
+type = "cli"
+
+[resolve]
+git-url = "https://github.com/EmbarkStudios/cargo-deny"
+
+[platform.linux]
+download-file = "cargo-deny-{version}-{arch}-unknown-linux-musl.tar.gz"
+archive-prefix = "cargo-deny-{version}-{arch}-unknown-linux-musl"
+
+[platform.macos]
+download-file = "cargo-deny-{version}-{arch}-apple-darwin.tar.gz"
+archive-prefix = "cargo-deny-{version}-{arch}-apple-darwin"
+
+[install]
+download-url = "https://github.com/EmbarkStudios/cargo-deny/releases/download/{version}/{download_file}"

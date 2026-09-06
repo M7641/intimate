@@ -1,0 +1,102 @@
+# All tools come from proto. Hooks run NON-INTERACTIVELY (they don't source
+# ~/.zshrc), so each command prepends proto's shims to PATH — the repo stays
+# self-sufficient regardless of each dev's shell config.
+
+assert_lefthook_installed: true
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: ruff-check
+      glob: "*.py"
+      run: PATH="$HOME/.proto/shims:$PATH" ruff check --fix {staged_files}
+      stage_fixed: true
+
+    - name: ruff-format
+      glob: "*.py"
+      run: PATH="$HOME/.proto/shims:$PATH" ruff format {staged_files}
+      stage_fixed: true
+
+    - name: rustfmt
+      glob: "*.rs"
+      # cargo fmt is edition-aware (reads Cargo.toml). Formats the whole affected
+      # crate, not just staged hunks — replaces scripts/rust-fmt-staged.sh.
+      run: PATH="$HOME/.proto/shims:$PATH" moon run :fmt --affected --query "language=rust"
+      stage_fixed: true
+
+    - name: vale
+      glob: "*.md"
+      # Prose lint: spelling against the House vocabulary + the style rules in
+      # .config/vale/styles/House. Only error-level alerts (spelling) fail the
+      # commit; hype and emoji are warnings you can weigh. Like gitleaks, the
+      # --config is mandatory — Vale looks for .vale.ini beside the file, not
+      # in .config/.
+      run: |
+        PATH="$HOME/.proto/shims:$PATH" vale --config .config/vale.ini {staged_files}
+
+    - name: gitleaks
+      # Secret scan over the whole staged diff. The config lives in .config/,
+      # which gitleaks does NOT auto-discover (it only looks for .gitleaks.toml
+      # in the scan target), so --config is mandatory. Hooks run from the repo
+      # root, so the relative path resolves.
+      run: |
+        PATH="$HOME/.proto/shims:$PATH" gitleaks git --staged --redact --no-banner \
+          --config .config/gitleaks.toml
+
+    # EOL normalisation is handled natively by .gitattributes (* text=auto);
+    # trailing-whitespace/EOF on config files is no longer auto-fixed.
+
+    - name: large-files
+      # block files > 5MB (inline; replaces scripts/check-large-files.sh)
+      run: |
+        for f in {staged_files}; do
+          if [ -f "$f" ] && [ "$(wc -c < "$f")" -gt 5242880 ]; then
+            echo "✖ $f exceeds 5MB"; exit 1
+          fi
+        done
+
+pre-push:
+  parallel: true
+  jobs:
+    # Build-graph aware: Moon runs lint/test ONLY for affected projects, across
+    # all languages — replaces the old per-crate fan-out scripts.
+    - name: lint-affected
+      run: PATH="$HOME/.proto/shims:$PATH" moon run ':lint' --affected
+    - name: test-affected
+      run: PATH="$HOME/.proto/shims:$PATH" moon run ':test' --affected
+
+    # All Claude config lives in ONE place: .claude/ at the repo root. It is both
+    # this project's config (Claude Code reads .claude/ natively) and the source
+    # of the personal install — the jobs below symlink it into ~/.claude/ so it
+    # loads in EVERY session, not just this project. It is version-controlled;
+    # only .claude/settings.local.json is gitignored (see .gitignore).
+    # Both jobs are best-effort + local-only:
+    #   - act only where ~/.claude exists (i.e. Claude Code is set up),
+    #   - opt out with SKIP_CLAUDE_SYNC=1,
+    #   - never block a push (always exit 0),
+    #   - refuse to run if the repo IS ~/.claude, which would self-link.
+    - name: sync-skills
+      # .claude/skills/<name>/ -> ~/.claude/skills/<name>
+      run: |
+        if [ -z "$SKIP_CLAUDE_SYNC" ] && [ -d "$HOME/.claude/skills" ]; then
+          root="$(git rev-parse --show-toplevel)"
+          if [ "$root/.claude" != "$HOME/.claude" ]; then
+            for d in "$root"/.claude/skills/*/; do
+              [ -f "${d}SKILL.md" ] && ln -sfn "$d" "$HOME/.claude/skills/$(basename "$d")"
+            done
+          fi
+        fi
+        exit 0
+
+    - name: sync-claude-md
+      # .claude/CLAUDE.md -> ~/.claude/CLAUDE.md (global context, all projects).
+      # NOTE: this file is ALSO read as this project's own instructions, since
+      # .claude/CLAUDE.md is a native Claude Code project-memory location.
+      run: |
+        if [ -z "$SKIP_CLAUDE_SYNC" ] && [ -d "$HOME/.claude" ]; then
+          root="$(git rev-parse --show-toplevel)"
+          if [ "$root/.claude" != "$HOME/.claude" ]; then
+            [ -f "$root/.claude/CLAUDE.md" ] && ln -sfn "$root/.claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+          fi
+        fi
+        exit 0

@@ -1,0 +1,8 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'application'
+language: 'rust'
+# Rust inter-crate deps are INFERRED from Cargo.toml — only add `dependsOn` for
+# cross-language deps moon can't infer. Most Cargo workspace members need nothing
+# beyond the three lines above.
+# dependsOn:
+#   - 'some-other-crate-id'

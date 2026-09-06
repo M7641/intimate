@@ -1,0 +1,14 @@
+# Profil dbt-duckdb. DuckDB est le moteur ; il lit les Parquet écrits par le
+# writer Iceberg Rust et matérialise les modèles dans un fichier dbt.duckdb.
+#
+#   pip install dbt-duckdb
+#   cd dbt && dbt run            # construit mart.revenue_by_country
+#
+# Le même moteur (DuckDB) que `galicia mart`, le même SQL, les mêmes fichiers.
+galicia:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('GALICIA_WAREHOUSE', '../warehouse') }}/dbt.duckdb"
+      threads: 4

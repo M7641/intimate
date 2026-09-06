@@ -1,0 +1,24 @@
+# Reference: a lean Python image the three axes assume. A Python app can't target
+# `scratch` — it ships an interpreter and site-packages — so the minimal base is
+# one tier up: gcr.io/distroless/python3 (no shell, no package manager) or a
+# python:*-slim. Larger than a scratch binary, but still lean. Trivy now has an OS
+# + Python packages to scan, so the hygiene axis does real work here.
+
+# ── Stage 1: install deps into a venv with a full toolchain ────────
+FROM python:3.12-slim AS build
+ENV UV_LINK_MODE=copy
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+# Install into /app/.venv so we can copy just that into the runtime image.
+RUN pip install --no-cache-dir uv && uv sync --frozen --no-dev
+COPY . ./
+
+# ── Stage 2: distroless runtime — interpreter + venv + app, no shell ─
+# Every line below is asserted by structure-test.yaml.
+FROM gcr.io/distroless/python3-debian12
+WORKDIR /app
+COPY --from=build /app /app
+ENV PATH="/app/.venv/bin:$PATH"
+EXPOSE 8000
+USER 1000:1000
+ENTRYPOINT ["python", "-m", "myapp"]

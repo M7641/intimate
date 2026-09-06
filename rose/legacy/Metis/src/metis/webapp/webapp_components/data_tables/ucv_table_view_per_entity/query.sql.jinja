@@ -1,0 +1,31 @@
+WITH
+    UCV_UCV_VALUES AS (
+        SELECT
+            {{ entity_id | safe }} AS TABLE_ID,
+            {%- for column in fields_to_return %}
+                {{column | safe}} {{ ", " if not loop.last else "" }}
+            {%- endfor %}
+        FROM {{ucv_ucv_table_name | safe}}
+        WHERE TABLE_ID = '{{selected_entity_id | safe}}'
+    ),
+    UNPIVOT_DATA AS (
+        SELECT *
+        FROM UCV_UCV_VALUES
+            UNPIVOT(
+                VALUE FOR FIELD IN (
+                    {%- for column in fields_to_return %}
+                        {{column | safe}} {{ ", " if not loop.last else "" }}
+                    {%- endfor %}
+                    )
+                )
+    ),
+    CLEAN_FIELDS AS (
+        SELECT
+            TABLE_ID,
+            FIELD,
+            INITCAP(REPLACE(FIELD, '_', ' ')) || ':' AS FIELD_CLEAN,
+            VALUE
+        FROM UNPIVOT_DATA
+    )
+SELECT * FROM CLEAN_FIELDS
+ORDER BY FIELD_CLEAN

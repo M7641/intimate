@@ -1,0 +1,15 @@
+# buf.yaml — module config for the Protobuf side of the registry.
+#
+# Production commands (require `buf` installed — `brew install bufbuild/buf/buf`):
+#   buf lint            # style + correctness checks on the .proto files
+#   buf breaking --against '.git#branch=main'   # fail CI on incompatible changes
+#   buf generate        # codegen Rust + Python from buf.gen.yaml
+version: v2
+modules:
+  - path: .
+lint:
+  use:
+    - STANDARD
+breaking:
+  use:
+    - FILE
