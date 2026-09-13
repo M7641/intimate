@@ -1,0 +1,39 @@
+[package]
+name = "parle"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+# Zed's GPU-accelerated UI framework. Pinned exactly: the API moves between
+# minor releases and the docs are thin, so an accidental bump is a real cost.
+gpui = "=0.2.2"
+# Grapheme boundaries for the text input (cursor moves by grapheme, not byte).
+unicode-segmentation = "1"
+# Channels between worker threads and the UI thread.
+futures = "0.3"
+
+# Dictionary page: MyMemory's free translation API, called from a worker.
+reqwest = { workspace = true, features = ["blocking"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Story page: a small quantized Qwen2.5 GGUF from Hugging Face, run locally
+# with candle. Same stack as `augur`; kept inline like the rest of the workspace.
+candle-core = "0.9"
+candle-transformers = "0.9"
+tokenizers = { version = "0.22", default-features = false, features = ["onig"] }
+
+[features]
+default = []
+# Opt-in GPU inference. Needs a CUDA toolkit at build time (`nvcc` on PATH).
+cuda = ["candle-core/cuda", "candle-transformers/cuda"]
+
+[target.'cfg(target_os = "macos")'.dependencies]
+candle-core = { version = "0.9", features = ["metal"] }
+candle-transformers = { version = "0.9", features = ["metal"] }
+
+[lints]
+workspace = true

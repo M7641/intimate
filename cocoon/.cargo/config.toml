@@ -3,3 +3,8 @@
 #
 # (The `cv` alias lived here until the CV moved out to `../cv` as a standalone
 # Typst document — it is built with `typst compile`, not cargo.)
+
+[alias]
+# `cargo parle` — run the language app with CUDA inference for the story page.
+# Needs nvcc on PATH at build time; use `cargo run -p parle` for a CPU build.
+parle = "run -p parle --features cuda"

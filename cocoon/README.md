@@ -12,6 +12,7 @@ cocoon/
 │   ├── snowhouse   Snowflake analytics   (Axum API + React frontend, port 8050)
 │   ├── tako        data ingest API       (Axum, port 3000)
 │   ├── nyx         LLM-powered dev CLI
+│   ├── parle       native desktop language-learning app (GPUI)
 │   └── warden      control layer: deploys the other apps into a tenant (CLI)
 └── crates/    reusable libraries (database, service-kit, ouroboros, deploy-catalog, …)
 ```
