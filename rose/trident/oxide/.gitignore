@@ -1,0 +1,10 @@
+# Build output and the device artifacts `cargo oxide` writes next to the crate.
+/target/
+/.oxide-artifacts/
+**/*.ptx
+**/*.ll
+**/*.ltoir
+**/*.cubin
+**/*.cubin.tmp
+**/*.identity
+**/*.bc

@@ -1,0 +1,12 @@
+# The cpu and tile crates build on stable Rust and share this workspace.
+# The oxide crate needs a pinned nightly and its own `cargo oxide` driver,
+# so it lives outside the workspace. See README.md.
+[workspace]
+resolver = "2"
+members = ["cpu", "tile"]
+exclude = ["oxide"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"

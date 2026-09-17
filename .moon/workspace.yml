@@ -55,6 +55,7 @@ projects:
   quartz: 'rose/quartz'
   saga: 'rose/saga'
   siren: 'rose/siren'
+  trident: 'rose/trident'
   troy-python: 'rose/troy/python'
   unity: 'rose/unity'
   unity-two: 'rose/unity/two'

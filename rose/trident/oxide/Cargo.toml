@@ -1,0 +1,16 @@
+[package]
+name = "trident-oxide"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+
+# Standalone: needs the pinned nightly in rust-toolchain.toml and `cargo oxide`.
+[workspace]
+
+[dependencies]
+# Device and host macros are git-only. Pinned to one commit so the codegen
+# backend that cargo-oxide builds matches these crates exactly.
+cuda-device = { git = "https://github.com/NVlabs/cuda-oxide.git", rev = "7ce30ec798c490e6ed772dfcbad193b3733fe55a" }
+cuda-host = { git = "https://github.com/NVlabs/cuda-oxide.git", rev = "7ce30ec798c490e6ed772dfcbad193b3733fe55a" }
+# Shared host-side runtime, published from NVlabs/cutile-rs.
+cuda-core = "0.3.1"

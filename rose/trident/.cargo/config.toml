@@ -1,0 +1,3 @@
+# cutile locates the CUDA toolkit through this variable at JIT time.
+[env]
+CUDA_TOOLKIT_PATH = { value = "/opt/cuda", relative = false }
