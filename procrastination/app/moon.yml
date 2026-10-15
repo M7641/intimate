@@ -1,0 +1,4 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'application'
+language: 'rust'
+dependsOn: ['procrastination-sim', 'procrastination-vehicle']

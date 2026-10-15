@@ -1,0 +1,7 @@
+# Bevy looks for `assets/` next to the crate being run, which would be
+# app/assets. Point it at the workspace root instead so the one assets
+# folder serves every crate. `relative = true` resolves against this
+# workspace, wherever cargo is invoked from. A shipped binary ignores this
+# and expects `assets/` beside the executable.
+[env]
+BEVY_ASSET_ROOT = { value = "", relative = true }

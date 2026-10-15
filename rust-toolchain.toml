@@ -1,0 +1,7 @@
+# Which Rust runs in this repo. proto installs Rust through rustup and adds
+# no shims of its own, so rustup reads this file, not .prototools, to pick the
+# toolchain. Keep the channel in step with `rust = ...` in .prototools.
+# A project that needs extra targets (atlantis: wasm32) nests its own file.
+[toolchain]
+channel = "stable"
+components = ["clippy", "rustfmt"]

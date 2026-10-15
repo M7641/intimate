@@ -1,0 +1,38 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+layer: 'application'
+language: 'typescript'
+dependsOn: ['atlantis-wasm']
+
+tasks:
+  install:
+    command: 'bun install --frozen-lockfile'
+    toolchain: 'system'
+    options:
+      cache: false
+  # Compile the engine to wasm into public/. Inputs span the sibling crates so
+  # an engine change rebuilds it.
+  wasm:
+    command: 'bash ../scripts/build-wasm.sh'
+    toolchain: 'system'
+    inputs:
+      - '/atlantis/core/**/*'
+      - '/atlantis/wasm/**/*'
+      - '/atlantis/data/**/*'
+      - '/atlantis/Cargo.toml'
+      - '/atlantis/scripts/build-wasm.sh'
+    outputs:
+      - 'public/atlantis.wasm'
+  dev:
+    command: 'bun run dev'
+    toolchain: 'system'
+    deps: ['install', 'wasm']
+    options:
+      cache: false
+      persistent: true
+      runInCI: false
+  build:
+    command: 'bun run build'
+    toolchain: 'system'
+    deps: ['install', 'wasm']
+    inputs: ['src/**/*', 'index.html', 'cards.html', 'vite.config.ts', 'tsconfig.json', 'public/**/*', '/atlantis/assets/avatars_full/**/*', '/atlantis/assets/cards/**/*', '/atlantis/docs/guides/*.md', '/atlantis/assets/spell_cards/**/*']
+    outputs: ['dist']

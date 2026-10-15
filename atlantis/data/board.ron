@@ -1,0 +1,53 @@
+// Single-lane map, transcribed from a top-down photo of the printed board.
+//
+// Hex lattice fitted to the photo (pitch 81.8 px, rotated -15 degrees), then
+// each hex classified by colour: sea, sand, jungle, rock. Zone borders follow
+// the sand shades (pale = outposts, brown = battlefield and thrones). Spawn
+// icons were read by hand against the rulebook's icon key (page 6).
+// The web viewer rotates the grid by -15 degrees so it looks like the photo.
+//
+// Cell = zone letter + feature. Feature legend in core/src/board.rs.
+// `~~` is sea (terrain), `__` is outside the photo. Rows use odd-r offset.
+//
+// Lane, red to blue: A Red Throne (north-west), B Red Outpost (west),
+// C Battlefield (centre), D Blue Outpost (east), E Blue Throne (south-east).
+// Jungles: F north, G south.
+(
+    zones: [
+        (letter: 'A', name: "Red Throne", kind: Throne(Red)),
+        (letter: 'B', name: "Red Outpost", kind: Lane),
+        (letter: 'C', name: "Battlefield", kind: Lane),
+        (letter: 'D', name: "Blue Outpost", kind: Lane),
+        (letter: 'E', name: "Blue Throne", kind: Throne(Blue)),
+        (letter: 'F', name: "North Jungle", kind: Side),
+        (letter: 'G', name: "South Jungle", kind: Side),
+        (letter: '~', name: "Sea", kind: Sea),
+    ],
+    rows: [
+        "__ __ __ __ __ ~~ ~~ ~~ ~~ __ __ __ __ __ __ __ __ __ __ __ __ __ __",
+         "__ __ __ __ __ A# A# A# A# A# ~~ ~~ __ __ __ __ __ __ __ __ __ __ __",
+        "__ __ __ __ __ A# A# A# A# A# A# ~~ ~~ ~~ ~~ ~~ __ __ __ __ __ __ __",
+         "__ __ __ __ ~~ A# A# A# A# A. A. F# F# ~~ ~~ ~~ ~~ ~~ __ __ __ __ __",
+        "__ __ __ __ ~~ A# A# A# A. A* A. F. F# F# F# F# F# ~~ ~~ ~~ ~~ ~~ __",
+         "__ __ __ __ A# A* A. A* A. A. F. F. F# F# F. F. F# ~~ ~~ ~~ ~~ ~~ ~~",
+        "__ __ __ __ ~~ A. A. A. A. A. F# F. F. F. F. F. F. F# F# ~~ ~~ ~~ ~~",
+         "__ __ __ ~~ Bm B. B. B. B. B# C# C. C. C# F# F. F. F# F# ~~ ~~ ~~ __",
+        "__ __ __ __ B. B. B. Bm Bm B. C. C. Cm C. C. C. F. F. F# F# ~~ ~~ __",
+         "__ __ __ B. B. Bh C. BM C. C. C. C. Cm CH C. C. C# D# D# ~~ ~~ ~~ __",
+        "__ __ __ ~~ B. Bs BH C. C. C. C. C. C. C. C. C. C. D. D. D. ~~ ~~ __",
+         "__ __ ~~ B. B. BM C. BS C# C. Cs CM C. C. C. CM C. Dm DM D. ~~ __ __",
+        "__ __ __ ~~ B. B. C. C. C. C. C. C# C# C. C. C. C. D. D. D. ~~ ~~ __",
+         "__ __ ~~ B. Bm BM C. Cm C. C. C. Cm CS C. C# Ds D. Dm D. D. ~~ __ __",
+        "__ __ ~~ ~~ B. C. C. C. C. C. C. C. C. C. C. D. D. Dh DS D. ~~ __ __",
+         "__ ~~ ~~ ~~ B# G# C# C. C. Ch CM C. C. C. C. Dm D. DH D. D. __ __ __",
+        "__ __ ~~ ~~ ~~ G# G. G# C# C. C. CM C. C. C. DM DM D. D. D. ~~ __ __",
+         "__ ~~ ~~ ~~ ~~ G# G. G. G# G# C# C. C# E# E. D. D. D. DM ~~ __ __ __",
+        "__ ~~ ~~ ~~ ~~ ~~ G# G# G. G. G. G. G. E# E. E. E. E. E. ~~ __ __ __",
+         "~~ ~~ ~~ ~~ ~~ ~~ G# G. G. G# G# G. G. E. E. E* E. E* E. __ __ __ __",
+        "__ __ __ ~~ ~~ ~~ ~~ G# G# G# G# G# G. E. E* E# E# E# E# ~~ __ __ __",
+         "__ __ __ __ __ __ ~~ ~~ ~~ ~~ G# G# ~~ E# E# E# E# E# E# __ __ __ __",
+        "__ __ __ __ __ __ __ __ __ __ ~~ ~~ ~~ ~~ E# E# E# ~~ E# __ __ __ __",
+         "__ __ __ __ __ __ __ __ __ __ __ __ ~~ ~~ E# E# E# E# __ __ __ __ __",
+        "__ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ E# ~~ ~~ __ __ __ __",
+    ],
+)

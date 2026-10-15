@@ -34,10 +34,13 @@ lefthook install                                           # install the git hoo
 ```
 
 Make proto available to **all** shells — including non-interactive ones (git hooks,
-CI). Add this to `~/.zshenv` (not just `~/.zshrc`, which is interactive-only):
+CI). Add this to `~/.zshenv` (not just `~/.zshrc`, which is interactive-only), or to
+`~/.bashrc` on bash. proto 0.6x installs under `~/.local/share/proto`; older
+versions used `~/.proto`. Rust has no proto shim: rustup's `~/.cargo/bin` runs
+`cargo`, and `rust-toolchain.toml` at the repo root picks the channel.
 
 ```sh
-export PATH="$HOME/.proto/shims:$HOME/.proto/bin:$PATH"
+export PATH="$HOME/.local/share/proto/shims:$HOME/.local/share/proto/bin:$HOME/.cargo/bin:$PATH"
 ```
 
 Verify:

@@ -60,6 +60,14 @@ projects:
   unity: 'rose/unity'
   unity-two: 'rose/unity/two'
   vive-restate_pipeline: 'rose/vive/restate_pipeline'
+  # atlantis — Guards of Atlantis II simulator (Rust engine + wasm + SolidJS viewer)
+  atlantis-core: 'atlantis/core'
+  atlantis-wasm: 'atlantis/wasm'
+  atlantis-web: 'atlantis/web'
+  # procrastination — learner-driver simulator (Bevy). Pure vehicle crate + sim plugins + app.
+  procrastination-vehicle: 'procrastination/crates/vehicle'
+  procrastination-sim: 'procrastination/sim'
+  procrastination-app: 'procrastination/app'
   # TypeScript frontends
   quartz-frontend: 'rose/quartz/frontend'
   nix_stack-frontend: 'rose/nix_stack/frontend'

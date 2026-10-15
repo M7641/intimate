@@ -1,0 +1,28 @@
+# Guards of Atlantis II simulator. Two crates:
+#   core/  the rules engine. Pure Rust, no rendering, no I/O.
+#   wasm/  a thin ABI that exposes core to the browser.
+[workspace]
+resolver = "3"
+members = ["core", "wasm"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ron = "0.12"
+thiserror = "2"
+atlantis-core = { path = "core" }
+
+[workspace.lints.clippy]
+all = "warn"
+
+# The wasm binary is served to the browser: favour size.
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"

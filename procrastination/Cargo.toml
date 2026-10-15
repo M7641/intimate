@@ -1,0 +1,38 @@
+# Learner-driver simulator. Three layers, dependencies point one way only:
+#   crates/*  pure Rust, no Bevy. Vehicle model, roads, rules, lessons.
+#   sim/      Bevy plugins that adapt crates/* into the ECS. No window.
+#   app/      the binary: rendering, input, HUD. The only crate that needs a GPU.
+[workspace]
+resolver = "3"
+members = ["crates/vehicle", "sim", "app"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace.dependencies]
+bevy = "0.19"
+avian3d = "0.7"
+glam = { version = "0.32", features = ["serde"] }
+serde = { version = "1", features = ["derive"] }
+ron = "0.12"
+thiserror = "2"
+proptest = "1"
+procrastination-vehicle = { path = "crates/vehicle" }
+procrastination-sim = { path = "sim" }
+
+[workspace.lints.clippy]
+all = "warn"
+
+# Bevy is slow to build unoptimised. The standard setup: optimise dependencies
+# fully even in dev, keep our own crates at a light level for fast rebuilds.
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

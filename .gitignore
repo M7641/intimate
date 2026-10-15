@@ -47,6 +47,8 @@ Cargo.lock
 
 # Applications (deployable) — track their Cargo.lock:
 !/cocoon/Cargo.lock
+!/atlantis/Cargo.lock
+!/procrastination/Cargo.lock
 !/rose/galicia-rs/Cargo.lock
 !/rose/incinerate/Cargo.lock
 !/rose/moss/Cargo.lock

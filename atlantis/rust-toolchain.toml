@@ -1,0 +1,7 @@
+# rustup reads this when cargo runs inside atlantis/. proto installs Rust
+# through rustup and adds no shims of its own, so this is where the wasm
+# target is declared: rustup installs it on first use.
+[toolchain]
+channel = "stable"
+targets = ["wasm32-unknown-unknown"]
+components = ["clippy", "rustfmt"]

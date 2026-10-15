@@ -1,0 +1,122 @@
+.hero-list {
+  width: 17rem; flex: none; overflow: auto; padding: 0.5rem 0.75rem;
+  border-right: 1px solid #ccc; background: #fff;
+}
+.hero-list input { width: 100%; box-sizing: border-box; margin-bottom: 0.25rem; }
+.hero-list h2 { font-size: 0.8rem; letter-spacing: 0.1em; color: #b8860b; margin: 0.7rem 0 0.2rem; }
+.hero-list a {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem;
+  padding: 0.2rem 0.4rem; border-radius: 3px; color: inherit; text-decoration: none;
+}
+.hero-list a:hover { background: #f4f1ea; }
+.hero-list a.current { background: #fff3c4; font-weight: 600; }
+.hero-list .set { color: #888; font-size: 0.75rem; font-weight: 400; }
+
+.sheet { flex: 1; min-width: 0; overflow: auto; padding: 1rem 1.5rem 2rem; }
+.sheet h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #666; }
+
+/* The hero's artwork, edge to edge, with the name set over its foot. */
+.banner { position: relative; height: 17rem; margin: -1rem -1.5rem 1rem; overflow: hidden; background: #1c2630; }
+.banner img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 32%; }
+.banner .title {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 4rem 1.5rem 0.9rem;
+  color: #fff; background: linear-gradient(transparent, #000d);
+}
+.banner h2 { font-size: 1.9rem; margin: 0; text-shadow: 0 1px 4px #000; }
+.banner p { margin: 0.3rem 0 0; }
+.banner .meta { color: #e6e0d0; }
+.banner .roles { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.role { text-transform: capitalize; padding: 0.05rem 0.5rem; border: 1px solid #fff8; border-radius: 1rem; background: #0006; font-size: 0.8rem; }
+
+.ratings { display: flex; flex-wrap: wrap; gap: 0.3rem 2.5rem; }
+.rating { display: grid; grid-template-columns: 5rem auto 3rem; gap: 0.6rem; align-items: center; }
+.rating .label { color: #666; font-size: 0.85rem; }
+.rating .pips { display: flex; gap: 3px; }
+.rating .pips i { width: 1rem; height: 0.6rem; border-radius: 2px; background: #e2ddd0; }
+.rating .pips i.base { background: #555; }
+.rating .pips i.peak { background: #fff; box-shadow: inset 0 0 0 2px #555; }
+.rating .value { font-variant-numeric: tabular-nums; }
+
+.tabs { display: flex; gap: 0.25rem; margin: 1rem 0 0; border-bottom: 1px solid #ccc; }
+.tabs a, .tabs span { padding: 0.35rem 0.9rem; border-bottom: 3px solid transparent; margin-bottom: -1px; color: #555; text-decoration: none; }
+.tabs a:hover { background: #e9e5da; }
+.tabs a.current { border-color: #222; color: #222; font-weight: 600; }
+.tabs span { color: #aaa; cursor: default; }
+
+/* A guide is prose: one readable column. */
+.markdown { max-width: 46rem; padding-top: 0.5rem; font-size: 1rem; line-height: 1.55; }
+.markdown h3 { font-size: 1.4rem; text-transform: none; letter-spacing: 0; color: inherit; margin: 1rem 0 0.5rem; }
+.markdown h4 { font-size: 1.2rem; margin: 1.6rem 0 0.4rem; }
+.markdown h5 { font-size: 1.05rem; margin: 1.3rem 0 0.3rem; }
+.markdown h6 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #666; margin: 1.1rem 0 0.2rem; }
+.markdown p { margin: 0.6rem 0; }
+.markdown ul { margin: 0.6rem 0; padding-left: 1.2rem; }
+.markdown a { color: #2c6fbd; overflow-wrap: anywhere; }
+
+/* Spell cards are scans, text included: three to a row, like the deck. */
+.spellbook h3 { margin: 1rem 0 0.5rem; }
+.spells { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+.spells img { display: block; width: 100%; height: auto; border-radius: 6px; }
+/* A colour per column. Each holds six spells: three of one school, then,
+   after a gap, three of the other. */
+.spells.schools { grid-auto-flow: column; grid-template-rows: repeat(6, auto); margin-top: 0.6rem; }
+.spells.schools img:nth-child(6n + 4) { margin-top: 1rem; }
+@media (max-width: 70rem) {
+  .spells { grid-template-columns: 1fr; }
+  .spells.schools { grid-auto-flow: row; grid-template-rows: none; }
+  .spells .column-head { display: none; }
+}
+
+/* The whole deck is one grid. Its card rows all share one height, the
+   tallest card's, so a row reads straight across and no card jumps a row. */
+.deck[hidden] { display: none; }
+.deck {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem;
+  grid-template-rows: auto repeat(var(--basic-rows), 1fr) auto auto repeat(5, 1fr);
+}
+.deck h3, .section-head { grid-column: 1 / -1; margin: 1rem 0 0; }
+.section-head { display: flex; align-items: center; gap: 1.5rem; }
+.section-head h3 { margin: 0; }
+.section-head label { display: flex; align-items: center; gap: 0.3rem; color: #555; font-size: 0.85rem; cursor: pointer; }
+.section-head input { margin: 0; }
+.column-head {
+  padding-top: 0.3rem; border-top: 3px solid; color: #666;
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
+}
+/* An upgrade's cell: its colour's column, and its row below the basic cards,
+   the two section headings and the column heads (--row 0). */
+.deck .placed { grid-column: var(--col); grid-row: calc(var(--basic-rows) + 3 + var(--row)); }
+/* Too narrow for three columns: one column, a colour at a time. */
+@media (max-width: 70rem) {
+  .deck { grid-template-columns: 1fr; grid-template-rows: none; }
+  .deck .placed { grid-column: 1; grid-row: auto; order: calc(var(--col) * 10 + var(--row)); }
+}
+
+.card-tile {
+  display: grid; grid-template-columns: 8.5rem minmax(0, 1fr);
+  border-left: 5px solid; border-radius: 3px; overflow: hidden; background: #fff; box-shadow: 0 1px 2px #0002;
+}
+/* The illustration fills the tile's height. Its foot fades to black on the
+   printed card, so crop from the bottom. */
+.card-tile .art { width: 100%; height: 100%; min-height: 11.7rem; object-fit: cover; object-position: 50% 0; background: #1c2630; }
+.card-tile .body { padding: 0.5rem 0.7rem; }
+.card-tile .head { display: flex; align-items: baseline; gap: 0.5rem; }
+.card-tile .init { min-width: 1.4rem; font-size: 1.1rem; font-weight: 700; text-align: right; }
+.card-tile .name { flex: 1; font-size: 1rem; font-weight: 600; }
+.card-tile .name sup { color: #888; font-weight: 400; margin-left: 0.2rem; }
+.card-tile .tag { color: #888; font-size: 0.7rem; text-transform: uppercase; white-space: nowrap; }
+.card-tile dl { display: grid; grid-template-columns: 5rem 1fr; gap: 0.1rem 0.5rem; margin: 0.4rem 0; font-size: 0.85rem; }
+.card-tile dt { color: #888; }
+.card-tile dd { margin: 0; }
+
+.rules-text { font-size: 0.9rem; line-height: 1.4; }
+.rules-text p { margin: 0.3rem 0; }
+.rules-text .option { padding-left: 1rem; text-indent: -1rem; }
+.rules-text .option::before { content: "▸ "; color: #888; }
+.rules-text .note { color: #777; font-style: italic; font-size: 0.85rem; }
+.rules-text hr { border: none; border-top: 1px solid #ddd; margin: 0.4rem 0; }
+.rules-text .pip { display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 50%; vertical-align: baseline; }
+.rules-text .icon-label { text-transform: capitalize; }
+
+.traits { display: flex; flex-wrap: wrap; gap: 0.25rem; margin: 0.5rem 0 0; }
+.traits span { padding: 0 0.4rem; border-radius: 2px; background: #f0ede4; color: #777; font-size: 0.7rem; }

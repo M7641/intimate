@@ -1,0 +1,16 @@
+[package]
+name = "procrastination-vehicle"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+description = "Vehicle dynamics: suspension, tyres, engine and gearbox. No Bevy."
+
+[dependencies]
+glam = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
+
+[lints]
+workspace = true

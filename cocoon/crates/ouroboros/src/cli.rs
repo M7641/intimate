@@ -16,11 +16,7 @@ use crate::tenant::Tenant;
 use crate::workflows::Workflows;
 
 #[derive(Parser)]
-#[command(
-    name = "ouroboros",
-    about = "Nimbus platform CLI (read-only)",
-    version
-)]
+#[command(name = "ouroboros", about = "Nimbus platform CLI (read-only)", version)]
 pub struct Cli {
     #[command(subcommand)]
     command: Commands,

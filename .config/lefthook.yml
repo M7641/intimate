@@ -9,19 +9,19 @@ pre-commit:
   jobs:
     - name: ruff-check
       glob: "*.py"
-      run: PATH="$HOME/.proto/shims:$PATH" ruff check --fix {staged_files}
+      run: PATH="$HOME/.local/share/proto/shims:$HOME/.proto/shims:$PATH" ruff check --fix {staged_files}
       stage_fixed: true
 
     - name: ruff-format
       glob: "*.py"
-      run: PATH="$HOME/.proto/shims:$PATH" ruff format {staged_files}
+      run: PATH="$HOME/.local/share/proto/shims:$HOME/.proto/shims:$PATH" ruff format {staged_files}
       stage_fixed: true
 
     - name: rustfmt
       glob: "*.rs"
       # cargo fmt is edition-aware (reads Cargo.toml). Formats the whole affected
       # crate, not just staged hunks — replaces scripts/rust-fmt-staged.sh.
-      run: PATH="$HOME/.proto/shims:$PATH" moon run :fmt --affected --query "language=rust"
+      run: PATH="$HOME/.local/share/proto/shims:$HOME/.proto/shims:$PATH" moon run :fmt --affected --query "language=rust"
       stage_fixed: true
 
     - name: vale
@@ -32,7 +32,7 @@ pre-commit:
       # --config is mandatory — Vale looks for .vale.ini beside the file, not
       # in .config/.
       run: |
-        PATH="$HOME/.proto/shims:$PATH" vale --config .config/vale.ini {staged_files}
+        PATH="$HOME/.local/share/proto/shims:$HOME/.proto/shims:$PATH" vale --config .config/vale.ini {staged_files}
 
     - name: gitleaks
       # Secret scan over the whole staged diff. The config lives in .config/,
@@ -40,7 +40,7 @@ pre-commit:
       # in the scan target), so --config is mandatory. Hooks run from the repo
       # root, so the relative path resolves.
       run: |
-        PATH="$HOME/.proto/shims:$PATH" gitleaks git --staged --redact --no-banner \
+        PATH="$HOME/.local/share/proto/shims:$HOME/.proto/shims:$PATH" gitleaks git --staged --redact --no-banner \
           --config .config/gitleaks.toml
 
     # EOL normalisation is handled natively by .gitattributes (* text=auto);
@@ -61,9 +61,9 @@ pre-push:
     # Build-graph aware: Moon runs lint/test ONLY for affected projects, across
     # all languages — replaces the old per-crate fan-out scripts.
     - name: lint-affected
-      run: PATH="$HOME/.proto/shims:$PATH" moon run ':lint' --affected
+      run: PATH="$HOME/.local/share/proto/shims:$HOME/.proto/shims:$PATH" moon run ':lint' --affected
     - name: test-affected
-      run: PATH="$HOME/.proto/shims:$PATH" moon run ':test' --affected
+      run: PATH="$HOME/.local/share/proto/shims:$HOME/.proto/shims:$PATH" moon run ':test' --affected
 
     # All Claude config lives in ONE place: .claude/ at the repo root. It is both
     # this project's config (Claude Code reads .claude/ natively) and the source

@@ -1,0 +1,167 @@
+# Table of Contents
+
+**[p. 1]**
+
+The rulebook's table of contents, as printed on pages 1-2. Indentation shows
+the three levels the rulebook uses. The number is the printed page.
+
+- LORE — 2
+- OVERVIEW — 3
+  - Heroes — 3
+  - Teams — 3
+  - Zones and Thrones — 3
+  - Minions — 3
+  - Battle Zone and "Pushing a Lane" — 3
+  - Action Cards — 3
+    - Read all the cards carefully! — 3
+  - Defeating Enemy Heroes — 3
+  - Last Push — 3
+  - Line of Sight — 3
+  - Table Talk — 4
+  - Hidden Information — 4
+- GAME SETUP — 5
+- ROUND STRUCTURE — 7
+- TURN SEQUENCE — 7
+  - Play One Card — 7
+  - Check the Initiative — 7
+    - Tied Initiative — 7
+  - Perform One Action — 7
+    - Hero Respawn — 7
+  - Resolve Your Card — 7
+  - Turn Ends — 7
+- END OF ROUND — 8
+  - Minion Battle — 8
+  - Remove Tokens, Return Markers — 8
+  - Push the Lane — 8
+    - Triggering a Push — 8
+  - Retrieve Cards — 8
+  - Level Up — 8
+  - Collect a Pity Coin — 8
+- ACTION CARD ANATOMY — 9
+    - Primary Action Type — 9
+    - Basic/Non-Basic (Supertype) — 9
+    - Ranged / Non-Ranged (Subtype) — 9
+    - Range/Radius Icon — 9
+- PERFORMING ACTIONS — 10
+  - Mandatory and Optional Steps — 10
+  - Making Choices — 10
+  - Picking Targets — 10
+  - Modal Actions ( Bullet Points) — 10
+  - Repeat ( Once / Up to X times ) — 10
+- CARD STATES — 10
+  - In Hand — 10
+  - Played — 10
+  - Unresolved — 10
+  - Resolved — 10
+  - Discarded — 10
+- CHANGING CARD STATE — 10
+  - Discard a Card — 10
+  - Retrieve a Card — 10
+  - Swap a Card — 10
+  - Facedown — 10
+- MOVEMENT ACTION — 11
+    - Movement as Primary Action — 11
+  - Movement in the Card Text — 11
+  - Fast Travel Action (Replaces Movement) — 11
+- SKILL ACTION — 12
+- HOLD ACTION — 12
+- ATTACK ACTION — 13
+  - Clear Action (Replaces Attack) — 13
+  - Attacking a Minion — 13
+    - Heavy Minion Immunity — 13
+  - Attacking a Hero — 13
+    - Calculate Your Attack Total: — 13
+    - When a Hero is Defeated: — 13
+- DEFENSE ACTION — 14
+  - Calculate Your Defense Total: — 14
+    - Minion Defense Modifiers — 14
+  - Defense/Skill cards — 14
+  - Block — 14
+  - Attack/Defense Detailed Order — 14
+- LEVELING UP — 15
+  - Upgrade a Card — 15
+    - Hero Level* — 15
+  - Gain an Item — 16
+    - Item Bonus — 16
+  - The Ultimate — 16
+- CONCEPTS AND KEYWORDS — 17
+  - Active Effects — 17
+  - Adjacent — 17
+  - After the Attack — 17
+  - Battle Zone — 17
+  - Before the Attack — 17
+  - Block — 17
+  - Choose ( One / Twice / Up to / etc. ) — 17
+  - Closer (Space) — 17
+  - Counts as — 17
+  - Defeat — 17
+  - Direction — 17
+  - Discard — 17
+  - Empty (Space / Spawn Point) — 17
+  - End of Turn (Active Effect) — 17
+  - End of Round (Active Effect) — 17
+  - Farther / Farthest — 17
+  - Friendly — 17
+  - Hero — 17
+  - If Able — 17
+  - Ignoring Obstacles — 18
+  - Immune — 18
+  - Markers — 18
+  - Minions — 18
+  - Minion Battle — 18
+  - Minion Defense Modifiers — 18
+  - Minions Outside of the Battle Zone — 18
+  - Move — 18
+  - Move Through — 18
+
+**[p. 2]**
+
+- CONCEPTS AND KEYWORDS, continued
+  - Nearest — 18
+  - Next Turn (Active Effect) — 18
+  - Next Turn, After Playing Cards (Active Effect) — 18
+  - Obstacle — 18
+  - Place — 18
+  - Push (Unit / Token) — 18
+  - Range / Ranged — 19
+  - Radius — 19
+  - Remove — 19
+  - Repeat — 19
+  - Replace — 19
+  - Resolved — 19
+  - Respawn — 19
+  - Retrieve — 19
+  - Space — 19
+  - Spawn — 19
+  - Spawn Point — 19
+  - Straight Line — 19
+  - Swap (with a Unit/Token) — 19
+  - Swap (Cards) — 19
+  - Target (Unit / Token / Space) — 19
+  - Terrain — 19
+  - This Turn / Round (Active Effect) — 19
+  - Tokens — 19
+  - Unit — 19
+  - Unresolved — 19
+  - Zone — 19
+- EXTENDED PLAYER COUNTS — 20
+  - 2 Players — 20
+  - 8 or 10 Players — 20
+  - Odd Number of Players — 20
+    - Handicap Cards — 20
+  - Playing on a Double-Lane Map — 20
+- HERO PROFILE CARDS — 21
+  - Hero Icon — 21
+  - Hero Name — 21
+  - Complexity Rating — 21
+  - Stat Profile — 21
+  - Hero Roles — 21
+- HERO SELECTION METHODS — 22
+  - All Random — 22
+  - All Pick — 22
+  - Single Draft — 22
+  - Random Draft — 22
+  - Player Draft — 22
+  - Pick and Ban — 22
+    - Pick/Ban Order — 22
+- SUMMARY — 23
