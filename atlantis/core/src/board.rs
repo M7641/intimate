@@ -386,6 +386,113 @@ mod tests {
         assert_eq!(sea.lane_index, None);
     }
 
+    /// A space written back in board-file notation, `__` for no space.
+    fn cell_code(board: &Board, hex: Hex) -> String {
+        let Some(space) = board.space(hex) else {
+            return "__".into();
+        };
+        let zone = board.zone(space.zone);
+        if zone.kind == ZoneKind::Sea {
+            return "~~".into();
+        }
+        let feature = match space.spawn {
+            _ if space.terrain => '#',
+            None => '.',
+            Some(SpawnPoint::Hero { .. }) => '*',
+            Some(SpawnPoint::Minion { team, kind }) => {
+                let c = match kind {
+                    MinionKind::Melee => 'm',
+                    MinionKind::Ranged => 's',
+                    MinionKind::Heavy => 'h',
+                };
+                if team == Team::Blue {
+                    c.to_ascii_uppercase()
+                } else {
+                    c
+                }
+            }
+        };
+        format!("{}{feature}", zone.letter)
+    }
+
+    /// What a cell must read as on the far side of the board: zones swap
+    /// ends, spawns swap teams, sea and no-space are both off the island.
+    fn twin_code(code: &str) -> String {
+        if code == "__" {
+            return "~~".into();
+        }
+        let mut chars = code.chars();
+        let zone = match chars.next().unwrap() {
+            'A' => 'E',
+            'E' => 'A',
+            'B' => 'D',
+            'D' => 'B',
+            'F' => 'G',
+            'G' => 'F',
+            other => other,
+        };
+        let f = chars.next().unwrap();
+        let feature = if f.is_ascii_uppercase() {
+            f.to_ascii_lowercase()
+        } else {
+            f.to_ascii_uppercase()
+        };
+        format!("{zone}{feature}")
+    }
+
+    #[test]
+    fn board_is_point_symmetric() {
+        // Turned half a circle, the map reads the same with red and blue
+        // swapped. The hero spawns pair up across the centre, so their sum
+        // is three times the doubled centre.
+        let board = Board::single_lane();
+        let heroes: Vec<Hex> = board
+            .spaces
+            .iter()
+            .filter(|(_, s)| matches!(s.spawn, Some(SpawnPoint::Hero { .. })))
+            .map(|(h, _)| *h)
+            .collect();
+        assert_eq!(heroes.len(), 6);
+        let sum = heroes.iter().fold(Hex::ZERO, |a, h| a + *h);
+        assert!(
+            sum.q % 3 == 0 && sum.r % 3 == 0,
+            "hero spawns are not paired"
+        );
+        let double_centre = Hex::new(sum.q / 3, sum.r / 3);
+
+        let mut mismatches = Vec::new();
+        for &hex in board.spaces.keys() {
+            let twin = double_centre - hex;
+            if twin < hex {
+                continue;
+            }
+            let here = cell_code(&board, hex);
+            let there = cell_code(&board, twin);
+            let off_island = |c: &str| c == "~~" || c == "__";
+            if off_island(&here) && off_island(&there) {
+                continue;
+            }
+            if twin_code(&here) != there {
+                let (c1, r1) = hex.to_offset();
+                let (c2, r2) = twin.to_offset();
+                mismatches.push((
+                    (r1, c1),
+                    format!(
+                        "row {r1:2} cell {c1:2}: {here}   vs   row {r2:2} cell {c2:2}: {there}"
+                    ),
+                ));
+            }
+        }
+        mismatches.sort();
+        let mismatches: Vec<String> = mismatches.into_iter().map(|(_, m)| m).collect();
+        assert!(
+            mismatches.is_empty(),
+            "{} asymmetric pairs:\n{}",
+            mismatches.len(),
+            mismatches.join("\n")
+        );
+    }
+
     #[test]
     fn one_touching_space_is_not_adjacency() {
         let text = r#"(

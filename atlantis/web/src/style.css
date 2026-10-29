@@ -64,14 +64,17 @@ aside h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;
 .log ol { margin: 0; padding-left: 2rem; font-size: 0.8rem; color: #444; }
 .log li { margin: 0.1rem 0; }
 
-.space polygon { stroke: #fff; stroke-width: 1.5; cursor: pointer; }
-.space:hover polygon:first-child { stroke: #333; }
-.space.selected polygon:first-child { stroke: #111; stroke-width: 3; }
-.space.battle polygon:first-child { stroke: #b8a35e; }
-.space.sea polygon:first-child { stroke: #8fc3e0; cursor: default; }
-.space.sea:hover polygon:first-child { stroke: #8fc3e0; }
-.zone-letter { font-size: 9px; fill: #444; text-anchor: middle; pointer-events: none; }
-.spawn { fill: none; stroke-width: 1.5; stroke-dasharray: 3 2; opacity: 0.8; }
+.ground { pointer-events: none; }
+/* The grid's colour, opacity and width come from boardTheme.ts. */
+.space polygon:first-child {
+  stroke: var(--grid-color); stroke-opacity: var(--grid-opacity); stroke-width: var(--grid-width); cursor: pointer;
+}
+.space:hover polygon:first-child { stroke: #333; stroke-opacity: 1; }
+.space.selected polygon:first-child { stroke: #111; stroke-opacity: 1; stroke-width: 3; }
+.space.sea polygon:first-child { stroke: none; cursor: default; }
+.space.terrain polygon:first-child { stroke-opacity: 0.06; }
+.zone-letter { font-size: 9px; fill: #000; opacity: 0.3; text-anchor: middle; pointer-events: none; }
+.spawn { fill: #fffaf0; fill-opacity: 0.35; stroke-width: 1.5; stroke-dasharray: 3 2; opacity: 0.85; pointer-events: none; }
 .spawn-letter { font-size: 10px; font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; opacity: 0.8; }
 .mark { fill: none; stroke-width: 3; pointer-events: none; }
 .mark-move { stroke: #2e8b57; }
@@ -81,7 +84,7 @@ aside h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;
 .space.marked polygon:first-child { cursor: crosshair; }
 
 .units { pointer-events: none; }
-.unit circle { stroke: #fff; stroke-width: 2; }
+.unit circle { stroke: #fff; stroke-width: 2; filter: drop-shadow(0 1.5px 1.5px rgb(0 0 0 / 0.45)); }
 .unit.hero circle { stroke: #222; stroke-width: 2.5; }
 .unit.active circle { stroke: #ffd400; stroke-width: 4; }
 .unit-letter { font-size: 12px; font-weight: 700; fill: #fff; text-anchor: middle; dominant-baseline: central; }

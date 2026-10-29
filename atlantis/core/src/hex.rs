@@ -43,6 +43,11 @@ impl Hex {
         }
     }
 
+    /// Back to "odd-r" offset coordinates: `(col, row)`.
+    pub const fn to_offset(self) -> (i32, i32) {
+        (self.q + (self.r - (self.r & 1)) / 2, self.r)
+    }
+
     pub fn neighbors(self) -> [Hex; 6] {
         Self::DIRECTIONS.map(|d| self + d)
     }
@@ -143,5 +148,14 @@ mod tests {
         // Row 2 is even again: column 0 is straight below row 0's column 0.
         assert_eq!(Hex::from_offset(0, 2), Hex::new(-1, 2));
         assert_eq!(Hex::from_offset(1, 2), Hex::new(0, 2));
+    }
+
+    #[test]
+    fn offset_round_trips() {
+        for row in -3..4 {
+            for col in -3..4 {
+                assert_eq!(Hex::from_offset(col, row).to_offset(), (col, row));
+            }
+        }
     }
 }

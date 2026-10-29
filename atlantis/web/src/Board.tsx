@@ -1,19 +1,8 @@
 import { For, Show, createMemo } from "solid-js";
 import type { Hex, SpaceView, Snapshot, Unit, Zone } from "./types";
 import { SIZE, center, corners, key } from "./hexmath";
-
-const ZONE_FILL: Record<string, string> = {
-  Throne_Red: "#e8b4a8",
-  Throne_Blue: "#a8c4e8",
-  Lane: "#e6d9b8",
-  Side: "#b9d4a6",
-  Sea: "#7fb8d8",
-};
-
-function zoneFill(z: Zone): string {
-  const k = z.kind;
-  return ZONE_FILL[k.type === "Throne" ? `Throne_${k.team}` : k.type];
-}
+import { GRID } from "./boardTheme";
+import { Ground } from "./Ground";
 
 export const TEAM_COLOR = { Red: "#c0392b", Blue: "#2c6fbd" };
 const MINION_LETTER = { Melee: "M", Ranged: "R", Heavy: "H" };
@@ -55,14 +44,21 @@ export function Board(props: Props) {
       maxY = Math.max(maxY, c.y);
     }
     const m = SIZE * 1.2;
-    return `${minX - m} ${minY - m} ${maxX - minX + 2 * m} ${maxY - minY + 2 * m}`;
-  });
+    return { x: minX - m, y: minY - m, w: maxX - minX + 2 * m, h: maxY - minY + 2 * m };
+  }, undefined, { equals: (a, b) => a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h });
 
   const isSelected = (s: SpaceView) =>
     props.selected !== null && key(props.selected) === key(s.hex);
 
   return (
-    <svg class="board" viewBox={viewBox()} preserveAspectRatio="xMidYMid meet">
+    <svg
+      class="board"
+      viewBox={`${viewBox().x} ${viewBox().y} ${viewBox().w} ${viewBox().h}`}
+      preserveAspectRatio="xMidYMid meet"
+      style={{ "--grid-color": GRID.color, "--grid-opacity": GRID.opacity, "--grid-width": GRID.width }}
+    >
+      {/* Layer 0: the painted board. Takes no clicks. */}
+      <Ground spaces={props.snapshot.spaces} zones={zones()} box={viewBox()} battleZone={props.snapshot.battle_zone} />
       {/* Layer 1: spaces. These take the clicks. */}
       <For each={props.snapshot.spaces}>
         {(s) => {
@@ -82,10 +78,7 @@ export function Board(props: Props) {
               }}
               onClick={() => props.onSelect(s.hex)}
             >
-              <polygon
-                points={corners(c.x, c.y)}
-                fill={s.terrain && !sea ? "#5b5b5b" : zoneFill(zone)}
-              />
+              <polygon points={corners(c.x, c.y)} fill="transparent" />
               <Show when={s.spawn}>
                 {(sp) => {
                   const p = sp();

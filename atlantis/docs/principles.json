@@ -1,0 +1,241 @@
+{
+  "about": "Strategy claims extracted from community hero guides. Each claim quotes its source. General principles are claims made independently by several guides. Pilot run over four guides; not yet the full set.",
+  "fields": {
+    "scope": "general: holds across heroes. hero: specific to one hero's cards.",
+    "status": "current: matches data/cards.json. stale: the guide predates the second printing and the card it relies on has changed. unchecked: not compared yet.",
+    "engine": "testable-now: the engine can measure it with a bot variant today. needs-card-text: depends on card effects the engine does not apply yet. needs-opponent-model: depends on bots that read and react to each other."
+  },
+  "sources": [
+    { "guide": "brogan.md", "printing": "first", "author": "Eric_McClain" },
+    { "guide": "tigerclaw.md", "printing": "first", "author": "Eric_McClain" },
+    { "guide": "rowenna.md", "printing": "second", "author": "CCplusplus" },
+    { "guide": "swift.md", "printing": "first (by date)", "author": "bcsj" }
+  ],
+  "principles": [
+    {
+      "id": "card-kill",
+      "scope": "general",
+      "claim": "Wound a hero early in the round, then finish them on turn 4, when their hand is nearly empty.",
+      "reason": "Every hero holds only five cards. Each defense spent earlier leaves fewer answers later, so even durable heroes fall to a late follow-up.",
+      "evidence": [
+        { "guide": "brogan.md", "quote": "someone from your team hits a target with a discard and wounds them, and then on turn 4 someone hits them again" },
+        { "guide": "brogan.md", "quote": "Even the tankiest of heroes are very vulnerable to this strategy, because everyone has 5 cards." },
+        { "guide": "rowenna.md", "quote": "its most common use is eliminating wounded opponents on turn 4 by going faster than whatever they play" }
+      ],
+      "status": "current",
+      "engine": "testable-now",
+      "test": "Brawler variant that, among attack targets, prefers the enemy hero with the fewest cards in hand. Compare kills and win rate against the plain Brawler."
+    },
+    {
+      "id": "hold-blue-as-block",
+      "scope": "general",
+      "claim": "Keep defense cards in hand to block with, instead of playing them for their action.",
+      "reason": "A defense card's value is the threat it answers. Played early, it no longer protects you later in the round.",
+      "evidence": [
+        { "guide": "brogan.md", "quote": "The best use for this card is often holding it in your hand and using them like block cards." },
+        { "guide": "tigerclaw.md", "quote": "holding that card in your hand until the right moment is the key to getting the most out of this hero" },
+        { "guide": "brogan.md", "quote": "they played their defense cards earlier in the round, they \"let their shields down\" and got punished for it" }
+      ],
+      "status": "current",
+      "engine": "testable-now",
+      "test": "Brawler variant that plays its highest-defense card last in the round. Compare deaths per game against the plain Brawler."
+    },
+    {
+      "id": "slow-initiative-is-information",
+      "scope": "general",
+      "claim": "Playing a low-initiative card can be an advantage: you act after seeing what everyone else did.",
+      "reason": "Initiative orders actions. The last to act reacts to resolved moves instead of guessing them.",
+      "evidence": [
+        { "guide": "tigerclaw.md", "quote": "The slow initiative means you get to see what everyone else does, then make the best decision with that information." },
+        { "guide": "tigerclaw.md", "quote": "At 2/1/1 initiative you’re green cards are the slowest in the game (This is a good thing)" },
+        { "guide": "brogan.md", "quote": "you can go slow (7 or 8 INI), defend the minions from the faster enemy attacks, and then rocket off to get your own minion" }
+      ],
+      "status": "current",
+      "engine": "needs-opponent-model",
+      "test": "Only measurable once a bot chooses its action from the board state after others have moved. The current Brawler gains nothing from acting late."
+    },
+    {
+      "id": "speed-to-finish",
+      "scope": "general",
+      "claim": "To finish a wounded hero, you must act before their defense or escape. Buy initiative for it.",
+      "reason": "A wounded hero escapes or blocks on their own turn. A faster attack lands before that turn comes.",
+      "evidence": [
+        { "guide": "brogan.md", "quote": "Purchase lots of INI and a Range item for maximum effect." },
+        { "guide": "rowenna.md", "quote": "It can require some initiative items to go faster than opponents' blues" },
+        { "guide": "tigerclaw.md", "quote": "dash through an enemy hero to start or (more likely) finish a fight before they can do anything to stop you" }
+      ],
+      "status": "current",
+      "engine": "testable-now",
+      "test": "Bot variant whose level-up choice favours initiative items. Compare kills against a variant that favours attack items."
+    },
+    {
+      "id": "force-a-choice",
+      "scope": "general",
+      "claim": "Threaten an enemy so they must choose between taking a minion and staying safe. Either answer is a gain for you.",
+      "reason": "If they stay, you get a kill or coins. If they run, you get the minion and they do not.",
+      "evidence": [
+        { "guide": "brogan.md", "quote": "you can often put them in a position of choosing between defeating a minion, or running for their lives. If they don't run, lots of coins for you. If they do run, well you get a minion and they don't, win win!" },
+        { "guide": "rowenna.md", "quote": "using her silver to jump to squishy opponents to force them out of minion takes" },
+        { "guide": "swift.md", "quote": "Make sure that they are giving up something (e.g. position and/or farm) if they do that." }
+      ],
+      "status": "current",
+      "engine": "needs-opponent-model"
+    },
+    {
+      "id": "predictability-gets-punished",
+      "scope": "general",
+      "claim": "A telegraphed play invites a counter. Setting up a threat also reveals it.",
+      "reason": "Opponents see your position and resolved cards. A play only one card can make is a play they can block.",
+      "evidence": [
+        { "guide": "brogan.md", "quote": "moving into position is a big tell that this card is coming" },
+        { "guide": "tigerclaw.md", "quote": "the dash on this card is predictable and clever enemies will threaten your landing point" },
+        { "guide": "swift.md", "quote": "you are predictable and a clever enemy will move in to threaten you on the turn you wish to repeat your red" }
+      ],
+      "status": "current",
+      "engine": "needs-opponent-model"
+    },
+    {
+      "id": "the-wave-wins-games",
+      "scope": "general",
+      "claim": "Being in the battle zone at the end of the round, and denying enemy minion kills, wins games more reliably than kills do.",
+      "reason": "Minion battle pushes the wave, and minion kills give coins. Denying a minion kill denies both.",
+      "evidence": [
+        { "guide": "brogan.md", "quote": "Be in the battlezone at the end of each round and you will have a VERY hard time losing the game." },
+        { "guide": "brogan.md", "quote": "to not only stop the enemy team from pushing the wave, but ALSO stop them from collecting coins" },
+        { "guide": "rowenna.md", "quote": "threatening oneshots in order to maintain wave pressure can be a primary strategy for her, since she often wants to take the final wave victory" }
+      ],
+      "status": "current",
+      "engine": "testable-now",
+      "test": "Bot variant that, on turn 4, moves into the battle zone rather than chasing the nearest enemy. Compare wins by push against the plain Brawler."
+    },
+    {
+      "id": "ranged-threat-counters-mobility",
+      "scope": "general",
+      "claim": "Fast, mobile heroes are best threatened by ranged attacks, not by chasing them.",
+      "reason": "A melee hero cannot keep pace with high movement and initiative. Range reaches without catching up.",
+      "evidence": [
+        { "guide": "tigerclaw.md", "quote": "Heroes can’t really keep pace with Tigerclaws premium movement and initiative. The only way they can consistently threaten him is with ranged attacks." }
+      ],
+      "status": "current",
+      "engine": "needs-card-text",
+      "note": "One source only. Needs confirmation from other guides before it counts as general."
+    },
+    {
+      "id": "healer-gets-targeted",
+      "scope": "general",
+      "claim": "Cards that heal allies but not yourself underperform, because enemies kill the healer first.",
+      "evidence": [
+        { "guide": "brogan.md", "quote": "The problem is that when people see that you can heal others, they simply target you instead." }
+      ],
+      "status": "current",
+      "engine": "needs-card-text",
+      "note": "One source, and Rowenna's guide values ally healing highly. A disagreement worth checking in more guides."
+    },
+    {
+      "id": "sniper-leaves-ally-exposed",
+      "scope": "general",
+      "claim": "A ranged hero who stays on the fringe leaves their teammate open to being outnumbered.",
+      "evidence": [
+        { "guide": "swift.md", "quote": "beware 'cause leaving your teammate alone like that risks them getting ganged up on while you are away" }
+      ],
+      "status": "current",
+      "engine": "needs-opponent-model",
+      "note": "One source."
+    },
+    {
+      "id": "brogan-anti-push",
+      "scope": "hero",
+      "hero": "brogan",
+      "claim": "Play the minion-saving green from the first turn of the game to stop the enemy push.",
+      "evidence": [
+        { "guide": "brogan.md", "quote": "Use this card (Even on the first turn of the game!)" }
+      ],
+      "status": "stale",
+      "engine": "needs-card-text",
+      "note": "Second printing (Shield, Bolster, Fortify) costs a silver or basic card per save, not any card. The trade-off has changed."
+    },
+    {
+      "id": "brogan-alt-red-killer",
+      "scope": "hero",
+      "hero": "brogan",
+      "claim": "The alternate red, not the charge, is Brogan's real kill threat. The charge is mostly for crossing the map and for bluffing.",
+      "evidence": [
+        { "guide": "brogan.md", "quote": "This is the actual killer. Any target that gets wounded will have a hard time escaping this card" },
+        { "guide": "brogan.md", "quote": "Sometimes you can bluff by setting up this card but choosing a different one, just the threat of this can really junk up an enemies round." }
+      ],
+      "status": "unchecked",
+      "engine": "needs-card-text"
+    },
+    {
+      "id": "tigerclaw-silver-then-red",
+      "scope": "hero",
+      "hero": "tigerclaw",
+      "claim": "Play silver for immunity, then attack next turn without fear of retaliation.",
+      "evidence": [
+        { "guide": "tigerclaw.md", "quote": "it allows you to attack the turn after you play silver. Play this on the turn you’re immune allows you to attack heroes or minions without fear of retaliation" }
+      ],
+      "status": "stale",
+      "engine": "needs-card-text",
+      "note": "Second-printing silver (Blend Into Shadows) needs adjacent terrain and is initiative 6. The combo may still hold but with a positioning condition."
+    },
+    {
+      "id": "tigerclaw-coin-swing",
+      "scope": "hero",
+      "hero": "tigerclaw",
+      "claim": "Upgrade into the coin-stealing green first. Taking enemy coins slows their levels while speeding yours.",
+      "evidence": [
+        { "guide": "tigerclaw.md", "quote": "You can get enemy heroes seriously behind by removing the coins, and get seriously ahead at the same time." }
+      ],
+      "status": "stale",
+      "engine": "needs-card-text",
+      "note": "Second printing takes 1 or 2 coins instead of removing 2 and gaining 2. The coin-swing idea survives, its size does not."
+    },
+    {
+      "id": "rowenna-is-support",
+      "scope": "hero",
+      "hero": "rowenna",
+      "claim": "Rowenna initiates and protects, but needs a teammate who can close kills.",
+      "reason": "Her gold lets the target retrieve a card before the attack, so it rarely finishes a wounded hero.",
+      "evidence": [
+        { "guide": "rowenna.md", "quote": "Rowenna is more of a support character than she looks, and requires support in return to shine." },
+        { "guide": "rowenna.md", "quote": "This prevents her from using this to finish off a wounded enemy" }
+      ],
+      "status": "current",
+      "engine": "needs-card-text"
+    },
+    {
+      "id": "rowenna-counterplay",
+      "scope": "hero",
+      "hero": "rowenna",
+      "claim": "Against Rowenna, predict her silver and move out of its range. Without it she has little movement for the round.",
+      "evidence": [
+        { "guide": "rowenna.md", "quote": "if you can predict when this will be and get out of range, she is forced to hold and get no movement leaving her mostly out of the round" }
+      ],
+      "status": "current",
+      "engine": "needs-card-text"
+    },
+    {
+      "id": "swift-red-then-reload",
+      "scope": "hero",
+      "hero": "swift",
+      "claim": "Swift's second attack comes from sequencing red into the gold reload, so the red's slot position matters.",
+      "evidence": [
+        { "guide": "swift.md", "quote": "Because sequencing red into gold is your only way of getting two attacks in a round you are predictable" }
+      ],
+      "status": "stale",
+      "engine": "needs-card-text",
+      "note": "Second-printing Reload! repeats the rightmost resolved card, not the previous turn slot, and gained a minion-defeat option. Most of the guide's sequencing advice needs rereading against the new deck."
+    },
+    {
+      "id": "swift-nebkher-matchup",
+      "scope": "hero",
+      "hero": "swift",
+      "claim": "Against Nebkher, leave the sniper red: he can copy the shot back.",
+      "evidence": [
+        { "guide": "swift.md", "quote": "Against a NebKher you will switch out of this 95% of the time." }
+      ],
+      "status": "unchecked",
+      "engine": "needs-card-text"
+    }
+  ]
+}

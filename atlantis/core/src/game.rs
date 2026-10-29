@@ -24,6 +24,9 @@ pub struct Setup {
     pub length: GameLength,
     /// Drives the tie-breaker flip. Nothing else in the rules is random.
     pub seed: u64,
+    /// The team whose heroes take the first player seats. The rules do not
+    /// care; it fixes the order players are listed and enumerated in.
+    pub seated_first: Team,
 }
 
 impl Setup {
@@ -35,6 +38,7 @@ impl Setup {
             blue: keys(&["arien", "brogan"]),
             length: rules::quick_game(4),
             seed: 1,
+            seated_first: Team::Red,
         }
     }
 }
@@ -108,8 +112,16 @@ impl Game {
             pending_level_ups: VecDeque::new(),
             next_unit: 0,
         };
-        game.seat_team(Team::Red, &setup.red)?;
-        game.seat_team(Team::Blue, &setup.blue)?;
+        let first = setup.seated_first;
+        let heroes = |t: Team| {
+            if t == Team::Red {
+                &setup.red
+            } else {
+                &setup.blue
+            }
+        };
+        game.seat_team(first, heroes(first))?;
+        game.seat_team(first.opponent(), heroes(first.opponent()))?;
         game.spawn_battle_zone_minions();
         game.log(format!(
             "Tie breaker shows {tie_breaker:?}. Round 1, turn 1."
@@ -130,6 +142,13 @@ impl Game {
             .filter(|(_, s)| s.spawn == Some(SpawnPoint::Hero { team }))
             .map(|(h, _)| h)
             .collect();
+        // Turned half a circle, the board lists hexes in reverse order. Blue
+        // takes its spawn points last to first, so each team's n-th hero
+        // starts on the twin of the other's.
+        let mut spawns = spawns;
+        if team == Team::Blue {
+            spawns.reverse();
+        }
         if keys.len() > spawns.len() {
             return Err(SetupError::TooManyHeroes {
                 team,
@@ -453,6 +472,27 @@ mod tests {
             assert_eq!(p.lowest_tier(&game.catalog), 1);
         }
         assert_eq!(game.players[0].hero_name, "Wasp the Warmaiden");
+    }
+
+    #[test]
+    fn heroes_in_the_same_seat_start_on_twin_spaces() {
+        let mut setup = Setup::teaching_game();
+        setup.red = vec!["wasp".into(), "xargatha".into(), "arien".into()];
+        setup.blue = setup.red.clone();
+        let game = Game::new(&setup).unwrap();
+        let start = |team| -> Vec<Hex> {
+            game.players
+                .iter()
+                .filter(|p| p.team == team)
+                .map(|p| game.units[&p.hero].hex.unwrap())
+                .collect()
+        };
+        let (red, blue) = (start(Team::Red), start(Team::Blue));
+        // Twins add up to the same point: twice the board's centre.
+        let double_centre = red[0] + blue[0];
+        for (r, b) in red.iter().zip(&blue) {
+            assert_eq!(*r + *b, double_centre, "{r:?} and {b:?} are not twins");
+        }
     }
 
     #[test]

@@ -15,7 +15,7 @@ bot against bot, hundreds of games, statistics.
 | `web/`     | SolidJS pages: the game (SVG board, dashboards, log) and the characters page. Know no rules. |
 | `data/`    | board layout, hero profiles, card catalogue.                |
 | `assets/`  | card art, portraits and icons, copied from Stats of Atlantis. The characters page shows the hero and card artwork. |
-| `docs/`    | `rules/`: the rulebook, transcribed. `guides/`: community hero guides. |
+| `docs/`    | `rules/`: the rulebook, transcribed. `guides/`: community hero guides. `strategy.md`: how strategy claims are extracted and tested; `principles.json`: the claims. |
 | `scripts/` | `build-wasm.sh`: compile the engine to `web/public/`. `fetch-assets.sh`, `guides-from-bgg/`: refresh `assets/` and `docs/guides/`. |
 
 ## Run

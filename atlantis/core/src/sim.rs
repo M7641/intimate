@@ -91,7 +91,7 @@ impl Game {
                 },
             };
         }
-        let closing: Option<&Action> = actions
+        let moves: Vec<(&Action, i32)> = actions
             .iter()
             .filter_map(|a| match a {
                 Action::Move { player, to } | Action::FastTravel { player, to } => Some((
@@ -100,11 +100,19 @@ impl Game {
                 )),
                 _ => None,
             })
-            .min_by_key(|(_, d)| *d)
-            .map(|(a, _)| a);
-        match closing {
-            Some(a) => a.clone(),
-            None => actions[rng.below(actions.len())].clone(),
+            .collect();
+        // Break ties at random: the first in list order would favour one
+        // side, since turning the board reverses hex order.
+        let best = moves.iter().map(|(_, d)| *d).min();
+        let closing: Vec<&Action> = moves
+            .iter()
+            .filter(|(_, d)| Some(*d) == best)
+            .map(|(a, _)| *a)
+            .collect();
+        if closing.is_empty() {
+            actions[rng.below(actions.len())].clone()
+        } else {
+            closing[rng.below(closing.len())].clone()
         }
     }
 
