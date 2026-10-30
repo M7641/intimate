@@ -120,6 +120,3 @@ data.parquet
 # sync-* pre-push jobs, so it must stay tracked. Only machine-local files here.
 .claude/settings.local.json
 .claude/*.local.json
-
-# — Personal CV — keep local, do not publish —
-/cv/
